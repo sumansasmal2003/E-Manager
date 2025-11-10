@@ -1,0 +1,478 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import api from '../api/axiosConfig';
+import { useAuth } from '../context/AuthContext';
+import { ArrowLeft, Plus, Users, ClipboardList, Calendar, Crown, User, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
+
+import AddMemberModal from '../components/AddMemberModal';
+import CreateTaskModal from '../components/CreateTaskModal';
+import TaskItem from '../components/TaskItem';
+import CreateMeetingModal from '../components/CreateMeetingModal';
+import MeetingItem from '../components/MeetingItem';
+import EditTaskModal from '../components/EditTaskModal';
+
+const TeamDetailPage = () => {
+  const { teamId } = useParams();
+  const { user } = useAuth();
+
+  const [team, setTeam] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [meetings, setMeetings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentTask, setCurrentTask] = useState(null);
+  const [expandedAssignees, setExpandedAssignees] = useState(new Set());
+  const [copied, setCopied] = useState(false);
+
+  const fetchTeamData = async () => {
+    try {
+      setLoading(true);
+      const [teamRes, tasksRes, meetingsRes] = await Promise.all([
+        api.get(`/teams/${teamId}`),
+        api.get(`/tasks/${teamId}`),
+        api.get(`/meetings/${teamId}`)
+      ]);
+      setTeam(teamRes.data);
+      setTasks(tasksRes.data);
+      setMeetings(meetingsRes.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to fetch team details');
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchTeamData();
+  }, [teamId]);
+
+  const handleMemberAdded = (updatedTeam) => {
+    setTeam(updatedTeam);
+  };
+
+  const handleTaskCreated = (newTask) => {
+    setTasks(prevTasks => [newTask, ...prevTasks]);
+  };
+
+  const handleMeetingCreated = (newMeeting) => {
+    const sortedMeetings = [...meetings, newMeeting].sort(
+      (a, b) => new Date(a.meetingTime) - new Date(b.meetingTime)
+    );
+    setMeetings(sortedMeetings);
+  };
+
+  // Group tasks by assignee
+  const tasksByAssignee = tasks.reduce((acc, task) => {
+    const assignee = task.assignedTo;
+    if (!acc[assignee]) {
+      acc[assignee] = [];
+    }
+    acc[assignee].push(task);
+    return acc;
+  }, {});
+
+  // Sort tasks within each group
+  for (const assignee in tasksByAssignee) {
+    tasksByAssignee[assignee].sort((a, b) => {
+      if (a.status === 'Pending' && b.status !== 'Pending') return -1;
+      if (a.status !== 'Pending' && b.status === 'Pending') return 1;
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    });
+  }
+
+  const handleOpenEditModal = (task) => {
+    setCurrentTask(task);
+    setIsEditModalOpen(true);
+  };
+
+  const handleTaskUpdated = (updatedTask) => {
+    setTasks(tasks.map(task =>
+      task._id === updatedTask._id ? updatedTask : task
+    ));
+    setIsEditModalOpen(false);
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await api.delete(`/tasks/task/${taskId}`);
+      setTasks(tasks.filter(task => task._id !== taskId));
+    } catch (err) {
+      console.error("Failed to delete task", err);
+      setError(err.response?.data?.message || 'Failed to delete task');
+    }
+  };
+
+  const toggleAssignee = (assignee) => {
+    setExpandedAssignees(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(assignee)) {
+        newSet.delete(assignee);
+      } else {
+        newSet.add(assignee);
+      }
+      return newSet;
+    });
+  };
+
+  const formatTasksForCopy = () => {
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  let formattedText = `📋 ${team.teamName} - Team Tasks\n`;
+  formattedText += `📅 ${currentDate}\n\n`;
+
+  Object.entries(tasksByAssignee).forEach(([assignee, assigneeTasks], index) => {
+    formattedText += `👤 ${assignee}\n\n`;
+
+    assigneeTasks.forEach((task, taskIndex) => {
+      formattedText += `${taskIndex + 1}. ${task.title}`;
+
+      if (task.description) {
+        formattedText += `   ${task.description}\n`;
+      }
+
+      if (task.priority && task.priority !== 'Medium') {
+        formattedText += `   Priority: ${task.priority}\n`;
+      }
+
+      // Add space between tasks
+      if (taskIndex < assigneeTasks.length - 1) {
+        formattedText += '\n';
+      }
+    });
+
+    // Add separator between assignees (except after the last one)
+    if (index < Object.keys(tasksByAssignee).length - 1) {
+      formattedText += '\n────────────────────────\n';
+    }
+  });
+
+  return formattedText;
+};
+
+  const handleCopyTasks = async () => {
+    try {
+      const tasksText = formatTasksForCopy();
+      await navigator.clipboard.writeText(tasksText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = formatTasksForCopy();
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">
+        {error}
+      </div>
+    );
+  }
+
+  if (!team) {
+    return (
+      <div className="text-center py-12">
+        <Users className="mx-auto text-gray-400 mb-4" size={48} />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Team not found</h3>
+        <p className="text-gray-600 mb-4">The team you're looking for doesn't exist.</p>
+        <Link
+          to="/teams"
+          className="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium"
+        >
+          <ArrowLeft size={16} className="mr-2" />
+          Back to teams
+        </Link>
+      </div>
+    );
+  }
+
+  const isOwner = team.owner._id === user._id;
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col space-y-4">
+        <Link
+          to="/teams"
+          className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft size={18} className="mr-2" />
+          Back to all teams
+        </Link>
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center">
+              <Users className="text-white" size={24} />
+            </div>
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{team.teamName}</h1>
+              <div className="flex items-center space-x-2 mt-1">
+                <span className="text-sm text-gray-600">
+                  {team.members.length} member{team.members.length !== 1 ? 's' : ''}
+                </span>
+                {isOwner && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <Crown size={10} className="mr-1" />
+                    Owner
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          {isOwner && (
+            <button
+              onClick={() => setIsMemberModalOpen(true)}
+              className="w-full lg:w-auto bg-gray-900 text-white px-6 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+            >
+              <Plus size={20} />
+              <span>Add Member</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Left Column: Members */}
+        <div className="xl:col-span-1">
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm h-fit">
+            <div className="flex items-center space-x-2 mb-4">
+              <Users className="text-gray-700" size={20} />
+              <h2 className="text-lg font-semibold text-gray-900">Team Members</h2>
+            </div>
+            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600">
+                Owned by: <span className="font-medium text-gray-900">{team.owner.username}</span>
+              </p>
+            </div>
+            <div className="space-y-3">
+              {team.members.map((memberName, index) => (
+                <div key={index} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-medium text-gray-600">
+                      {memberName.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="font-medium text-gray-900">{memberName}</span>
+                </div>
+              ))}
+              {team.members.length === 0 && (
+                <div className="text-center py-4">
+                  <Users className="mx-auto text-gray-400 mb-2" size={24} />
+                  <p className="text-sm text-gray-600">No members yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Tasks & Meetings */}
+        <div className="xl:col-span-2 space-y-6">
+          {/* Tasks Section */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex items-center space-x-2">
+                  <ClipboardList className="text-gray-700" size={20} />
+                  <h2 className="text-lg font-semibold text-gray-900">Team Tasks</h2>
+                  <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm font-medium">
+                    {tasks.length}
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                  <button
+                    onClick={handleCopyTasks}
+                    disabled={tasks.length === 0}
+                    className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {copied ? (
+                      <>
+                        <Check size={16} className="text-green-600" />
+                        <span className="text-green-600">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={16} />
+                        <span>Copy Tasks</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setIsTaskModalOpen(true)}
+                    className="w-full sm:w-auto bg-gray-900 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+                  >
+                    <Plus size={16} />
+                    <span>New Task</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Scrollable Tasks Container */}
+            <div className="p-6 max-h-[600px] overflow-y-auto">
+              {tasks.length > 0 ? (
+                <div className="space-y-8">
+                  {Object.entries(tasksByAssignee).map(([assignee, assigneeTasks], index) => {
+                    const isExpanded = expandedAssignees.has(assignee);
+                    const visibleTasks = isExpanded ? assigneeTasks : assigneeTasks.slice(0, 3);
+                    const hasMoreTasks = assigneeTasks.length > 3;
+
+                    return (
+                      <div key={assignee} className="border border-gray-200 rounded-lg overflow-hidden">
+                        {/* Assignee Header */}
+                        <button
+                          onClick={() => toggleAssignee(assignee)}
+                          className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                              <User size={16} className="text-gray-600" />
+                            </div>
+                            <div className="text-left">
+                              <h3 className="font-semibold text-gray-900">{assignee}</h3>
+                              <p className="text-sm text-gray-600">
+                                {assigneeTasks.length} task{assigneeTasks.length !== 1 ? 's' : ''}
+                                {hasMoreTasks && !isExpanded && ` • ${assigneeTasks.length - 3} more`}
+                              </p>
+                            </div>
+                          </div>
+                          {hasMoreTasks && (
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm text-gray-500">
+                                {isExpanded ? 'Show less' : 'Show all'}
+                              </span>
+                              {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                            </div>
+                          )}
+                        </button>
+
+                        {/* Tasks List */}
+                        <div className="divide-y divide-gray-100">
+                          {visibleTasks.map(task => (
+                            <div key={task._id} className="p-4 hover:bg-gray-50 transition-colors">
+                              <TaskItem
+                                task={task}
+                                onEdit={handleOpenEditModal}
+                                onDelete={handleDeleteTask}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <ClipboardList className="mx-auto text-gray-400 mb-3" size={32} />
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">No tasks yet</h3>
+                  <p className="text-sm text-gray-600">Create the first task for this team</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Meetings Section */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+              <div className="flex items-center space-x-2">
+                <Calendar className="text-gray-700" size={20} />
+                <h2 className="text-lg font-semibold text-gray-900">Upcoming Meetings</h2>
+                <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm font-medium">
+                  {meetings.length}
+                </span>
+              </div>
+              <button
+                onClick={() => setIsMeetingModalOpen(true)}
+                className="w-full sm:w-auto bg-gray-900 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+              >
+                <Plus size={16} />
+                <span>New Meeting</span>
+              </button>
+            </div>
+
+            {/* Scrollable Meetings Container */}
+            <div className="max-h-[400px] overflow-y-auto">
+              {meetings.length > 0 ? (
+                <div className="space-y-4">
+                  {meetings.map(meeting => (
+                    <MeetingItem key={meeting._id} meeting={meeting} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Calendar className="mx-auto text-gray-400 mb-3" size={32} />
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">No meetings scheduled</h3>
+                  <p className="text-sm text-gray-600">Schedule your first team meeting</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modals */}
+      <AddMemberModal
+        isOpen={isMemberModalOpen}
+        onClose={() => setIsMemberModalOpen(false)}
+        teamId={teamId}
+        onMemberAdded={handleMemberAdded}
+      />
+
+      {team && (
+        <CreateTaskModal
+          isOpen={isTaskModalOpen}
+          onClose={() => setIsTaskModalOpen(false)}
+          teamId={teamId}
+          members={team.members}
+          onTaskCreated={handleTaskCreated}
+        />
+      )}
+
+      {team && (
+        <EditTaskModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          taskToEdit={currentTask}
+          teamMembers={team.members}
+          onTaskUpdated={handleTaskUpdated}
+        />
+      )}
+
+      {team && (
+        <CreateMeetingModal
+          isOpen={isMeetingModalOpen}
+          onClose={() => setIsMeetingModalOpen(false)}
+          teamId={teamId}
+          members={team.members}
+          onMeetingCreated={handleMeetingCreated}
+        />
+      )}
+    </div>
+  );
+};
+
+export default TeamDetailPage;
