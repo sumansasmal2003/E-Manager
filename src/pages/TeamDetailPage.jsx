@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, Plus, Users, ClipboardList, Calendar, Crown, User, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Plus, Users, ClipboardList, Calendar, Crown, User, ChevronDown, ChevronUp, Copy, Check, Link2, Trash2, Github } from 'lucide-react';
 
 import AddMemberModal from '../components/AddMemberModal';
 import CreateTaskModal from '../components/CreateTaskModal';
@@ -10,6 +10,8 @@ import TaskItem from '../components/TaskItem';
 import CreateMeetingModal from '../components/CreateMeetingModal';
 import MeetingItem from '../components/MeetingItem';
 import EditTaskModal from '../components/EditTaskModal';
+import AddFigmaModal from '../components/AddFigmaModal';
+import AddGithubModal from '../components/AddGithubModal';
 
 const TeamDetailPage = () => {
   const { teamId } = useParams();
@@ -24,6 +26,8 @@ const TeamDetailPage = () => {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isFigmaModalOpen, setIsFigmaModalOpen] = useState(false);
+  const [isGithubModalOpen, setIsGithubModalOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
   const [expandedAssignees, setExpandedAssignees] = useState(new Set());
   const [copied, setCopied] = useState(false);
@@ -176,6 +180,42 @@ const TeamDetailPage = () => {
     }
   };
 
+  const handleFigmaLinkAdded = (updatedTeam) => {
+    setTeam(updatedTeam);
+  };
+
+  const handleDeleteFigmaLink = async (linkId) => {
+    if (!window.confirm('Are you sure you want to remove this Figma link?')) {
+      return;
+    }
+
+    try {
+      const res = await api.delete(`/teams/${teamId}/figma/${linkId}`);
+      setTeam(res.data);
+    } catch (err) {
+      console.error("Failed to delete Figma link", err);
+      setError(err.response?.data?.message || 'Failed to delete link');
+    }
+  };
+
+  const handleGithubRepoAdded = (updatedTeam) => {
+    setTeam(updatedTeam);
+  };
+
+  const handleDeleteGithubRepo = async (repoId) => {
+    if (!window.confirm('Are you sure you want to remove this GitHub repo?')) {
+      return;
+    }
+
+    try {
+      const res = await api.delete(`/teams/${teamId}/github/${repoId}`);
+      setTeam(res.data);
+    } catch (err) {
+      console.error("Failed to delete GitHub repo", err);
+      setError(err.response?.data?.message || 'Failed to delete repo');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -256,9 +296,10 @@ const TeamDetailPage = () => {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Left Column: Members */}
-        <div className="xl:col-span-1">
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm h-fit">
+        {/* Left Column: Members, Figma, GitHub */}
+        <div className="xl:col-span-1 space-y-6">
+          {/* Team Members Section */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div className="flex items-center space-x-2 mb-4">
               <Users className="text-gray-700" size={20} />
               <h2 className="text-lg font-semibold text-gray-900">Team Members</h2>
@@ -268,23 +309,127 @@ const TeamDetailPage = () => {
                 Owned by: <span className="font-medium text-gray-900">{team.owner.username}</span>
               </p>
             </div>
-            <div className="space-y-3">
-              {team.members.map((memberName, index) => (
-                <div key={index} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-gray-600">
-                      {memberName.charAt(0).toUpperCase()}
-                    </span>
+            <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+              <div className="space-y-3 pr-2">
+                {team.members.map((memberName, index) => (
+                  <div key={index} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-medium text-gray-600">
+                        {memberName.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <span className="font-medium text-gray-900">{memberName}</span>
                   </div>
-                  <span className="font-medium text-gray-900">{memberName}</span>
-                </div>
-              ))}
-              {team.members.length === 0 && (
-                <div className="text-center py-4">
-                  <Users className="mx-auto text-gray-400 mb-2" size={24} />
-                  <p className="text-sm text-gray-600">No members yet</p>
-                </div>
-              )}
+                ))}
+                {team.members.length === 0 && (
+                  <div className="text-center py-4">
+                    <Users className="mx-auto text-gray-400 mb-2" size={24} />
+                    <p className="text-sm text-gray-600">No members yet</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Figma Files Section */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center space-x-2">
+                <Link2 className="text-gray-700" size={20} />
+                <h2 className="text-lg font-semibold text-gray-900">Figma Files</h2>
+              </div>
+              <button
+                onClick={() => setIsFigmaModalOpen(true)}
+                className="bg-gray-900 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+              <div className="space-y-3 pr-2">
+                {team.figmaFiles && team.figmaFiles.length > 0 ? (
+                  team.figmaFiles.map((file) => (
+                    <div
+                      key={file._id}
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                    >
+                      <a
+                        href={file.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-3"
+                      >
+                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                          <Link2 size={16} className="text-gray-600" />
+                        </div>
+                        <span className="font-medium text-gray-900">{file.name}</span>
+                      </a>
+                      <button
+                        onClick={() => handleDeleteFigmaLink(file._id)}
+                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4">
+                    <Link2 className="mx-auto text-gray-400 mb-2" size={24} />
+                    <p className="text-sm text-gray-600">No Figma files added</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* GitHub Repos Section */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center space-x-2">
+                <Github className="text-gray-700" size={20} />
+                <h2 className="text-lg font-semibold text-gray-900">GitHub Repos</h2>
+              </div>
+              <button
+                onClick={() => setIsGithubModalOpen(true)}
+                className="bg-gray-900 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+              <div className="space-y-3 pr-2">
+                {team.githubRepos && team.githubRepos.length > 0 ? (
+                  team.githubRepos.map((repo) => (
+                    <div
+                      key={repo._id}
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                    >
+                      <a
+                        href={repo.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-3"
+                      >
+                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                          <Github size={16} className="text-gray-600" />
+                        </div>
+                        <span className="font-medium text-gray-900">{repo.name}</span>
+                      </a>
+                      <button
+                        onClick={() => handleDeleteGithubRepo(repo._id)}
+                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4">
+                    <Github className="mx-auto text-gray-400 mb-2" size={24} />
+                    <p className="text-sm text-gray-600">No repos linked yet</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -332,10 +477,10 @@ const TeamDetailPage = () => {
             </div>
 
             {/* Scrollable Tasks Container */}
-            <div className="p-6 max-h-[600px] overflow-y-auto">
+            <div className="p-6 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
               {tasks.length > 0 ? (
                 <div className="space-y-8">
-                  {Object.entries(tasksByAssignee).map(([assignee, assigneeTasks], index) => {
+                  {Object.entries(tasksByAssignee).map(([assignee, assigneeTasks]) => {
                     const isExpanded = expandedAssignees.has(assignee);
                     const visibleTasks = isExpanded ? assigneeTasks : assigneeTasks.slice(0, 3);
                     const hasMoreTasks = assigneeTasks.length > 3;
@@ -415,20 +560,20 @@ const TeamDetailPage = () => {
             </div>
 
             {/* Scrollable Meetings Container */}
-            <div className="max-h-[400px] overflow-y-auto">
-              {meetings.length > 0 ? (
-                <div className="space-y-4">
-                  {meetings.map(meeting => (
+            <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+              <div className="space-y-4 pr-2">
+                {meetings.length > 0 ? (
+                  meetings.map(meeting => (
                     <MeetingItem key={meeting._id} meeting={meeting} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Calendar className="mx-auto text-gray-400 mb-3" size={32} />
-                  <h3 className="text-sm font-medium text-gray-900 mb-1">No meetings scheduled</h3>
-                  <p className="text-sm text-gray-600">Schedule your first team meeting</p>
-                </div>
-              )}
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <Calendar className="mx-auto text-gray-400 mb-3" size={32} />
+                    <h3 className="text-sm font-medium text-gray-900 mb-1">No meetings scheduled</h3>
+                    <p className="text-sm text-gray-600">Schedule your first team meeting</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -471,6 +616,18 @@ const TeamDetailPage = () => {
           onMeetingCreated={handleMeetingCreated}
         />
       )}
+      <AddFigmaModal
+        isOpen={isFigmaModalOpen}
+        onClose={() => setIsFigmaModalOpen(false)}
+        teamId={teamId}
+        onFigmaLinkAdded={handleFigmaLinkAdded}
+      />
+      <AddGithubModal
+        isOpen={isGithubModalOpen}
+        onClose={() => setIsGithubModalOpen(false)}
+        teamId={teamId}
+        onGithubRepoAdded={handleGithubRepoAdded}
+      />
     </div>
   );
 };

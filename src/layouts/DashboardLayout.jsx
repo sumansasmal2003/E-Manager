@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -66,6 +66,7 @@ const DashboardLayout = () => {
     if (path === '/dashboard') return 'Dashboard Overview';
     if (path === '/notes') return 'My Notes';
     if (path === '/teams') return 'My Teams';
+    if (path === '/settings') return 'My Settings';
     return 'Dashboard';
   };
 
@@ -74,6 +75,7 @@ const DashboardLayout = () => {
     if (path === '/dashboard') return 'Welcome to your dashboard overview';
     if (path === '/notes') return 'Manage and organize your personal notes';
     if (path === '/teams') return 'Collaborate with your team members';
+    if (path === '/settings') return 'Manage your account and connections';
     return '';
   };
 
@@ -81,7 +83,7 @@ const DashboardLayout = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sticky Sidebar */}
           <div
@@ -138,6 +140,13 @@ const DashboardLayout = () => {
                   >
                     My Teams
                   </SidebarLink>
+                  <SidebarLink
+                to="/settings"
+                icon={<Settings size={isSidebarCollapsed ? 22 : 20} />}
+                isCollapsed={isSidebarCollapsed}
+              >
+                Settings
+              </SidebarLink>
                 </nav>
 
                 {/* Sidebar Footer - Optional, can be used for user info or additional actions */}

@@ -15,7 +15,16 @@ export const AuthProvider = ({ children }) => {
     try {
       const storedUser = localStorage.getItem('eManagerUser');
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+
+        // --- ADD THIS BLOCK ---
+        // For backwards compatibility
+        if (parsedUser.connecteamAccounts === undefined) {
+          parsedUser.connecteamAccounts = [];
+        }
+        // --- END BLOCK ---
+
+        setUser(parsedUser);
       }
     } catch (error) {
       console.error("Failed to parse user from localStorage", error);
@@ -39,6 +48,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     token: user?.token, // Easy access to token
+    connecteamAccounts: user?.connecteamAccounts || [],
     isLoggedIn: !!user,
     loading,
     login,

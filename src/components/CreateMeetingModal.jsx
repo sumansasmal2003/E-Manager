@@ -3,7 +3,7 @@ import Modal from './Modal';
 import Input from './Input';
 import { motion } from 'framer-motion';
 import api from '../api/axiosConfig';
-import { Calendar, Video, Users, Clock } from 'lucide-react';
+import { Calendar, Video, Users, Clock, Zap } from 'lucide-react';
 
 const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated }) => {
   const [title, setTitle] = useState('');
@@ -13,6 +13,12 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
   const [participants, setParticipants] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [zoomLoading, setZoomLoading] = useState(false);
+
+  // --- START OF FIX ---
+  // Determine if the Zoom button should be disabled
+  const isZoomDisabled = !title || !meetingTime || zoomLoading;
+  // ------------------
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,6 +39,7 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
       onMeetingCreated(res.data);
       setLoading(false);
       onClose();
+      // Reset all fields
       setTitle('');
       setAgenda('');
       setMeetingTime('');
@@ -44,7 +51,32 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
     }
   };
 
+  const handleGenerateZoom = async () => {
+    // This check is redundant because the button is disabled, but it's good practice
+    if (!title || !meetingTime) {
+      setError('Please set a title and meeting time first.');
+      return;
+    }
+
+    setZoomLoading(true);
+    setError(null);
+    try {
+      // Now, title and meetingTime are guaranteed to be set
+      const res = await api.post('/meetings/generate-zoom', {
+        title: title,
+        meetingTime: meetingTime,
+      });
+
+      setMeetingLink(res.data.join_url);
+
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to generate Zoom link');
+    }
+    setZoomLoading(false);
+  };
+
   const handleParticipantChange = (e) => {
+    // ... (no changes)
     const options = e.target.options;
     const selected = [];
     for (const option of options) {
@@ -56,12 +88,15 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
   };
 
   const handleClose = () => {
+    // Reset all fields on close
     setTitle('');
     setAgenda('');
     setMeetingTime('');
     setMeetingLink('');
     setParticipants([]);
     setError(null);
+    setLoading(false);
+    setZoomLoading(false);
     onClose();
   };
 
@@ -83,6 +118,7 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
           </p>
         </div>
 
+        {/* 1. Title (User fills this first) */}
         <Input
           icon={<Calendar size={18} className="text-gray-400" />}
           type="text"
@@ -93,6 +129,7 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
           autoComplete="off"
         />
 
+        {/* 2. Agenda (Optional) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Agenda
@@ -106,16 +143,7 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
           />
         </div>
 
-        <Input
-          icon={<Video size={18} className="text-gray-400" />}
-          type="text"
-          placeholder="Meeting link (Google Meet, Zoom, etc.)"
-          value={meetingLink}
-          onChange={(e) => setMeetingLink(e.target.value)}
-          required
-          autoComplete="off"
-        />
-
+        {/* 3. Meeting Time (User fills this second) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -131,6 +159,7 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
             />
           </div>
 
+          {/* 4. Participants (User fills this after) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Users size={16} className="inline mr-1" />
@@ -152,6 +181,42 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
           </div>
         </div>
 
+        {/* 5. Meeting Link (User interacts with this last) */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Meeting Link</label>
+          <div className="flex items-center space-x-2">
+            <Input
+              icon={<Video size={18} className="text-gray-400" />}
+              type="text"
+              placeholder="Click 'Generate Zoom' or paste a link"
+              value={meetingLink}
+              onChange={(e) => setMeetingLink(e.target.value)}
+              required
+              autoComplete="off"
+              className="flex-1"
+            />
+            {/* Wrap button in a div to show tooltip even when disabled */}
+            <div title={isZoomDisabled ? 'Please enter a title and meeting time first' : 'Generate Zoom Link'}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="button"
+                onClick={handleGenerateZoom}
+                disabled={isZoomDisabled} // <-- BUTTON IS NOW DISABLED
+                className="px-4 py-3 bg-gray-900 text-white rounded-lg flex items-center space-x-2 hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {zoomLoading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Zap size={16} />
+                )}
+                <span>Zoom</span>
+              </motion.button>
+            </div>
+          </div>
+        </div>
+
+        {/* --- FORM SUBMIT BUTTONS --- */}
         <div className="flex space-x-3 pt-4">
           <button
             type="button"

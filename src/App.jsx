@@ -12,6 +12,7 @@ import LoginPage from './pages/LoginPage';
 import NotesPage from './pages/NotesPage'; // <-- Import NotesPage
 import TeamDetailPage from './pages/TeamDetailPage';
 import DashboardPage from './pages/DashboardPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
               <Route path="/notes" element={<NotesPage />} /> {/* <-- 2. Add route */}
               <Route path="/teams" element={<TeamsPage />} />
               <Route path="/team/:teamId" element={<TeamDetailPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Route>
           </Route>
 
