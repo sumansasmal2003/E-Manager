@@ -4,7 +4,8 @@ import api from '../api/axiosConfig';
 import { useAuth } from '../context/AuthContext';
 import {
   ArrowLeft, Plus, Users, ClipboardList, Calendar, Crown, User,
-  ChevronDown, ChevronUp, Copy, Check, Link2, Trash2, Github, X
+  ChevronDown, ChevronUp, Copy, Check, Link2, Trash2, Github, X,
+  FileText, Activity // <-- ADD THIS
 } from 'lucide-react';
 
 import AddMemberModal from '../components/AddMemberModal';
@@ -15,6 +16,10 @@ import MeetingItem from '../components/MeetingItem';
 import EditTaskModal from '../components/EditTaskModal';
 import AddFigmaModal from '../components/AddFigmaModal';
 import AddGithubModal from '../components/AddGithubModal';
+import TeamNoteCard from '../components/TeamNoteCard';
+import AddTeamNoteModal from '../components/AddTeamNoteModal';
+import EditTeamNoteModal from '../components/EditTeamNoteModal';
+import TeamActivityEvent from '../components/TeamActivityEvent';
 
 const TeamDetailPage = () => {
   const { teamId } = useParams();
@@ -34,22 +39,33 @@ const TeamDetailPage = () => {
   const [currentTask, setCurrentTask] = useState(null);
   const [expandedAssignees, setExpandedAssignees] = useState(new Set());
   const [copied, setCopied] = useState(false);
+  const [teamNotes, setTeamNotes] = useState([]);
+  const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
+  const [isEditNoteModalOpen, setIsEditNoteModalOpen] = useState(false);
+  const [currentTeamNote, setCurrentTeamNote] = useState(null);
+  const [activity, setActivity] = useState([]);
+  const [activityLoading, setActivityLoading] = useState(true);
 
   const fetchTeamData = async () => {
     try {
       setLoading(true);
-      const [teamRes, tasksRes, meetingsRes] = await Promise.all([
+      const [teamRes, tasksRes, meetingsRes, notesRes, activityRes] = await Promise.all([
         api.get(`/teams/${teamId}`),
         api.get(`/tasks/${teamId}`),
-        api.get(`/meetings/${teamId}`)
+        api.get(`/meetings/${teamId}`),
+        api.get(`/teamnotes/${teamId}`),
+        api.get(`/activity/${teamId}`)
       ]);
       setTeam(teamRes.data);
       setTasks(tasksRes.data);
       setMeetings(meetingsRes.data);
+      setTeamNotes(notesRes.data);
+      setActivity(activityRes.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch team details');
     }
     setLoading(false);
+    setActivityLoading(false);
   };
 
   useEffect(() => {
@@ -58,10 +74,12 @@ const TeamDetailPage = () => {
 
   const handleMemberAdded = (updatedTeam) => {
     setTeam(updatedTeam);
+    refreshActivities();
   };
 
   const handleTaskCreated = (newTask) => {
     setTasks(prevTasks => [newTask, ...prevTasks]);
+    refreshActivities();
   };
 
   const handleMeetingCreated = (newMeeting) => {
@@ -69,6 +87,7 @@ const TeamDetailPage = () => {
       (a, b) => new Date(a.meetingTime) - new Date(b.meetingTime)
     );
     setMeetings(sortedMeetings);
+    refreshActivities();
   };
 
   // Group tasks by assignee
@@ -100,12 +119,14 @@ const TeamDetailPage = () => {
       task._id === updatedTask._id ? updatedTask : task
     ));
     setIsEditModalOpen(false);
+    refreshActivities();
   };
 
   const handleDeleteTask = async (taskId) => {
     try {
       await api.delete(`/tasks/task/${taskId}`);
       setTasks(tasks.filter(task => task._id !== taskId));
+      refreshActivities();
     } catch (err) {
       console.error("Failed to delete task", err);
       setError(err.response?.data?.message || 'Failed to delete task');
@@ -195,6 +216,7 @@ const TeamDetailPage = () => {
     try {
       const res = await api.delete(`/teams/${teamId}/figma/${linkId}`);
       setTeam(res.data);
+      refreshActivities();
     } catch (err) {
       console.error("Failed to delete Figma link", err);
       setError(err.response?.data?.message || 'Failed to delete link');
@@ -203,6 +225,7 @@ const TeamDetailPage = () => {
 
   const handleGithubRepoAdded = (updatedTeam) => {
     setTeam(updatedTeam);
+    refreshActivities();
   };
 
   const handleDeleteGithubRepo = async (repoId) => {
@@ -213,6 +236,7 @@ const TeamDetailPage = () => {
     try {
       const res = await api.delete(`/teams/${teamId}/github/${repoId}`);
       setTeam(res.data);
+      refreshActivities();
     } catch (err) {
       console.error("Failed to delete GitHub repo", err);
       setError(err.response?.data?.message || 'Failed to delete repo');
@@ -233,11 +257,54 @@ const TeamDetailPage = () => {
 
       // Re-fetch all data to get updated task and meeting lists
       fetchTeamData();
+      refreshActivities();
 
     } catch (err) {
       console.error("Failed to remove member", err);
       setError(err.response?.data?.message || 'Failed to remove member');
     }
+  };
+
+  const handleTeamNoteAdded = (newNote) => {
+    setTeamNotes([newNote, ...teamNotes]);
+    refreshActivities();
+
+  };
+
+  const handleOpenEditTeamNoteModal = (note) => {
+    setCurrentTeamNote(note);
+    setIsEditNoteModalOpen(true);
+  };
+
+  const handleTeamNoteUpdated = (updatedNote) => {
+    setTeamNotes(
+      teamNotes.map(note => (note._id === updatedNote._id ? updatedNote : note))
+    );
+    refreshActivities();
+  };
+
+  const handleDeleteTeamNote = async (noteId) => {
+    if (!window.confirm('Are you sure you want to delete this team note?')) {
+      return;
+    }
+    try {
+      await api.delete(`/teamnotes/note/${noteId}`);
+      setTeamNotes(teamNotes.filter(note => note._id !== noteId));
+      refreshActivities();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete note');
+    }
+  };
+
+  const refreshActivities = async () => {
+    try {
+      setActivityLoading(true);
+      const activityRes = await api.get(`/activity/${teamId}`);
+      setActivity(activityRes.data);
+    } catch (err) {
+      console.warn('Could not refresh activity feed', err);
+    }
+    setActivityLoading(false);
   };
 
   if (loading) {
@@ -472,6 +539,63 @@ const TeamDetailPage = () => {
               </div>
             </div>
           </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center space-x-2">
+                <FileText className="text-gray-700" size={20} />
+                <h2 className="text-lg font-semibold text-gray-900">Team Notes</h2>
+              </div>
+              <button
+                onClick={() => setIsAddNoteModalOpen(true)}
+                className="bg-gray-900 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+              <div className="space-y-4 pr-2">
+                {teamNotes.length > 0 ? (
+                  teamNotes.map((note) => (
+                    <TeamNoteCard
+                      key={note._id}
+                      note={note}
+                      onEdit={handleOpenEditTeamNoteModal}
+                      onDelete={handleDeleteTeamNote}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-4">
+                    <FileText className="mx-auto text-gray-400 mb-2" size={24} />
+                    <p className="text-sm text-gray-600">No team notes yet.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center space-x-2 mb-4">
+              <Activity className="text-gray-700" size={20} />
+              <h2 className="text-lg font-semibold text-gray-900">Activity Feed</h2>
+            </div>
+            <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+              <div className="space-y-2 pr-2 divide-y divide-gray-100">
+                {activityLoading ? (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-gray-500">Loading feed...</p>
+                  </div>
+                ) : activity.length > 0 ? (
+                  activity.map((item) => (
+                    <TeamActivityEvent key={item._id} activity={item} />
+                  ))
+                ) : (
+                  <div className="text-center py-4">
+                    <Activity className="mx-auto text-gray-400 mb-2" size={24} />
+                    <p className="text-sm text-gray-600">No activity yet.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Tasks & Meetings */}
@@ -667,6 +791,19 @@ const TeamDetailPage = () => {
         onClose={() => setIsGithubModalOpen(false)}
         teamId={teamId}
         onGithubRepoAdded={handleGithubRepoAdded}
+      />
+      <AddTeamNoteModal
+        isOpen={isAddNoteModalOpen}
+        onClose={() => setIsAddNoteModalOpen(false)}
+        teamId={teamId}
+        onNoteAdded={handleTeamNoteAdded}
+      />
+
+      <EditTeamNoteModal
+        isOpen={isEditNoteModalOpen}
+        onClose={() => setIsEditNoteModalOpen(false)}
+        note={currentTeamNote}
+        onNoteUpdated={handleTeamNoteUpdated}
       />
     </div>
   );

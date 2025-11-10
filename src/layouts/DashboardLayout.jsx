@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar } from 'lucide-react';
-import Navbar from '../components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SidebarLink = ({ to, icon, children, isCollapsed }) => {
@@ -83,13 +82,12 @@ const DashboardLayout = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
 
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sticky Sidebar */}
           <div
-            className={`flex-shrink-0 ${
+            className={`shrink-0 ${
               isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'
             } transition-all duration-300`}
           >
