@@ -13,6 +13,7 @@ import NotesPage from './pages/NotesPage'; // <-- Import NotesPage
 import TeamDetailPage from './pages/TeamDetailPage';
 import DashboardPage from './pages/DashboardPage';
 import SettingsPage from './pages/SettingsPage';
+import CalendarPage from './pages/CalendarPage';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
               <Route path="/teams" element={<TeamsPage />} />
               <Route path="/team/:teamId" element={<TeamDetailPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/calendar" element={<CalendarPage />} />
             </Route>
           </Route>
 

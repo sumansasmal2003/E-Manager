@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
+import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -67,6 +67,7 @@ const DashboardLayout = () => {
     if (path === '/notes') return 'My Notes';
     if (path === '/teams') return 'My Teams';
     if (path === '/settings') return 'My Settings';
+    if (path === '/calendar') return 'My Calendar';
     return 'Dashboard';
   };
 
@@ -76,6 +77,7 @@ const DashboardLayout = () => {
     if (path === '/notes') return 'Manage and organize your personal notes';
     if (path === '/teams') return 'Collaborate with your team members';
     if (path === '/settings') return 'Manage your account and connections';
+    if (path === '/calendar') return 'View all your tasks and meetings in one place';
     return '';
   };
 
@@ -140,6 +142,13 @@ const DashboardLayout = () => {
                   >
                     My Teams
                   </SidebarLink>
+                  <SidebarLink
+                to="/calendar"
+                icon={<Calendar size={isSidebarCollapsed ? 22 : 20} />}
+                isCollapsed={isSidebarCollapsed}
+              >
+                Calendar
+              </SidebarLink>
                   <SidebarLink
                 to="/settings"
                 icon={<Settings size={isSidebarCollapsed ? 22 : 20} />}

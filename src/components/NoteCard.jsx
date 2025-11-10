@@ -1,6 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Trash2, Edit, Calendar } from 'lucide-react';
+import { Trash2, Edit, Calendar, Tag } from 'lucide-react'; // <-- Import Tag
+
+// Helper function for category colors
+const getCategoryColor = (category) => {
+  if (!category) return 'bg-gray-100 text-gray-700';
+  const normalizedCategory = category.toLowerCase();
+  if (normalizedCategory === 'work') {
+    return 'bg-blue-100 text-blue-700';
+  }
+  if (normalizedCategory === 'personal') {
+    return 'bg-green-100 text-green-700';
+  }
+  if (normalizedCategory === 'urgent') {
+    return 'bg-red-100 text-red-700';
+  }
+  // Default color
+  return 'bg-gray-100 text-gray-700';
+};
 
 const NoteCard = ({ note, onDelete, onEdit }) => {
   const formattedDate = new Date(note.createdAt).toLocaleDateString('en-US', {
@@ -51,12 +68,20 @@ const NoteCard = ({ note, onDelete, onEdit }) => {
         </div>
       </div>
 
-      {/* Plan Period Badge */}
-      <div className="flex justify-between items-center">
+      {/* --- UPDATED BADGES SECTION --- */}
+      <div className="flex flex-wrap gap-2 items-center">
+        {/* Plan Period Badge */}
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlanPeriodColor(note.planPeriod)}`}>
+          <Calendar size={12} className="mr-1" />
           {note.planPeriod}
         </span>
+        {/* Category Badge */}
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(note.category)}`}>
+          <Tag size={12} className="mr-1" />
+          {note.category || 'General'}
+        </span>
       </div>
+      {/* --- END BADGES SECTION --- */}
 
       {/* Content */}
       <div className="space-y-2">

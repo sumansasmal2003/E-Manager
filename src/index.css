@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 @theme {
   --color-light-white: #f8f9fa;
@@ -7,4 +8,47 @@
   --color-secondary: #6c757d;
   --color-dark: #212529;
   --color-border: #dee2e6;
+}
+
+.rbc-time-header-gutter,
+/* This targets the main time column */
+.rbc-time-gutter {
+  min-width: 55px !important;  /* Give it a fixed width */
+  max-width: 55px !important;  /* Give it a fixed width */
+  flex: 0 0 55px !important;    /* Don't let it shrink */
+  text-align: right;           /* Align time nicely */
+  padding-right: 5px;
+  z-index: 10;                 /* Keep it on top */
+}
+
+/* 2. Fix for the "All-Day" row (scrollable) */
+/* This is the container for all-day events */
+.rbc-day-slot .rbc-allday-cell {
+  max-height: 120px !important; /* Set a max height */
+  overflow-y: auto !important;  /* Make it scrollable */
+}
+
+/* 3. Fix for the "+X more" links in the ALL-DAY row */
+/* This is your new request! */
+.rbc-allday-cell .rbc-row-segment {
+  max-height: 120px !important; /* Match the cell height */
+}
+.rbc-allday-cell .rbc-show-more {
+  display: block !important;    /* Ensure the "+X more" button is visible */
+  position: sticky;
+  bottom: 0;
+  background: white;
+  width: 100%;
+  text-align: center;
+}
+
+/* 4. This class applies the fixed height for Week/Day view */
+.rbc-tailwind-wrapper {
+  height: 75vh;
+}
+
+/* 5. Fix event content to wrap text */
+.rbc-event-content {
+  white-space: normal !important;
+  word-break: break-word !important;
 }

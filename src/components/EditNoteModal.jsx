@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import Input from './Input';
 import { motion } from 'framer-motion';
-import { FileText, Calendar } from 'lucide-react';
+import { FileText, Calendar, Tag } from 'lucide-react'; // <-- Import Tag
 import api from '../api/axiosConfig';
 
 const EditNoteModal = ({ isOpen, onClose, note, onNoteUpdated }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [planPeriod, setPlanPeriod] = useState('General');
+  const [category, setCategory] = useState(''); // <-- ADDED
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -17,6 +18,7 @@ const EditNoteModal = ({ isOpen, onClose, note, onNoteUpdated }) => {
       setTitle(note.title);
       setContent(note.content);
       setPlanPeriod(note.planPeriod);
+      setCategory(note.category || 'Personal'); // <-- ADDED
     }
   }, [note]);
 
@@ -29,6 +31,7 @@ const EditNoteModal = ({ isOpen, onClose, note, onNoteUpdated }) => {
         title,
         content,
         planPeriod,
+        category, // <-- ADDED
       });
 
       onNoteUpdated(res.data);
@@ -80,22 +83,40 @@ const EditNoteModal = ({ isOpen, onClose, note, onNoteUpdated }) => {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            <Calendar size={16} className="inline mr-1" />
-            Plan Period
-          </label>
-          <select
-            value={planPeriod}
-            onChange={(e) => setPlanPeriod(e.target.value)}
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200"
-          >
-            <option value="General">General</option>
-            <option value="This Week">This Week</option>
-            <option value="This Month">This Month</option>
-            <option value="This Year">This Year</option>
-          </select>
+        {/* --- UPDATED SECTION --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Calendar size={16} className="inline mr-1" />
+              Plan Period
+            </label>
+            <select
+              value={planPeriod}
+              onChange={(e) => setPlanPeriod(e.target.value)}
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200"
+            >
+              <option value="General">General</option>
+              <option value="This Week">This Week</option>
+              <option value="This Month">This Month</option>
+              <option value="This Year">This Year</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Tag size={16} className="inline mr-1" />
+              Category
+            </label>
+            <Input
+              type="text"
+              placeholder="e.g., Personal, Work"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+              autoComplete="off"
+            />
+          </div>
         </div>
+        {/* --- END UPDATED SECTION --- */}
 
         <div className="flex space-x-3 pt-4">
           <button

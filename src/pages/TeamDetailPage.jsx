@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, Plus, Users, ClipboardList, Calendar, Crown, User, ChevronDown, ChevronUp, Copy, Check, Link2, Trash2, Github } from 'lucide-react';
+import {
+  ArrowLeft, Plus, Users, ClipboardList, Calendar, Crown, User,
+  ChevronDown, ChevronUp, Copy, Check, Link2, Trash2, Github, X
+} from 'lucide-react';
 
 import AddMemberModal from '../components/AddMemberModal';
 import CreateTaskModal from '../components/CreateTaskModal';
@@ -216,6 +219,27 @@ const TeamDetailPage = () => {
     }
   };
 
+  const handleRemoveMember = async (name) => {
+    const confirmMessage = `Are you sure you want to remove ${name}?\n\nThis action will also DELETE all tasks assigned to them and REMOVE them from all future meetings.`;
+
+    // Using window.confirm as it's used elsewhere in your project
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      // We don't need the response, we'll re-fetch for simplicity
+      await api.put(`/teams/${teamId}/remove`, { name });
+
+      // Re-fetch all data to get updated task and meeting lists
+      fetchTeamData();
+
+    } catch (err) {
+      console.error("Failed to remove member", err);
+      setError(err.response?.data?.message || 'Failed to remove member');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -312,7 +336,11 @@ const TeamDetailPage = () => {
             <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
               <div className="space-y-3 pr-2">
                 {team.members.map((memberName, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <div
+                  key={index}
+                  className="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                       <span className="text-sm font-medium text-gray-600">
                         {memberName.charAt(0).toUpperCase()}
@@ -320,7 +348,19 @@ const TeamDetailPage = () => {
                     </div>
                     <span className="font-medium text-gray-900">{memberName}</span>
                   </div>
-                ))}
+
+                  {/* Show remove button only if user is owner */}
+                  {isOwner && (
+                    <button
+                      onClick={() => handleRemoveMember(memberName)}
+                      title={`Remove ${memberName}`}
+                      className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              ))}
                 {team.members.length === 0 && (
                   <div className="text-center py-4">
                     <Users className="mx-auto text-gray-400 mb-2" size={24} />
