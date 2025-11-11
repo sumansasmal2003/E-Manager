@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   ArrowLeft, Plus, Users, ClipboardList, Calendar, Crown, User,
   ChevronDown, ChevronUp, Copy, Check, Link2, Trash2, Github, X,
-  FileText, Activity // <-- ADD THIS
+  FileText, Activity, FilePieChart // <-- ADD THIS
 } from 'lucide-react';
 
 import AddMemberModal from '../components/AddMemberModal';
@@ -20,6 +20,7 @@ import TeamNoteCard from '../components/TeamNoteCard';
 import AddTeamNoteModal from '../components/AddTeamNoteModal';
 import EditTeamNoteModal from '../components/EditTeamNoteModal';
 import TeamActivityEvent from '../components/TeamActivityEvent';
+import GenerateReportModal from '../components/GenerateReportModal';
 
 const TeamDetailPage = () => {
   const { teamId } = useParams();
@@ -45,6 +46,7 @@ const TeamDetailPage = () => {
   const [currentTeamNote, setCurrentTeamNote] = useState(null);
   const [activity, setActivity] = useState([]);
   const [activityLoading, setActivityLoading] = useState(true);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const fetchTeamData = async () => {
     try {
@@ -373,15 +375,25 @@ const TeamDetailPage = () => {
               </div>
             </div>
           </div>
-          {isOwner && (
+          <div className="flex items-center space-x-3 w-full lg:w-auto">
+            {/* --- 4. ADD THE NEW BUTTON --- */}
             <button
-              onClick={() => setIsMemberModalOpen(true)}
-              className="w-full lg:w-auto bg-gray-900 text-white px-6 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+              onClick={() => setIsReportModalOpen(true)}
+              className="w-full lg:w-auto bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
             >
-              <Plus size={20} />
-              <span>Add Member</span>
+              <FilePieChart size={20} />
+              <span>Generate Report</span>
             </button>
-          )}
+            {isOwner && (
+              <button
+                onClick={() => setIsMemberModalOpen(true)}
+                className="w-full lg:w-auto bg-gray-900 text-white px-6 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+              >
+                <Plus size={20} />
+                <span>Add Member</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -805,6 +817,14 @@ const TeamDetailPage = () => {
         note={currentTeamNote}
         onNoteUpdated={handleTeamNoteUpdated}
       />
+      {team && (
+        <GenerateReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          teamId={team._id}
+          teamName={team.teamName}
+        />
+      )}
     </div>
   );
 };

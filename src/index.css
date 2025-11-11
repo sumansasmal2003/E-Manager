@@ -10,6 +10,36 @@
   --color-border: #dee2e6;
 }
 
+/*
+ * For Firefox
+ * scrollbar-color: <thumb-color> <track-color>
+ */
+* {
+  scrollbar-color: #111827 transparent; /* (gray-900 thumb, transparent track) */
+  scrollbar-width: thin;
+}
+
+/*
+ * For WebKit-based browsers (Chrome, Edge, Safari)
+ */
+::-webkit-scrollbar {
+  width: 10px;  /* Width of the vertical scrollbar */
+  height: 10px; /* Height of the horizontal scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Makes the track invisible */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #111827; /* (gray-900) */
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #374151; /* (gray-700 for hover) */
+}
+
 .rbc-time-header-gutter,
 /* This targets the main time column */
 .rbc-time-gutter {

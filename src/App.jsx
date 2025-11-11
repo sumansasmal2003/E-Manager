@@ -14,6 +14,7 @@ import TeamDetailPage from './pages/TeamDetailPage';
 import DashboardPage from './pages/DashboardPage';
 import SettingsPage from './pages/SettingsPage';
 import CalendarPage from './pages/CalendarPage';
+import TodayPage from './pages/TodayPage';
 
 // --- IMPORT NAVBAR HERE ---
 import Navbar from './components/Navbar';
@@ -35,7 +36,8 @@ function App() {
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route element={<DashboardLayout />}>
-              <Route path="/" element={<DashboardPage />} />
+              <Route path="/" element={<TodayPage />} />
+              <Route path="/today" element={<TodayPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/notes" element={<NotesPage />} />
               <Route path="/teams" element={<TeamsPage />} />

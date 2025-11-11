@@ -17,7 +17,9 @@ const Navbar = () => {
   };
 
   const isActiveRoute = (path) => {
-    return location.pathname === path;
+    const current = location.pathname;
+    if (path === "/today") return current === "/" || current === "/today"; // <-- 1. UPDATE THIS
+    return current === path;
   };
 
   return (
@@ -27,7 +29,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
             <Link
-              to={isLoggedIn ? "/dashboard" : "/"}
+              to={isLoggedIn ? "/today" : "/"}
               className="flex items-center space-x-2"
             >
               <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
@@ -49,9 +51,9 @@ const Navbar = () => {
                     <span>Hello, {user?.username}</span>
                   </span>
                   <Link
-                    to="/dashboard"
+                    to="/today"
                     className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      isActiveRoute('/dashboard')
+                      isActiveRoute('/today')
                         ? 'bg-gray-900 text-white'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}
@@ -119,10 +121,10 @@ const Navbar = () => {
                     <span className="text-sm text-gray-600">{user?.username}</span>
                   </div>
                   <Link
-                    to="/dashboard"
+                    to="/today"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 w-full ${
-                      isActiveRoute('/dashboard')
+                      isActiveRoute('/today')
                         ? 'bg-gray-900 text-white'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}
