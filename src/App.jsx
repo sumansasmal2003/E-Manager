@@ -14,7 +14,10 @@ import TeamDetailPage from './pages/TeamDetailPage';
 import DashboardPage from './pages/DashboardPage';
 import SettingsPage from './pages/SettingsPage';
 import CalendarPage from './pages/CalendarPage';
+import MembersPage from './pages/MembersPage';
+import MemberDetailPage from './pages/MemberDetailPage';
 import TodayPage from './pages/TodayPage';
+import AttendancePage from './pages/AttendancePage';
 
 // --- IMPORT NAVBAR HERE ---
 import Navbar from './components/Navbar';
@@ -44,6 +47,9 @@ function App() {
               <Route path="/team/:teamId" element={<TeamDetailPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/calendar" element={<CalendarPage />} />
+              <Route path="/members" element={<MembersPage />} />
+              <Route path="/members/details" element={<MemberDetailPage />} />
+              <Route path="/attendance" element={<AttendancePage />} />
             </Route>
           </Route>
 

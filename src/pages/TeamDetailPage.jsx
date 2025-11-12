@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   ArrowLeft, Plus, Users, ClipboardList, Calendar, Crown, User,
   ChevronDown, ChevronUp, Copy, Check, Link2, Trash2, Github, X,
-  FileText, Activity, FilePieChart // <-- ADD THIS
+  FileText, Activity, FilePieChart, ExternalLink // <-- ADD THIS
 } from 'lucide-react';
 
 import AddMemberModal from '../components/AddMemberModal';
@@ -21,6 +21,7 @@ import AddTeamNoteModal from '../components/AddTeamNoteModal';
 import EditTeamNoteModal from '../components/EditTeamNoteModal';
 import TeamActivityEvent from '../components/TeamActivityEvent';
 import GenerateReportModal from '../components/GenerateReportModal';
+import AddLiveProjectModal from '../components/AddLiveProjectModal';
 
 const TeamDetailPage = () => {
   const { teamId } = useParams();
@@ -47,6 +48,7 @@ const TeamDetailPage = () => {
   const [activity, setActivity] = useState([]);
   const [activityLoading, setActivityLoading] = useState(true);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isLiveProjectModalOpen, setIsLiveProjectModalOpen] = useState(false);
 
   const fetchTeamData = async () => {
     try {
@@ -307,6 +309,26 @@ const TeamDetailPage = () => {
       console.warn('Could not refresh activity feed', err);
     }
     setActivityLoading(false);
+  };
+
+  const handleLiveProjectAdded = (updatedTeam) => {
+    setTeam(updatedTeam);
+    refreshActivities();
+  };
+
+  const handleDeleteLiveProject = async (linkId) => {
+    if (!window.confirm('Are you sure you want to remove this project link?')) {
+      return;
+    }
+
+    try {
+      const res = await api.delete(`/teams/${teamId}/liveproject/${linkId}`);
+      setTeam(res.data);
+      refreshActivities();
+    } catch (err) {
+      console.error("Failed to delete project link", err);
+      setError(err.response?.data?.message || 'Failed to delete link');
+    }
   };
 
   if (loading) {
@@ -585,6 +607,59 @@ const TeamDetailPage = () => {
             </div>
           </div>
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center space-x-2">
+                <ExternalLink className="text-gray-700" size={20} /> {/* <-- New icon */}
+                <h2 className="text-lg font-semibold text-gray-900">Live Projects</h2> {/* <-- New title */}
+              </div>
+              <button
+                onClick={() => setIsLiveProjectModalOpen(true)} // <-- Use new state
+                className="bg-gray-900 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+              <div className="space-y-3 pr-2">
+                {team.liveProjects && team.liveProjects.length > 0 ? ( // <-- Use new array
+                  team.liveProjects.map((project) => ( // <-- Use new array
+                    <div
+                      key={project._id}
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                    >
+                      <a
+                        href={project.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-3"
+                      >
+                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                          <ExternalLink size={16} className="text-gray-600" /> {/* <-- New icon */}
+                        </div>
+                        <span className="font-medium text-gray-900">{project.name}</span>
+                      </a>
+                      <button
+                        onClick={() => handleDeleteLiveProject(project._id)} // <-- Use new handler
+                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4">
+                    <ExternalLink className="mx-auto text-gray-400 mb-2" size={24} /> {/* <-- New icon */}
+                    <p className="text-sm text-gray-600">No live projects linked yet</p> {/* <-- New text */}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Tasks & Meetings */}
+        <div className="xl:col-span-2 space-y-6">
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div className="flex items-center space-x-2 mb-4">
               <Activity className="text-gray-700" size={20} />
               <h2 className="text-lg font-semibold text-gray-900">Activity Feed</h2>
@@ -608,10 +683,6 @@ const TeamDetailPage = () => {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Right Column: Tasks & Meetings */}
-        <div className="xl:col-span-2 space-y-6">
           {/* Tasks Section */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
             <div className="p-6 border-b border-gray-200">
@@ -825,6 +896,13 @@ const TeamDetailPage = () => {
           teamName={team.teamName}
         />
       )}
+
+      <AddLiveProjectModal
+        isOpen={isLiveProjectModalOpen}
+        onClose={() => setIsLiveProjectModalOpen(false)}
+        teamId={teamId}
+        onLiveProjectAdded={handleLiveProjectAdded}
+      />
     </div>
   );
 };

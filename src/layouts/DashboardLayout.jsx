@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar, Menu, X, Sunrise } from 'lucide-react';
+import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar, Menu, X, Sunrise, UserCheck, CheckSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SidebarLink = ({ to, icon, children, isCollapsed, onNavigate }) => {
@@ -184,6 +184,22 @@ const DashboardLayout = () => {
                         My Teams
                       </SidebarLink>
                       <SidebarLink
+                to="/members"
+                icon={<UserCheck size={20} />}
+                isCollapsed={false}
+                onNavigate={handleNavigate}
+              >
+                Members
+              </SidebarLink>
+              <SidebarLink
+                to="/attendance"
+                icon={<CheckSquare size={20} />}
+                isCollapsed={false}
+                onNavigate={handleNavigate}
+              >
+                Attendance
+              </SidebarLink>
+                      <SidebarLink
                         to="/calendar"
                         icon={<Calendar size={20} />}
                         isCollapsed={false}
@@ -278,6 +294,22 @@ const DashboardLayout = () => {
                   >
                     My Teams
                   </SidebarLink>
+                  <SidebarLink
+                to="/members"
+                icon={<UserCheck size={isSidebarCollapsed ? 22 : 20} />}
+                isCollapsed={isSidebarCollapsed}
+                onNavigate={handleNavigate}
+              >
+                Members
+              </SidebarLink>
+              <SidebarLink
+                to="/attendance"
+                icon={<CheckSquare size={isSidebarCollapsed ? 22 : 20} />}
+                isCollapsed={isSidebarCollapsed}
+                onNavigate={handleNavigate}
+              >
+                Attendance
+              </SidebarLink>
                   <SidebarLink
                     to="/calendar"
                     icon={<Calendar size={isSidebarCollapsed ? 22 : 20} />}
