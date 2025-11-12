@@ -2,14 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import {
-  Loader2,
-  AlertCircle,
-  User,
-  ClipboardList,
-  Calendar,
-  Activity,
-  ArrowLeft,
-  Edit
+  Loader2, AlertCircle, User, ClipboardList, Calendar, Activity, ArrowLeft, Edit,
+  Users as UsersIcon // <-- Rename Users to avoid conflict
 } from 'lucide-react';
 import TaskItem from '../components/TaskItem'; //
 import MeetingItem from '../components/MeetingItem'; //
@@ -17,6 +11,9 @@ import TeamActivityEvent from '../components/TeamActivityEvent'; //
 import EditTaskModal from '../components/EditTaskModal'; // <-- 1. IMPORT THE MODAL
 import EditMemberProfileModal from '../components/EditMemberProfileModal';
 import format from 'date-fns/format';
+import { Users, Plus } from 'lucide-react'; // <-- IMPORT Plus and Users (as Users)
+import AddOneOnOneModal from '../components/AddOneOnOneModal'; // <-- IMPORT NEW MODAL
+import OneOnOneCard from '../components/OneOnOneCard';
 
 const MemberDetailPage = () => {
   const [searchParams] = useSearchParams();
@@ -27,6 +24,8 @@ const MemberDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('tasks');
+  const [oneOnOnes, setOneOnOnes] = useState([]);
+  const [isOneOnOneModalOpen, setIsOneOnOneModalOpen] = useState(false);
 
   // --- 2. ADD STATE FOR MODALS AND TEAM DATA ---
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -45,14 +44,16 @@ const MemberDetailPage = () => {
       try {
         setLoading(true);
         // We fetch teams and member details in parallel
-        const [detailsRes, teamsRes] = await Promise.all([
+        const [detailsRes, teamsRes, oneOnOnesRes] = await Promise.all([
           api.get(`/members/details?name=${encodeURIComponent(memberName)}`),
-          api.get('/teams') // Fetch all teams to get member lists for the edit modal
+          api.get('/teams'), // Fetch all teams to get member lists for the edit modal
+          api.get(`/oneonones/member/${encodeURIComponent(memberName)}`)
         ]);
 
         setData(detailsRes.data);
         setProfile(detailsRes.data.profile);
         setAllTeams(teamsRes.data);
+        setOneOnOnes(oneOnOnesRes.data);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch member details');
       }
@@ -66,6 +67,19 @@ const MemberDetailPage = () => {
   const handleOpenEditModal = (task) => {
     setCurrentTask(task);
     setIsEditModalOpen(true);
+  };
+
+  const handleOneOnOneCreated = (newOneOnOne) => {
+    setOneOnOnes([newOneOnOne, ...oneOnOnes]); // Add to top of the list
+    setIsOneOnOneModalOpen(false);
+  };
+
+  const handleOneOnOneUpdated = (updatedOneOnOne) => {
+    setOneOnOnes(oneOnOnes.map(o => o._id === updatedOneOnOne._id ? updatedOneOnOne : o));
+  };
+
+  const handleOneOnOneDeleted = (deletedId) => {
+    setOneOnOnes(oneOnOnes.filter(o => o._id !== deletedId));
   };
 
   const handleTaskUpdated = (updatedTask) => {
@@ -143,6 +157,7 @@ const MemberDetailPage = () => {
   const tabs = [
     { id: 'tasks', name: 'Tasks', count: tasks.length, icon: ClipboardList },
     { id: 'meetings', name: 'Meetings', count: meetings.length, icon: Calendar },
+    { id: 'oneonones', name: '1-on-1s', count: oneOnOnes.length, icon: Users },
     { id: 'activity', name: 'Activity', count: activities.length, icon: Activity },
   ];
 
@@ -314,6 +329,40 @@ const MemberDetailPage = () => {
           </div>
         )}
 
+        {activeTab === 'oneonones' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">1-on-1 Records</h2>
+              <button
+                onClick={() => setIsOneOnOneModalOpen(true)}
+                className="bg-gray-900 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 transition-all duration-200"
+              >
+                <Plus size={16} />
+                <span>Schedule 1-on-1</span>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {oneOnOnes.length > 0 ? (
+                oneOnOnes.map(oneOnOne => (
+                  <OneOnOneCard
+                    key={oneOnOne._id}
+                    oneOnOne={oneOnOne}
+                    onUpdated={handleOneOnOneUpdated}
+                    onDeleted={handleOneOnOneDeleted}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-12 bg-white border border-gray-200 rounded-xl">
+                  <Users size={48} className="mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No 1-on-1s scheduled</h3>
+                  <p className="text-gray-600">Schedule your first 1-on-1 to keep track of notes and action items.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {activeTab === 'activity' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -359,6 +408,12 @@ const MemberDetailPage = () => {
         // We find the correct member list for the specific task
         teamMembers={getTeamMembersForTask(currentTask)}
         onTaskUpdated={handleTaskUpdated}
+      />
+      <AddOneOnOneModal
+        isOpen={isOneOnOneModalOpen}
+        onClose={() => setIsOneOnOneModalOpen(false)}
+        memberName={memberName}
+        onOneOnOneCreated={handleOneOnOneCreated}
       />
     </div>
   );

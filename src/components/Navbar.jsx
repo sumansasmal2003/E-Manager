@@ -1,35 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogIn, UserPlus, LogOut, LayoutDashboard, Menu, X, User } from 'lucide-react';
+import {
+  LogIn, UserPlus, LogOut, LayoutDashboard, Menu, X, User,
+  Search,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import api from '../api/axiosConfig';
+import { useDebounce } from '../hooks/useDebounce';
+import GlobalSearchResults from './GlobalSearchResults';
+import Input from './Input';
+
 const Navbar = () => {
   const { isLoggedIn, user, logout } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Already here, which is great
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [results, setResults] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const debouncedQuery = useDebounce(searchQuery, 300);
+  const searchContainerRef = useRef(null);
+
+  // This useEffect (for API calls) remains the same
+  useEffect(() => {
+    if (debouncedQuery.length > 1) {
+      setIsSearching(true);
+      api.get(`/search?q=${debouncedQuery}`)
+        .then(res => {
+          setResults(res.data);
+          setIsSearching(false);
+        })
+        .catch(err => {
+          console.error("Search failed:", err);
+          setIsSearching(false);
+          setResults(null);
+        });
+    } else {
+      setResults(null);
+      setIsSearching(false);
+    }
+  }, [debouncedQuery]);
+
+  // This useEffect (for clicking outside) remains the same
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // This function remains the same
   const handleLogout = () => {
     logout();
     navigate('/login');
     setIsMobileMenuOpen(false);
   };
 
+  // This function remains the same (with the fix from before)
   const isActiveRoute = (path) => {
     const current = location.pathname;
-    if (path === "/today") return current === "/" || current === "/today"; // <-- 1. UPDATE THIS
+    if (path === "/" || path === "/today") {
+        return current === "/" || current === "/today";
+    }
     return current === path;
   };
+
+  // --- *** MODIFICATION HERE *** ---
+  // We rename 'clearSearch' to 'handleResultClick'
+  // It now receives the 'link' and handles navigation
+  const handleResultClick = (link) => {
+    navigate(link); // 1. Navigate first
+
+    // 2. Then clear and close the search dropdown
+    setSearchQuery('');
+    setResults(null);
+    setIsSearching(false);
+    setIsSearchFocused(false);
+  };
+  // --- *** END MODIFICATION *** ---
 
   return (
     <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+          {/* Logo (remains the same) */}
           <div className="flex-shrink-0 flex items-center">
             <Link
-              to={isLoggedIn ? "/today" : "/"}
+              to={isLoggedIn ? "/" : "/"}
               className="flex items-center space-x-2"
             >
               <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
@@ -41,19 +107,41 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Search Bar */}
+          {isLoggedIn && (
+            <div className="hidden md:block w-full max-w-md mx-4" ref={searchContainerRef}>
+              <div className="relative">
+                <Input
+                  icon={<Search size={18} className="text-gray-400" />}
+                  type="text"
+                  placeholder="Search tasks, teams, members, notes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                />
+                {isSearchFocused && (
+                  <GlobalSearchResults
+                    isLoading={isSearching}
+                    results={results}
+                    // --- *** MODIFICATION HERE *** ---
+                    // Pass the new handler down
+                    onResultClick={handleResultClick}
+                    // --- *** END MODIFICATION *** ---
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Desktop Navigation (remains the same) */}
           <div className="hidden md:flex items-center space-x-6">
             {isLoggedIn ? (
               <>
                 <div className="flex items-center space-x-6">
-                  <span className="text-sm text-gray-600 flex items-center space-x-2">
-                    <User size={16} className="text-gray-400" />
-                    <span>Hello, {user?.username}</span>
-                  </span>
                   <Link
-                    to="/today"
+                    to="/"
                     className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      isActiveRoute('/today')
+                      isActiveRoute('/')
                         ? 'bg-gray-900 text-white'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}
@@ -71,7 +159,7 @@ const Navbar = () => {
                 </div>
               </>
             ) : (
-              <div className="flex items-center space-x-4">
+               <div className="flex items-center space-x-4">
                 <Link
                   to="/login"
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -94,7 +182,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile menu button (remains the same) */}
           <div className="flex md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -105,7 +193,33 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Search Bar */}
+        {isLoggedIn && (
+          <div className="md:hidden pt-2 pb-4" ref={isMobileMenuOpen ? null : searchContainerRef}>
+            <div className="relative">
+              <Input
+                icon={<Search size={18} className="text-gray-400" />}
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+              />
+              {isSearchFocused && (
+                <GlobalSearchResults
+                  isLoading={isSearching}
+                  results={results}
+                  // --- *** MODIFICATION HERE *** ---
+                  // Pass the new handler down
+                  onResultClick={handleResultClick}
+                  // --- *** END MODIFICATION *** ---
+                />
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Navigation (remains the same) */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
@@ -121,10 +235,10 @@ const Navbar = () => {
                     <span className="text-sm text-gray-600">{user?.username}</span>
                   </div>
                   <Link
-                    to="/today"
+                    to="/"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 w-full ${
-                      isActiveRoute('/today')
+                      isActiveRoute('/')
                         ? 'bg-gray-900 text-white'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     }`}

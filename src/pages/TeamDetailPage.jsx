@@ -4,7 +4,7 @@ import api from '../api/axiosConfig';
 import { useAuth } from '../context/AuthContext';
 import {
   ArrowLeft, Plus, Users, ClipboardList, Calendar, Crown, User,
-  ChevronDown, ChevronUp, Copy, Check, Link2, Trash2, Github, X,
+  ChevronDown, ChevronUp, Link2, Trash2, Github, X,
   FileText, Activity, FilePieChart, ExternalLink // <-- ADD THIS
 } from 'lucide-react';
 
@@ -22,6 +22,7 @@ import EditTeamNoteModal from '../components/EditTeamNoteModal';
 import TeamActivityEvent from '../components/TeamActivityEvent';
 import GenerateReportModal from '../components/GenerateReportModal';
 import AddLiveProjectModal from '../components/AddLiveProjectModal';
+import CopyTasksModal from '../components/CopyTasksModal';
 
 const TeamDetailPage = () => {
   const { teamId } = useParams();
@@ -40,7 +41,6 @@ const TeamDetailPage = () => {
   const [isGithubModalOpen, setIsGithubModalOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
   const [expandedAssignees, setExpandedAssignees] = useState(new Set());
-  const [copied, setCopied] = useState(false);
   const [teamNotes, setTeamNotes] = useState([]);
   const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
   const [isEditNoteModalOpen, setIsEditNoteModalOpen] = useState(false);
@@ -49,6 +49,7 @@ const TeamDetailPage = () => {
   const [activityLoading, setActivityLoading] = useState(true);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isLiveProjectModalOpen, setIsLiveProjectModalOpen] = useState(false);
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
 
   const fetchTeamData = async () => {
     try {
@@ -149,63 +150,8 @@ const TeamDetailPage = () => {
     });
   };
 
-  const formatTasksForCopy = () => {
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-
-  let formattedText = `📋 ${team.teamName} - Team Tasks\n`;
-  formattedText += `📅 ${currentDate}\n\n`;
-
-  Object.entries(tasksByAssignee).forEach(([assignee, assigneeTasks], index) => {
-    formattedText += `👤 ${assignee}\n\n`;
-
-    assigneeTasks.forEach((task, taskIndex) => {
-      formattedText += `${taskIndex + 1}. ${task.title}`;
-
-      if (task.description) {
-        formattedText += `   ${task.description}\n`;
-      }
-
-      if (task.priority && task.priority !== 'Medium') {
-        formattedText += `   Priority: ${task.priority}\n`;
-      }
-
-      // Add space between tasks
-      if (taskIndex < assigneeTasks.length - 1) {
-        formattedText += '\n';
-      }
-    });
-
-    // Add separator between assignees (except after the last one)
-    if (index < Object.keys(tasksByAssignee).length - 1) {
-      formattedText += '\n────────────────────────\n';
-    }
-  });
-
-  return formattedText;
-};
-
-  const handleCopyTasks = async () => {
-    try {
-      const tasksText = formatTasksForCopy();
-      await navigator.clipboard.writeText(tasksText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = formatTasksForCopy();
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+  const handleCopyTasks = () => {
+    setIsCopyModalOpen(true);
   };
 
   const handleFigmaLinkAdded = (updatedTeam) => {
@@ -696,22 +642,14 @@ const TeamDetailPage = () => {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                   <button
-                    onClick={handleCopyTasks}
-                    disabled={tasks.length === 0}
-                    className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {copied ? (
-                      <>
-                        <Check size={16} className="text-green-600" />
-                        <span className="text-green-600">Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={16} />
-                        <span>Copy Tasks</span>
-                      </>
-                    )}
-                  </button>
+                onClick={handleCopyTasks}
+                disabled={tasks.length === 0}
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {/* The "Copied!" logic is gone from here, which is correct */}
+                <ClipboardList size={16} /> {/* <-- Use ClipboardList for consistency */}
+                <span>Copy Tasks...</span>
+              </button>
                   <button
                     onClick={() => setIsTaskModalOpen(true)}
                     className="w-full sm:w-auto bg-gray-900 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
@@ -843,6 +781,13 @@ const TeamDetailPage = () => {
           onTaskCreated={handleTaskCreated}
         />
       )}
+
+      <CopyTasksModal
+        isOpen={isCopyModalOpen}
+        onClose={() => setIsCopyModalOpen(false)}
+        tasks={tasks}
+        teamName={team.teamName}
+      />
 
       {team && (
         <EditTaskModal
