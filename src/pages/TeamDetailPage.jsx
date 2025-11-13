@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   ArrowLeft, Plus, Users, ClipboardList, Calendar, Crown, User,
   ChevronDown, ChevronUp, Link2, Trash2, Github, X,
-  FileText, Activity, FilePieChart, ExternalLink // <-- ADD THIS
+  FileText, Activity, FilePieChart, ExternalLink, Mail, Loader2 // <-- ADD THIS
 } from 'lucide-react';
 
 import AddMemberModal from '../components/AddMemberModal';
@@ -55,6 +55,7 @@ const TeamDetailPage = () => {
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [isEditMeetingModalOpen, setIsEditMeetingModalOpen] = useState(false);
   const [currentMeeting, setCurrentMeeting] = useState(null);
+  const [sendingReport, setSendingReport] = useState(null);
 
   const fetchTeamData = async () => {
     try {
@@ -87,8 +88,8 @@ const TeamDetailPage = () => {
     refreshActivities();
   };
 
-  const handleTaskCreated = (newTask) => {
-    setTasks(prevTasks => [newTask, ...prevTasks]);
+  const handleTasksCreated = (newTasks) => {
+    setTasks(prevTasks => [...newTasks, ...prevTasks]);
     refreshActivities();
   };
 
@@ -330,6 +331,33 @@ const TeamDetailPage = () => {
     }
   };
 
+  const handleSendMemberReport = async (memberName, memberEmail) => {
+    if (!memberEmail) {
+      alert("This member does not have an email address on file. Please add one from their profile page.");
+      return;
+    }
+
+    // Use the custom confirm dialog
+    const confirmed = await confirm({
+      title: 'Send Report?',
+      description: `This will generate a PDF report and email it to ${memberName} at ${memberEmail}.`,
+      confirmText: 'Send Email',
+      danger: false // This is not a destructive action
+    });
+
+    if (confirmed) {
+      setSendingReport(memberName);
+      try {
+        const res = await api.post('/members/send-report', { memberName });
+        alert(res.data.message); // Simple success alert
+      } catch (err) {
+        // Use error from state if available, else generic message
+        setError(err.response?.data?.message || 'Failed to send report');
+      }
+      setSendingReport(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -440,25 +468,48 @@ const TeamDetailPage = () => {
                   key={index}
                   className="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                  {/* Wrap the member info in a Link */}
+                  <Link
+                    to={`/members/details?name=${encodeURIComponent(memberName)}`}
+                    className="flex-1 flex items-center space-x-3 min-w-0" // Added flex-1 and min-w-0 for proper text truncation
+                  >
+                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-sm font-medium text-gray-600">
                         {memberName.charAt(0).toUpperCase()}
                       </span>
                     </div>
-                    <span className="font-medium text-gray-900">{memberName}</span>
-                  </div>
+                    {/* Added truncate and title for long names */}
+                    <span className="font-medium text-gray-900 truncate" title={memberName}>
+                      {memberName}
+                    </span>
+                  </Link>
 
-                  {/* Show remove button only if user is owner */}
-                  {isOwner && (
-                    <button
-                      onClick={() => handleRemoveMember(memberName)}
-                      title={`Remove ${memberName}`}
-                      className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
+                  {/* The delete button remains a separate element */}
+                  <div className="flex items-center flex-shrink-0 ml-2 z-10">
+                        {isOwner && (
+                          <button
+                            onClick={() => handleSendMemberReport(memberName)}
+                            disabled={sendingReport === memberName}
+                            title={sendingReport === memberName ? "Sending..." : "Send PDF Report"}
+                            className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            {sendingReport === memberName ? (
+                              <Loader2 size={16} className="animate-spin" />
+                            ) : (
+                              <Mail size={16} />
+                            )}
+                          </button>
+                        )}
+                        {isOwner && (
+                          <button
+                            onClick={() => handleRemoveMember(memberName)}
+                            title={`Remove ${memberName}`}
+                            className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
                 </div>
               ))}
                 {team.members.length === 0 && (
@@ -836,7 +887,7 @@ const TeamDetailPage = () => {
           onClose={() => setIsTaskModalOpen(false)}
           teamId={teamId}
           members={team.members}
-          onTaskCreated={handleTaskCreated}
+          onTasksCreated={handleTasksCreated}
         />
       )}
 

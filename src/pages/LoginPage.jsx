@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Shield, Users, Calendar, Zap } from 'lucide-react';
 import Input from '../components/Input';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -47,112 +47,211 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white py-8 px-4 sm:px-6 lg:px-8">
-      <motion.div
-        className="max-w-md w-full bg-white border border-gray-200 rounded-2xl shadow-sm p-8 space-y-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        {/* Header */}
-        <div className="text-center space-y-3">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-            className="mx-auto w-12 h-12 bg-black rounded-full flex items-center justify-center"
-          >
-            <Lock className="text-white" size={20} />
-          </motion.div>
-          <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
-            Welcome Back
-          </h2>
-          <p className="text-gray-600 text-base">
-            Sign in to your account to continue
-          </p>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm text-center"
-          >
-            {error}
-          </motion.div>
-        )}
-
-        {/* Login Form */}
-        <form className="space-y-6" onSubmit={onSubmit}>
-          <Input
-            icon={<Mail size={18} className="text-gray-400" />}
-            type="email"
-            placeholder="Enter your email"
-            name="email"
-            value={email}
-            onChange={onChange}
-            required
-            autoComplete="email"
-          />
-
-          <div className="relative">
-            <Input
-              icon={<Lock size={18} className="text-gray-400" />}
-              type={showPassword ? "text" : "password"}
-              placeholder="Enter your password"
-              name="password"
-              value={password}
-              onChange={onChange}
-              required
-              autoComplete="current-password"
-            />
-            <button
-              type="button"
-              onClick={togglePasswordVisibility}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-
-          <motion.button
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gray-900 text-white font-medium py-3.5 px-4 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <div className="flex items-center justify-center space-x-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Signing in...</span>
-              </div>
-            ) : (
-              'Sign in'
-            )}
-          </motion.button>
-        </form>
-
-        {/* Footer */}
-        <div className="text-center space-y-4">
-          <Link
-            to="/forgot-password"
-            className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
-          >
-            Forgot your password?
+    <div className="min-h-screen flex">
+      {/* Left Section - Brand & Features */}
+      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-between lg:p-12 xl:p-16 bg-gradient-to-br from-gray-50 to-gray-100">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-lg"
+        >
+          <Link to="/" className="inline-flex items-center space-x-3 mb-16">
+            <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
+              <Shield className="text-white" size={20} />
+            </div>
+            <span className="text-2xl font-bold text-gray-900">E-Manager</span>
           </Link>
-          <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link
-              to="/register"
-              className="font-semibold text-gray-900 hover:text-gray-700 transition-colors underline underline-offset-2"
+
+          <div className="space-y-8">
+            <div>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-4xl xl:text-5xl font-bold text-gray-900 leading-tight mb-4"
+              >
+                Welcome back to your
+                <span className="block text-gray-700">command center</span>
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-lg text-gray-600 leading-relaxed"
+              >
+                Continue your journey to streamlined team management and productivity excellence.
+              </motion.p>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="space-y-6"
             >
-              Create account
-            </Link>
+              {[
+                {
+                  icon: <Users className="text-gray-900" size={20} />,
+                  text: "Manage unlimited teams and members"
+                },
+                {
+                  icon: <Calendar className="text-gray-900" size={20} />,
+                  text: "Track tasks and schedule meetings"
+                },
+                {
+                  icon: <Zap className="text-gray-900" size={20} />,
+                  text: "AI-powered insights and reports"
+                }
+              ].map((feature, index) => (
+                <div key={index} className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center shadow-sm">
+                    {feature.icon}
+                  </div>
+                  <span className="text-gray-700 font-medium">{feature.text}</span>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Bottom text */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="text-center lg:text-left"
+        >
+          <p className="text-gray-500 text-sm">
+            Trusted by 500+ team leaders worldwide
           </p>
+        </motion.div>
+      </div>
+
+      {/* Right Section - Login Form */}
+      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+        <div className="mx-auto w-full max-w-md lg:max-w-lg">
+          {/* Mobile Logo */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="lg:hidden flex justify-center mb-8"
+          >
+            <Link to="/" className="inline-flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
+                <Shield className="text-white" size={20} />
+              </div>
+              <span className="text-2xl font-bold text-gray-900">E-Manager</span>
+            </Link>
+          </motion.div>
+
+          <motion.div
+            className="w-full bg-white lg:bg-transparent lg:border-0 lg:shadow-none border border-gray-200 rounded-2xl shadow-sm p-8 space-y-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            {/* Header */}
+            <div className="text-center space-y-3">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                className="mx-auto w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center"
+              >
+                <Lock className="text-white" size={20} />
+              </motion.div>
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+                Welcome Back
+              </h2>
+              <p className="text-gray-600 text-base">
+                Sign in to your account to continue
+              </p>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm text-center"
+              >
+                {error}
+              </motion.div>
+            )}
+
+            {/* Login Form */}
+            <form className="space-y-6" onSubmit={onSubmit}>
+              <Input
+                icon={<Mail size={18} className="text-gray-400" />}
+                type="email"
+                placeholder="Enter your email"
+                name="email"
+                value={email}
+                onChange={onChange}
+                required
+                autoComplete="email"
+              />
+
+              <div className="relative">
+                <Input
+                  icon={<Lock size={18} className="text-gray-400" />}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  name="password"
+                  value={password}
+                  onChange={onChange}
+                  required
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gray-900 text-white font-medium py-3.5 px-4 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Signing in...</span>
+                  </div>
+                ) : (
+                  'Sign in'
+                )}
+              </motion.button>
+            </form>
+
+            {/* Footer */}
+            <div className="text-center space-y-4">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
+              >
+                Forgot your password?
+              </Link>
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <Link
+                  to="/register"
+                  className="font-semibold text-gray-900 hover:text-gray-700 transition-colors underline underline-offset-2"
+                >
+                  Create account
+                </Link>
+              </p>
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

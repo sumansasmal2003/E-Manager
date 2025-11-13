@@ -18,6 +18,7 @@
 * {
   scrollbar-color: #111827 transparent; /* (gray-900 thumb, transparent track) */
   scrollbar-width: thin;
+  font-family: "Roboto", sans-serif;
 }
 
 /*

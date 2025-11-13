@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import Input from './Input';
 import api from '../api/axiosConfig';
-import { Loader2, Calendar } from 'lucide-react';
+import { Loader2, Calendar, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 import format from 'date-fns/format';
 
@@ -16,6 +16,7 @@ const EditMemberProfileModal = ({ isOpen, onClose, profile, onProfileUpdated }) 
   const [formData, setFormData] = useState({
     joiningDate: '',
     endingDate: '',
+    email: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -25,6 +26,7 @@ const EditMemberProfileModal = ({ isOpen, onClose, profile, onProfileUpdated }) 
       setFormData({
         joiningDate: formatDateForInput(profile.joiningDate),
         endingDate: formatDateForInput(profile.endingDate),
+        email: profile.email || '',
       });
     }
   }, [profile]);
@@ -43,6 +45,7 @@ const EditMemberProfileModal = ({ isOpen, onClose, profile, onProfileUpdated }) 
         name: profile.name, // Send the name as the identifier
         joiningDate: formData.joiningDate || null,
         endingDate: formData.endingDate || null,
+        email: formData.email,
       });
       onProfileUpdated(res.data); // Send the new profile back to the parent page
       onClose();
@@ -62,6 +65,16 @@ const EditMemberProfileModal = ({ isOpen, onClose, profile, onProfileUpdated }) 
             {error}
           </div>
         )}
+
+        <Input
+          icon={<Mail size={18} className="text-gray-400" />}
+          label="Email Address"
+          type="email"
+          name="email"
+          placeholder="e.g., member@email.com"
+          value={formData.email}
+          onChange={onChange}
+        />
 
         <Input
           icon={<Calendar size={18} className="text-gray-400" />}

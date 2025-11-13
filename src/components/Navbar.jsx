@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   LogIn, UserPlus, LogOut, LayoutDashboard, Menu, X, User,
   Search,
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -98,9 +99,9 @@ const Navbar = () => {
               to={isLoggedIn ? "/" : "/"}
               className="flex items-center space-x-2"
             >
-              <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">E</span>
-              </div>
+              <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
+              <Shield className="text-white" size={20} />
+            </div>
               <span className="text-xl font-bold text-gray-900 hidden sm:block">
                 E Manager
               </span>

@@ -152,7 +152,7 @@ const DashboardLayout = () => {
                     {/* Navigation Links */}
                     <nav className="space-y-2 flex-1">
                       <SidebarLink
-                        to="/"
+                        to="/today"
                         icon={<Sunrise size={20} />}
                         isCollapsed={false}
                         onNavigate={handleNavigate}
@@ -263,7 +263,7 @@ const DashboardLayout = () => {
                 {/* Navigation Links */}
                 <nav className="space-y-2 flex-1">
                   <SidebarLink
-                    to="/"
+                    to="/today"
                     icon={<Sunrise size={isSidebarCollapsed ? 22 : 20} />}
                     isCollapsed={isSidebarCollapsed}
                     onNavigate={handleNavigate}

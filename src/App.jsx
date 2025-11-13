@@ -18,28 +18,35 @@ import MembersPage from './pages/MembersPage';
 import MemberDetailPage from './pages/MemberDetailPage';
 import TodayPage from './pages/TodayPage';
 import AttendancePage from './pages/AttendancePage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
-// --- IMPORT NAVBAR HERE ---
+// --- IMPORT NAVBAR AND NEW COMPONENTS ---
 import Navbar from './components/Navbar';
+import Home from './components/Home'; // <-- IMPORT HOME
+import TermsOfServicePage from './pages/TermsOfServicePage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 function App() {
   return (
     <div className="min-h-screen bg-light-white text-dark">
 
-      {/* --- RENDER NAVBAR HERE --- */}
+      {/* Navbar is global and will show the correct links */}
       <Navbar />
-      {/* It will now be on every page */}
 
       <main>
         <Routes>
           {/* Public Routes */}
+          <Route path="/" element={<Home />} /> {/* <-- THIS IS THE NEW / ROUTE */}
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/terms" element={<TermsOfServicePage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route element={<DashboardLayout />}>
-              <Route path="/" element={<TodayPage />} />
+              {/* The old '/' route is now '/today' */}
               <Route path="/today" element={<TodayPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/notes" element={<NotesPage />} />

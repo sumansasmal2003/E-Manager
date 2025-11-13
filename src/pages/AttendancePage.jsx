@@ -12,11 +12,14 @@ import {
   Download,
   Filter,
   Lock, // <-- Import Lock icon
+  MinusCircle
 } from 'lucide-react';
 import format from 'date-fns/format';
 import Input from '../components/Input'; //
 import ExportAttendanceModal from '../components/ExportAttendanceModal';
 import CustomSelect from '../components/CustomSelect';
+
+const NOT_SET = 'Due';
 
 const filterOptions = [
   { value: 'all', label: 'All Status' },
@@ -24,6 +27,7 @@ const filterOptions = [
   { value: 'Absent', label: 'Absent' },
   { value: 'Leave', label: 'Leave' },
   { value: 'Holiday', label: 'Holiday' },
+  { value: 'Due', label: 'Due' },
 ];
 
 const statusOptions = [
@@ -31,6 +35,7 @@ const statusOptions = [
   { value: 'Absent', label: 'Mark Absent' },
   { value: 'Leave', label: 'Mark Leave' },
   { value: 'Holiday', label: 'Mark Holiday' },
+  { value: NOT_SET, label: 'Select Status...', disabled: true },
 ];
 
 const getTodayString = () => {
@@ -44,16 +49,18 @@ const StatusBadge = ({ status, size = "medium" }) => {
     Absent: { color: 'bg-red-500', bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', icon: XCircle },
     Leave: { color: 'bg-yellow-500', bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-800', icon: Umbrella },
     Holiday: { color: 'bg-blue-500', bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', icon: Clock },
+    'Due': { color: 'bg-gray-400', bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-800', icon: MinusCircle },
   };
   const config = statusConfig[status] || statusConfig.Present;
   const Icon = config.icon;
   if (size === "small") {
     return (<div className={`w-3 h-3 rounded-full ${config.color} border-2 border-white shadow-sm`} title={status} />);
   }
+
   return (
-    <span className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-full text-sm font-medium border ${config.bg} ${config.border} ${config.text}`}>
+    <span className={`inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-sm font-medium border ${config.bg} ${config.border} ${config.text}`}>
       <Icon size={16} />
-      <span>{status}</span>
+      <p>{status}</p>
     </span>
   );
 };
@@ -100,9 +107,10 @@ const AttendancePage = () => {
         const res = await api.get(`/attendance/date?date=${selectedDate}`);
 
         const recordsMap = {};
-        // --- UPDATED: Loop over member objects ---
         members.forEach(member => {
-          recordsMap[member.name] = 'Present';
+          // --- THIS IS THE FIX ---
+          // Default to "Not Set" instead of "Present"
+          recordsMap[member.name] = NOT_SET;
         });
 
         res.data.forEach(record => {
@@ -123,6 +131,7 @@ const AttendancePage = () => {
 
   // Handle changing a member's status
   const handleStatusChange = async (member, status) => {
+    if (status === NOT_SET) return;
     const saveKey = `${member.name}-${selectedDate}`;
     setSaving(prev => ({ ...prev, [saveKey]: true }));
     setUpdateError(null);
@@ -151,6 +160,8 @@ const AttendancePage = () => {
     Object.values(attendanceRecords).forEach(status => {
       if (stats[status] !== undefined) {
         stats[status]++;
+      } else {
+        stats['Due']++; // Fallback for any other unexpected status
       }
     });
     return stats;
@@ -255,6 +266,17 @@ const AttendancePage = () => {
             </div>
           </div>
         </div>
+        <div className="bg-white border border-gray-200 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{stats['Due']}</p>
+              <p className="text-sm text-gray-600">Due</p>
+            </div>
+            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+              <MinusCircle className="text-gray-600" size={20} />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -296,7 +318,7 @@ const AttendancePage = () => {
               filteredMembers.map((member) => {
                 // --- THIS IS THE NEW LOGIC ---
                 const { name, joiningDate, endingDate } = member;
-                const status = attendanceRecords[name] || 'Present';
+                const status = attendanceRecords[name] || NOT_SET;
                 const saveKey = `${name}-${selectedDate}`;
 
                 // Convert selectedDate (string) to a Date object at start of day
@@ -375,7 +397,8 @@ const AttendancePage = () => {
                                   </div>
                                   <CustomSelect
                                     options={statusOptions}
-                                    value={status}
+                                    // If status is "Not Set", show the placeholder
+                                    value={status === NOT_SET ? NOT_SET : status}
                                     onChange={(newStatus) => handleStatusChange(member, newStatus)}
                                   />
                                 </>
