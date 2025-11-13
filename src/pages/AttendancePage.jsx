@@ -16,6 +16,22 @@ import {
 import format from 'date-fns/format';
 import Input from '../components/Input'; //
 import ExportAttendanceModal from '../components/ExportAttendanceModal';
+import CustomSelect from '../components/CustomSelect';
+
+const filterOptions = [
+  { value: 'all', label: 'All Status' },
+  { value: 'Present', label: 'Present' },
+  { value: 'Absent', label: 'Absent' },
+  { value: 'Leave', label: 'Leave' },
+  { value: 'Holiday', label: 'Holiday' },
+];
+
+const statusOptions = [
+  { value: 'Present', label: 'Mark Present' },
+  { value: 'Absent', label: 'Mark Absent' },
+  { value: 'Leave', label: 'Mark Leave' },
+  { value: 'Holiday', label: 'Mark Holiday' },
+];
 
 const getTodayString = () => {
   return format(new Date(), 'yyyy-MM-dd');
@@ -253,17 +269,11 @@ const AttendancePage = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex items-center space-x-2">
                 <Filter size={18} className="text-gray-400" />
-                <select
+                <CustomSelect
+                  options={filterOptions}
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-sm"
-                >
-                  <option value="all">All Status</option>
-                  <option value="Present">Present</option>
-                  <option value="Absent">Absent</option>
-                  <option value="Leave">Leave</option>
-                  <option value="Holiday">Holiday</option>
-                </select>
+                  onChange={(value) => setStatusFilter(value)}
+                />
               </div>
               <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-600">
                 {filteredMembers.length} of {members.length} members
@@ -363,16 +373,11 @@ const AttendancePage = () => {
                                   <div className="hidden sm:block">
                                     <StatusBadge status={status} />
                                   </div>
-                                  <select
+                                  <CustomSelect
+                                    options={statusOptions}
                                     value={status}
-                                    onChange={(e) => handleStatusChange(member, e.target.value)}
-                                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-sm font-medium min-w-[120px]"
-                                  >
-                                    <option value="Present">Mark Present</option>
-                                    <option value="Absent">Mark Absent</option>
-                                    <option value="Leave">Mark Leave</option>
-                                    <option value="Holiday">Mark Holiday</option>
-                                  </select>
+                                    onChange={(newStatus) => handleStatusChange(member, newStatus)}
+                                  />
                                 </>
                               )}
                             </>

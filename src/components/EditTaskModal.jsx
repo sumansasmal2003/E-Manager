@@ -4,6 +4,13 @@ import Input from './Input';
 import { motion } from 'framer-motion';
 import api from '../api/axiosConfig';
 import { ClipboardList, User, Calendar, CheckCircle } from 'lucide-react';
+import CustomSelect from './CustomSelect';
+
+const statusOptions = [
+  { value: 'Pending', label: 'Pending' },
+  { value: 'In Progress', label: 'In Progress' },
+  { value: 'Completed', label: 'Completed' },
+];
 
 const EditTaskModal = ({ isOpen, onClose, taskToEdit, teamMembers, onTaskUpdated }) => {
   const [formData, setFormData] = useState({
@@ -31,6 +38,11 @@ const EditTaskModal = ({ isOpen, onClose, taskToEdit, teamMembers, onTaskUpdated
 
   const { title, description, status, dueDate, assignedTo } = formData;
 
+  const handleSelectChange = (name) => (value) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // This handler is now just for text inputs
   const onChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -56,6 +68,8 @@ const EditTaskModal = ({ isOpen, onClose, taskToEdit, teamMembers, onTaskUpdated
   };
 
   if (!taskToEdit) return null;
+
+  const memberOptions = teamMembers.map(name => ({ value: name, label: name }));
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Edit Task">
@@ -97,16 +111,12 @@ const EditTaskModal = ({ isOpen, onClose, taskToEdit, teamMembers, onTaskUpdated
               <CheckCircle size={16} className="inline mr-1" />
               Status
             </label>
-            <select
-              name="status"
-              value={status}
-              onChange={onChange}
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200"
-            >
-              <option value="Pending">Pending</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-            </select>
+            <CustomSelect
+              icon={CheckCircle}
+              options={statusOptions}
+              value={formData.status}
+              onChange={handleSelectChange('status')}
+            />
           </div>
 
           {/* Due Date */}
@@ -131,16 +141,13 @@ const EditTaskModal = ({ isOpen, onClose, taskToEdit, teamMembers, onTaskUpdated
             <User size={16} className="inline mr-1" />
             Assign To
           </label>
-          <select
-            name="assignedTo"
-            value={assignedTo}
-            onChange={onChange}
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200"
-          >
-            {teamMembers.map((name) => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
+          <CustomSelect
+            icon={User}
+            options={memberOptions}
+            value={formData.assignedTo}
+            onChange={handleSelectChange('assignedTo')}
+            placeholder="Select a member"
+          />
         </div>
 
         {/* Buttons */}

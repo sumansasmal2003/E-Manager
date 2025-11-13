@@ -4,6 +4,7 @@ import Input from './Input';
 import { motion } from 'framer-motion';
 import api from '../api/axiosConfig';
 import { ClipboardList, User, Plus, Trash2, Calendar } from 'lucide-react'; // <-- ADDED CALENDAR
+import CustomSelect from './CustomSelect';
 
 const CreateTaskModal = ({ isOpen, onClose, teamId, members, onTasksCreated }) => {
   const [assignedTo, setAssignedTo] = useState('');
@@ -78,6 +79,8 @@ const CreateTaskModal = ({ isOpen, onClose, teamId, members, onTasksCreated }) =
     onClose();
   };
 
+  const memberOptions = members.map(name => ({ value: name, label: name }));
+
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Create New Tasks">
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -104,15 +107,13 @@ const CreateTaskModal = ({ isOpen, onClose, teamId, members, onTasksCreated }) =
             <User size={16} className="inline mr-1" />
             Assign All Tasks To
           </label>
-          <select
+          <CustomSelect
+            icon={User}
+            options={memberOptions}
             value={assignedTo}
-            onChange={(e) => setAssignedTo(e.target.value)}
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200"
-          >
-            {members.map((name) => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
+            onChange={(value) => setAssignedTo(value)}
+            placeholder="Select a member"
+          />
         </div>
 
         {/* 2. Dynamic Task List */}

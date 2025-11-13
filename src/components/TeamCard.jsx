@@ -37,7 +37,7 @@ const TeamCard = ({ team, onDelete }) => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="flex items-center space-x-2 duration-200">
           <button
             onClick={handleDeleteClick}
             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"

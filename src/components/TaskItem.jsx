@@ -1,8 +1,10 @@
 import React from 'react';
 import { Calendar, CheckCircle, Clock, AlertCircle, Edit, Trash2, User, Flag } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useConfirm } from '../context/ConfirmContext';
 
 const TaskItem = ({ task, onEdit, onDelete }) => {
+  const { confirm } = useConfirm();
   const getStatusConfig = (status) => {
     const configs = {
       'Completed': {
@@ -37,9 +39,18 @@ const TaskItem = ({ task, onEdit, onDelete }) => {
   const statusConfig = getStatusConfig(task.status);
   const StatusIcon = statusConfig.icon;
 
-  const handleDeleteClick = (e) => {
+  const handleDeleteClick = async (e) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this task?')) {
+
+    // --- 4. REPLACE window.confirm WITH await confirm ---
+    const confirmed = await confirm({
+      title: 'Delete Task?',
+      description: `Are you sure you want to delete the task "${task.title}"? This cannot be undone.`,
+      confirmText: 'Delete Task',
+      danger: true
+    });
+
+    if (confirmed) { // Check the boolean result
       onDelete(task._id);
     }
   };

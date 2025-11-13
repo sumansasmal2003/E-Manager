@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, Video, Users, Share, Check } from 'lucide-react';
+import { Calendar, Clock, Video, Users, Share, Check, Edit, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const MeetingItem = ({ meeting }) => {
+const MeetingItem = ({ meeting, onEdit, onDelete }) => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -75,13 +75,34 @@ See you there! 👋`;
               <h4 className="text-lg font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
                 {meeting.title}
               </h4>
-              <button
-                onClick={handleShareClick}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors ml-2"
-                title="Share meeting details"
-              >
-                <Share size={16} />
-              </button>
+              <div className="flex items-center space-x-1 ml-2">
+                {/* Only show Edit/Delete for upcoming meetings */}
+                {isUpcoming && onEdit && (
+                  <button
+                    onClick={() => onEdit(meeting)}
+                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    title="Edit meeting"
+                  >
+                    <Edit size={16} />
+                  </button>
+                )}
+                {isUpcoming && onDelete && (
+                  <button
+                    onClick={() => onDelete(meeting._id)}
+                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Delete meeting"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+                <button
+                  onClick={handleShareClick}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Share meeting details"
+                >
+                  <Share size={16} />
+                </button>
+              </div>
             </div>
 
             <p className="text-sm text-gray-600 mb-3 leading-relaxed">

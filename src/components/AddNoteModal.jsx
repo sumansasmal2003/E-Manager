@@ -4,6 +4,14 @@ import Input from './Input';
 import { motion } from 'framer-motion';
 import { FileText, Calendar, Tag } from 'lucide-react'; // <-- Import Tag
 import api from '../api/axiosConfig';
+import CustomSelect from './CustomSelect';
+
+const planPeriodOptions = [
+  { value: 'General', label: 'General' },
+  { value: 'This Week', label: 'This Week' },
+  { value: 'This Month', label: 'This Month' },
+  { value: 'This Year', label: 'This Year' },
+];
 
 const AddNoteModal = ({ isOpen, onClose, onNoteAdded }) => {
   const [title, setTitle] = useState('');
@@ -89,16 +97,12 @@ const AddNoteModal = ({ isOpen, onClose, onNoteAdded }) => {
               <Calendar size={16} className="inline mr-1" />
               Plan Period
             </label>
-            <select
+            <CustomSelect
+              icon={Calendar}
+              options={planPeriodOptions}
               value={planPeriod}
-              onChange={(e) => setPlanPeriod(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200"
-            >
-              <option value="General">General</option>
-              <option value="This Week">This Week</option>
-              <option value="This Month">This Month</option>
-              <option value="This Year">This Year</option>
-            </select>
+              onChange={(value) => setPlanPeriod(value)}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

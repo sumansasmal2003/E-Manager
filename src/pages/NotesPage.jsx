@@ -5,6 +5,13 @@ import { Plus, FileText, Tag, Search, Filter, Grid, List } from 'lucide-react';
 import AddNoteModal from '../components/AddNoteModal';
 import EditNoteModal from '../components/EditNoteModal';
 import Input from '../components/Input';
+import CustomSelect from '../components/CustomSelect';
+
+const sortOptions = [
+  { value: 'newest', label: 'Newest First' },
+  { value: 'oldest', label: 'Oldest First' },
+  { value: 'title', label: 'Sort by Title' },
+];
 
 const NotesPage = () => {
   const [notes, setNotes] = useState([]);
@@ -179,15 +186,11 @@ const NotesPage = () => {
                 </button>
               </div>
 
-              <select
+              <CustomSelect
+                options={sortOptions}
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-gray-100 border-0 rounded-lg px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-gray-900 focus:outline-none transition-all"
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="title">Sort by Title</option>
-              </select>
+                onChange={(value) => setSortBy(value)}
+              />
             </div>
           </div>
 

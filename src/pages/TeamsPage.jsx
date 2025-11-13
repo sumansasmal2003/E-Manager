@@ -210,7 +210,7 @@ const TeamsPage = () => {
                             </span>
                           </td>
                           <td className="py-4 px-6">
-                            <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100">
+                            <div className="flex items-center space-x-2">
                               <Link
                                 to={`/team/${team._id}`}
                                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
@@ -220,7 +220,7 @@ const TeamsPage = () => {
                               </Link>
                               <button
                                 onClick={() => handleDeleteTeam(team._id)}
-                                className="p-2 rounded-lg hover:bg-red-50 transition-colors text-red-600"
+                                className="p-2 rounded-lg hover:bg-red-50 transition-colors text-red-600 cursor-pointer"
                                 title="Delete Team"
                               >
                                 <Trash2 size={16} />

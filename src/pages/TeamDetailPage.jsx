@@ -23,10 +23,13 @@ import TeamActivityEvent from '../components/TeamActivityEvent';
 import GenerateReportModal from '../components/GenerateReportModal';
 import AddLiveProjectModal from '../components/AddLiveProjectModal';
 import CopyTasksModal from '../components/CopyTasksModal';
+import EditMeetingModal from '../components/EditMeetingModal';
+import { useConfirm } from '../context/ConfirmContext.jsx';
 
 const TeamDetailPage = () => {
   const { teamId } = useParams();
   const { user } = useAuth();
+  const { confirm } = useConfirm();
 
   const [team, setTeam] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -50,6 +53,8 @@ const TeamDetailPage = () => {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isLiveProjectModalOpen, setIsLiveProjectModalOpen] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [isEditMeetingModalOpen, setIsEditMeetingModalOpen] = useState(false);
+  const [currentMeeting, setCurrentMeeting] = useState(null);
 
   const fetchTeamData = async () => {
     try {
@@ -159,17 +164,21 @@ const TeamDetailPage = () => {
   };
 
   const handleDeleteFigmaLink = async (linkId) => {
-    if (!window.confirm('Are you sure you want to remove this Figma link?')) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: 'Remove Link?',
+      description: 'Are you sure you want to remove this Figma link?',
+      confirmText: 'Remove'
+    });
 
-    try {
-      const res = await api.delete(`/teams/${teamId}/figma/${linkId}`);
-      setTeam(res.data);
-      refreshActivities();
-    } catch (err) {
-      console.error("Failed to delete Figma link", err);
-      setError(err.response?.data?.message || 'Failed to delete link');
+    if (confirmed) {
+      try {
+        const res = await api.delete(`/teams/${teamId}/figma/${linkId}`);
+        setTeam(res.data);
+        refreshActivities();
+      } catch (err) {
+        console.error("Failed to delete Figma link", err);
+        setError(err.response?.data?.message || 'Failed to delete link');
+      }
     }
   };
 
@@ -179,39 +188,44 @@ const TeamDetailPage = () => {
   };
 
   const handleDeleteGithubRepo = async (repoId) => {
-    if (!window.confirm('Are you sure you want to remove this GitHub repo?')) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: 'Remove Repo?',
+      description: 'Are you sure you want to remove this GitHub repo?',
+      confirmText: 'Remove'
+    });
 
-    try {
-      const res = await api.delete(`/teams/${teamId}/github/${repoId}`);
-      setTeam(res.data);
-      refreshActivities();
-    } catch (err) {
-      console.error("Failed to delete GitHub repo", err);
-      setError(err.response?.data?.message || 'Failed to delete repo');
+    if (confirmed) {
+      try {
+        const res = await api.delete(`/teams/${teamId}/github/${repoId}`);
+        setTeam(res.data);
+        refreshActivities();
+      } catch (err) {
+        console.error("Failed to delete GitHub repo", err);
+        setError(err.response?.data?.message || 'Failed to delete repo');
+      }
     }
   };
 
   const handleRemoveMember = async (name) => {
-    const confirmMessage = `Are you sure you want to remove ${name}?\n\nThis action will also DELETE all tasks assigned to them and REMOVE them from all future meetings.`;
+    const confirmed = await confirm({
+      title: `Remove ${name}?`,
+      description: `This will DELETE all tasks assigned to ${name} and REMOVE them from all future meetings.`,
+      confirmText: `Remove ${name}`
+    });
 
-    // Using window.confirm as it's used elsewhere in your project
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
+    if (confirmed) {
+      try {
+        // We don't need the response, we'll re-fetch for simplicity
+        await api.put(`/teams/${teamId}/remove`, { name });
 
-    try {
-      // We don't need the response, we'll re-fetch for simplicity
-      await api.put(`/teams/${teamId}/remove`, { name });
+        // Re-fetch all data to get updated task and meeting lists
+        fetchTeamData();
+        refreshActivities();
 
-      // Re-fetch all data to get updated task and meeting lists
-      fetchTeamData();
-      refreshActivities();
-
-    } catch (err) {
-      console.error("Failed to remove member", err);
-      setError(err.response?.data?.message || 'Failed to remove member');
+      } catch (err) {
+        console.error("Failed to remove member", err);
+        setError(err.response?.data?.message || 'Failed to remove member');
+      }
     }
   };
 
@@ -234,15 +248,19 @@ const TeamDetailPage = () => {
   };
 
   const handleDeleteTeamNote = async (noteId) => {
-    if (!window.confirm('Are you sure you want to delete this team note?')) {
-      return;
-    }
-    try {
-      await api.delete(`/teamnotes/note/${noteId}`);
-      setTeamNotes(teamNotes.filter(note => note._id !== noteId));
-      refreshActivities();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to delete note');
+    const confirmed = await confirm({
+      title: 'Delete Note?',
+      description: 'Are you sure you want to delete this team note?',
+      confirmText: 'Delete'
+    });
+    if (confirmed) {
+      try {
+        await api.delete(`/teamnotes/note/${noteId}`);
+        setTeamNotes(teamNotes.filter(note => note._id !== noteId));
+        refreshActivities();
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to delete note');
+      }
     }
   };
 
@@ -263,17 +281,52 @@ const TeamDetailPage = () => {
   };
 
   const handleDeleteLiveProject = async (linkId) => {
-    if (!window.confirm('Are you sure you want to remove this project link?')) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: 'Remove Project Link?',
+      description: 'Are you sure you want to remove this project link?',
+      confirmText: 'Remove'
+    });
 
-    try {
-      const res = await api.delete(`/teams/${teamId}/liveproject/${linkId}`);
-      setTeam(res.data);
-      refreshActivities();
-    } catch (err) {
-      console.error("Failed to delete project link", err);
-      setError(err.response?.data?.message || 'Failed to delete link');
+    if (confirmed) {
+      try {
+        const res = await api.delete(`/teams/${teamId}/liveproject/${linkId}`);
+        setTeam(res.data);
+        refreshActivities();
+      } catch (err) {
+        console.error("Failed to delete project link", err);
+        setError(err.response?.data?.message || 'Failed to delete link');
+      }
+    }
+  };
+
+  const handleOpenEditMeetingModal = (meeting) => {
+    setCurrentMeeting(meeting);
+    setIsEditMeetingModalOpen(true);
+  };
+
+  const handleMeetingUpdated = (updatedMeeting) => {
+    setMeetings(meetings.map(m =>
+      m._id === updatedMeeting._id ? updatedMeeting : m
+    ));
+    refreshActivities();
+    setIsEditMeetingModalOpen(false);
+  };
+
+  const handleDeleteMeeting = async (meetingId) => {
+    const confirmed = await confirm({
+      title: 'Delete Meeting?',
+      description: 'Are you sure you want to delete this upcoming meeting?',
+      confirmText: 'Delete'
+    });
+    if (confirmed) {
+      try {
+        await api.delete(`/meetings/meeting/${meetingId}`);
+        setMeetings(meetings.filter(m => m._id !== meetingId));
+        refreshActivities();
+      } catch (err) {
+        console.error("Failed to delete meeting", err);
+        setError(err.response?.data?.message || 'Failed to delete meeting');
+      }
     }
   };
 
@@ -749,7 +802,12 @@ const TeamDetailPage = () => {
               <div className="space-y-4 pr-2">
                 {meetings.length > 0 ? (
                   meetings.map(meeting => (
-                    <MeetingItem key={meeting._id} meeting={meeting} />
+                    <MeetingItem
+                    key={meeting._id}
+                    meeting={meeting}
+                    onEdit={handleOpenEditMeetingModal} // <-- PASS PROP
+                    onDelete={handleDeleteMeeting}     // <-- PASS PROP
+                  />
                   ))
                 ) : (
                   <div className="text-center py-8">
@@ -848,6 +906,15 @@ const TeamDetailPage = () => {
         teamId={teamId}
         onLiveProjectAdded={handleLiveProjectAdded}
       />
+      {team && (
+        <EditMeetingModal
+          isOpen={isEditMeetingModalOpen}
+          onClose={() => setIsEditMeetingModalOpen(false)}
+          meetingToEdit={currentMeeting}
+          teamMembers={team.members}
+          onMeetingUpdated={handleMeetingUpdated}
+        />
+      )}
     </div>
   );
 };

@@ -4,6 +4,7 @@ import Input from './Input';
 import { motion } from 'framer-motion';
 import api from '../api/axiosConfig';
 import { Calendar, Video, Users, Clock, Zap } from 'lucide-react';
+import CustomMultiSelect from './CustomMultiSelect';
 
 const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated }) => {
   const [title, setTitle] = useState('');
@@ -19,6 +20,10 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
   // Determine if the Zoom button should be disabled
   const isZoomDisabled = !title || !meetingTime || zoomLoading;
   // ------------------
+
+  const handleParticipantChange = (selectedValues) => {
+    setParticipants(selectedValues);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -75,18 +80,6 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
     setZoomLoading(false);
   };
 
-  const handleParticipantChange = (e) => {
-    // ... (no changes)
-    const options = e.target.options;
-    const selected = [];
-    for (const option of options) {
-      if (option.selected) {
-        selected.push(option.value);
-      }
-    }
-    setParticipants(selected);
-  };
-
   const handleClose = () => {
     // Reset all fields on close
     setTitle('');
@@ -99,6 +92,8 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
     setZoomLoading(false);
     onClose();
   };
+
+  const memberOptions = members.map(name => ({ value: name, label: name }));
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Schedule New Meeting">
@@ -165,18 +160,15 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
               <Users size={16} className="inline mr-1" />
               Participants
             </label>
-            <select
-              multiple
+            <CustomMultiSelect
+              icon={Users}
+              options={memberOptions}
               value={participants}
               onChange={handleParticipantChange}
-              className="w-full px-4 py-3 h-32 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200"
-            >
-              {members.map((name) => (
-                <option key={name} value={name}>{name}</option>
-              ))}
-            </select>
+              placeholder="Select participants"
+            />
             <p className="text-xs text-gray-500 mt-1">
-              Hold Ctrl/Cmd to select multiple. Leave empty for all members.
+              Leave empty to invite all members.
             </p>
           </div>
         </div>
