@@ -8,7 +8,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // To check if user is logged in on load
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check local storage for user data on initial app load
@@ -17,12 +17,17 @@ export const AuthProvider = ({ children }) => {
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
 
-        // --- ADD THIS BLOCK ---
-        // For backwards compatibility
+        // For backwards compatibility with connecteamAccounts
         if (parsedUser.connecteamAccounts === undefined) {
           parsedUser.connecteamAccounts = [];
         }
-        // --- END BLOCK ---
+
+        // --- THIS IS THE FIX ---
+        // For backwards compatibility with googleCalendarConnected
+        if (parsedUser.googleCalendarConnected === undefined) {
+          parsedUser.googleCalendarConnected = false;
+        }
+        // -----------------------
 
         setUser(parsedUser);
       }
@@ -47,7 +52,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    token: user?.token, // Easy access to token
+    token: user?.token,
     connecteamAccounts: user?.connecteamAccounts || [],
     isLoggedIn: !!user,
     loading,

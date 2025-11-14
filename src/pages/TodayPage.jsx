@@ -13,11 +13,51 @@ import {
   CheckCircle,
   Users,
   Target,
-  Zap
+  Zap,
+  Moon,
+  Sun,
+  Coffee
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Input from '../components/Input';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Time-based greeting function
+const getTimeBasedGreeting = () => {
+  const hour = new Date().getHours();
+
+  if (hour >= 5 && hour < 12) {
+    return {
+      text: "Good Morning",
+      icon: <Sunrise className="text-amber-500" size={24} />,
+      description: "Rise and shine! Ready to conquer the day?"
+    };
+  } else if (hour >= 12 && hour < 13) {
+    return {
+      text: "Good Noon",
+      icon: <Sun className="text-yellow-500" size={24} />,
+      description: "Midday energy! Time to check your progress."
+    };
+  } else if (hour >= 13 && hour < 17) {
+    return {
+      text: "Good Afternoon",
+      icon: <Sun className="text-orange-500" size={24} />,
+      description: "Afternoon momentum! Keep pushing forward."
+    };
+  } else if (hour >= 17 && hour < 21) {
+    return {
+      text: "Good Evening",
+      icon: <Moon className="text-indigo-500" size={24} />,
+      description: "Evening reflection! Wrapping up the day's work."
+    };
+  } else {
+    return {
+      text: "Good Night",
+      icon: <Moon className="text-blue-500" size={24} />,
+      description: "Night owl! Don't forget to rest and recharge."
+    };
+  }
+};
 
 // --- Sub-component for the Quick Add Note form ---
 const QuickAddNote = ({ onNoteAdded }) => {
@@ -146,6 +186,16 @@ const TodayPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
+  const [currentGreeting, setCurrentGreeting] = useState(getTimeBasedGreeting());
+
+  // Update greeting every minute to handle time changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentGreeting(getTimeBasedGreeting());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -178,7 +228,7 @@ const TodayPage = () => {
           className="text-center"
         >
           <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Sunrise className="text-white" size={24} />
+            {currentGreeting.icon}
           </div>
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your day...</p>
@@ -231,11 +281,21 @@ const TodayPage = () => {
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                Good Morning
-              </h1>
-              <p className="text-gray-600 text-sm sm:text-base">
-                Here's your overview for {new Date().toLocaleDateString('en-US', {
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl flex items-center justify-center">
+                  {currentGreeting.icon}
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+                    {currentGreeting.text}
+                  </h1>
+                  <p className="text-gray-600 text-sm sm:text-base">
+                    {currentGreeting.description}
+                  </p>
+                </div>
+              </div>
+              <p className="text-gray-500 text-sm mt-2">
+                {new Date().toLocaleDateString('en-US', {
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',

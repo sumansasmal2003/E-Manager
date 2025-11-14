@@ -96,21 +96,45 @@ const AttendancePage = () => {
 
   // Fetch attendance records whenever the date or member list changes
   useEffect(() => {
-    if (members.length === 0) return;
+    if (members.length === 0) return; // Don't run if members aren't loaded
+
+    // --- 1. NEW FUNCTION TO CALL THE ENDPOINT ---
+    const handleSetSundayAsHoliday = async (date) => {
+      try {
+        // Call the new batch endpoint
+        await api.post('/attendance/bulk-holiday', { date });
+      } catch (err) {
+        console.error("Failed to auto-set Sunday as holiday", err);
+        // We can just log the error and continue.
+        // The user can still set it manually.
+      }
+    };
 
     const fetchDailyRecords = async () => {
       setLoadingRecords(true);
       setLoadingError(null);
       setUpdateError(null);
 
+      // --- 2. NEW SUNDAY CHECK ---
+      const selectedDay = new Date(selectedDate);
+      // Use getUTCDay() because "YYYY-MM-DD" date strings are best
+      // treated as UTC to avoid timezone shifting the day.
+      // Sunday is 0.
+      const dayOfWeek = selectedDay.getUTCDay();
+
+      if (dayOfWeek === 0) {
+        // It's a Sunday! Run the batch update *before* fetching records.
+        await handleSetSundayAsHoliday(selectedDate);
+      }
+      // --- END NEW LOGIC ---
+
       try {
+        // 3. This fetch now runs *after* the Sunday update
         const res = await api.get(`/attendance/date?date=${selectedDate}`);
 
         const recordsMap = {};
         members.forEach(member => {
-          // --- THIS IS THE FIX ---
-          // Default to "Not Set" instead of "Present"
-          recordsMap[member.name] = NOT_SET;
+          recordsMap[member.name] = NOT_SET; // Default to "Due"
         });
 
         res.data.forEach(record => {

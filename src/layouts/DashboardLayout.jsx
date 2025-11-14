@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar, Menu, X, Sunrise, UserCheck, CheckSquare } from 'lucide-react';
+import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar, Menu, X, Sunrise, UserCheck, CheckSquare, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SidebarLink = ({ to, icon, children, isCollapsed, onNavigate }) => {
@@ -78,6 +78,7 @@ const DashboardLayout = () => {
     if (path === '/calendar') return 'My Calendar';
     if (path === '/members') return 'Team Members';
     if (path === '/attendance') return 'Attendance Tracking';
+    if (path === '/notifications') return 'Notification Log';
     return 'Dashboard';
   };
 
@@ -91,12 +92,94 @@ const DashboardLayout = () => {
     if (path === '/calendar') return 'View all your tasks and meetings in one place';
     if (path === '/members') return 'Manage your team members and roles';
     if (path === '/attendance') return 'Track and manage team attendance';
+    if (path === '/notifications') return 'View a log of all sent emails';
     return '';
   };
 
   const handleNavigate = () => {
     setIsMobileSidebarOpen(false);
   };
+
+  const renderSidebarLinks = (isCollapsed) => (
+    <>
+      <SidebarLink
+        to="/today"
+        icon={<Sunrise size={isCollapsed ? 22 : 20} />}
+        isCollapsed={isCollapsed}
+        onNavigate={handleNavigate}
+      >
+        Today
+      </SidebarLink>
+      <SidebarLink
+        to="/dashboard"
+        icon={<LayoutDashboard size={isCollapsed ? 22 : 20} />}
+        isCollapsed={isCollapsed}
+        onNavigate={handleNavigate}
+      >
+        Overview
+      </SidebarLink>
+      <SidebarLink
+        to="/notes"
+        icon={<Notebook size={isCollapsed ? 22 : 20} />}
+        isCollapsed={isCollapsed}
+        onNavigate={handleNavigate}
+      >
+        My Notes
+      </SidebarLink>
+      <SidebarLink
+        to="/teams"
+        icon={<Users size={isCollapsed ? 22 : 20} />}
+        isCollapsed={isCollapsed}
+        onNavigate={handleNavigate}
+      >
+        My Teams
+      </SidebarLink>
+      <SidebarLink
+        to="/members"
+        icon={<UserCheck size={isCollapsed ? 22 : 20} />}
+        isCollapsed={isCollapsed}
+        onNavigate={handleNavigate}
+      >
+        Members
+      </SidebarLink>
+      <SidebarLink
+        to="/attendance"
+        icon={<CheckSquare size={isCollapsed ? 22 : 20} />}
+        isCollapsed={isCollapsed}
+        onNavigate={handleNavigate}
+      >
+        Attendance
+      </SidebarLink>
+      <SidebarLink
+        to="/calendar"
+        icon={<Calendar size={isCollapsed ? 22 : 20} />}
+        isCollapsed={isCollapsed}
+        onNavigate={handleNavigate}
+      >
+        Calendar
+      </SidebarLink>
+
+      {/* --- 5. ADD NEW NOTIFICATION LINK --- */}
+      <SidebarLink
+        to="/notifications"
+        icon={<Bell size={isCollapsed ? 22 : 20} />}
+        isCollapsed={isCollapsed}
+        onNavigate={handleNavigate}
+      >
+        Notifications
+      </SidebarLink>
+      {/* ---------------------------------- */}
+
+      <SidebarLink
+        to="/settings"
+        icon={<Settings size={isCollapsed ? 22 : 20} />}
+        isCollapsed={isCollapsed}
+        onNavigate={handleNavigate}
+      >
+        Settings
+      </SidebarLink>
+    </>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -156,70 +239,7 @@ const DashboardLayout = () => {
 
                     {/* Navigation Links - Scrollable */}
                     <nav className="space-y-2 flex-1 overflow-y-auto">
-                      <SidebarLink
-                        to="/today"
-                        icon={<Sunrise size={20} />}
-                        isCollapsed={false}
-                        onNavigate={handleNavigate}
-                      >
-                        Today
-                      </SidebarLink>
-                      <SidebarLink
-                        to="/dashboard"
-                        icon={<LayoutDashboard size={20} />}
-                        isCollapsed={false}
-                        onNavigate={handleNavigate}
-                      >
-                        Overview
-                      </SidebarLink>
-                      <SidebarLink
-                        to="/notes"
-                        icon={<Notebook size={20} />}
-                        isCollapsed={false}
-                        onNavigate={handleNavigate}
-                      >
-                        My Notes
-                      </SidebarLink>
-                      <SidebarLink
-                        to="/teams"
-                        icon={<Users size={20} />}
-                        isCollapsed={false}
-                        onNavigate={handleNavigate}
-                      >
-                        My Teams
-                      </SidebarLink>
-                      <SidebarLink
-                        to="/members"
-                        icon={<UserCheck size={20} />}
-                        isCollapsed={false}
-                        onNavigate={handleNavigate}
-                      >
-                        Members
-                      </SidebarLink>
-                      <SidebarLink
-                        to="/attendance"
-                        icon={<CheckSquare size={20} />}
-                        isCollapsed={false}
-                        onNavigate={handleNavigate}
-                      >
-                        Attendance
-                      </SidebarLink>
-                      <SidebarLink
-                        to="/calendar"
-                        icon={<Calendar size={20} />}
-                        isCollapsed={false}
-                        onNavigate={handleNavigate}
-                      >
-                        Calendar
-                      </SidebarLink>
-                      <SidebarLink
-                        to="/settings"
-                        icon={<Settings size={20} />}
-                        isCollapsed={false}
-                        onNavigate={handleNavigate}
-                      >
-                        Settings
-                      </SidebarLink>
+                      {renderSidebarLinks(false)}
                     </nav>
 
                     <div className="pt-4 border-t border-gray-200 mt-4">
@@ -267,70 +287,7 @@ const DashboardLayout = () => {
 
                 {/* Navigation Links - Scrollable */}
                 <nav className="space-y-2 flex-1 overflow-y-auto">
-                  <SidebarLink
-                    to="/today"
-                    icon={<Sunrise size={isSidebarCollapsed ? 22 : 20} />}
-                    isCollapsed={isSidebarCollapsed}
-                    onNavigate={handleNavigate}
-                  >
-                    Today
-                  </SidebarLink>
-                  <SidebarLink
-                    to="/dashboard"
-                    icon={<LayoutDashboard size={isSidebarCollapsed ? 22 : 20} />}
-                    isCollapsed={isSidebarCollapsed}
-                    onNavigate={handleNavigate}
-                  >
-                    Overview
-                  </SidebarLink>
-                  <SidebarLink
-                    to="/notes"
-                    icon={<Notebook size={isSidebarCollapsed ? 22 : 20} />}
-                    isCollapsed={isSidebarCollapsed}
-                    onNavigate={handleNavigate}
-                  >
-                    My Notes
-                  </SidebarLink>
-                  <SidebarLink
-                    to="/teams"
-                    icon={<Users size={isSidebarCollapsed ? 22 : 20} />}
-                    isCollapsed={isSidebarCollapsed}
-                    onNavigate={handleNavigate}
-                  >
-                    My Teams
-                  </SidebarLink>
-                  <SidebarLink
-                    to="/members"
-                    icon={<UserCheck size={isSidebarCollapsed ? 22 : 20} />}
-                    isCollapsed={isSidebarCollapsed}
-                    onNavigate={handleNavigate}
-                  >
-                    Members
-                  </SidebarLink>
-                  <SidebarLink
-                    to="/attendance"
-                    icon={<CheckSquare size={isSidebarCollapsed ? 22 : 20} />}
-                    isCollapsed={isSidebarCollapsed}
-                    onNavigate={handleNavigate}
-                  >
-                    Attendance
-                  </SidebarLink>
-                  <SidebarLink
-                    to="/calendar"
-                    icon={<Calendar size={isSidebarCollapsed ? 22 : 20} />}
-                    isCollapsed={isSidebarCollapsed}
-                    onNavigate={handleNavigate}
-                  >
-                    Calendar
-                  </SidebarLink>
-                  <SidebarLink
-                    to="/settings"
-                    icon={<Settings size={isSidebarCollapsed ? 22 : 20} />}
-                    isCollapsed={isSidebarCollapsed}
-                    onNavigate={handleNavigate}
-                  >
-                    Settings
-                  </SidebarLink>
+                  {renderSidebarLinks(isSidebarCollapsed)}
                 </nav>
 
                 <div className={`pt-4 border-t border-gray-200 mt-4 ${isSidebarCollapsed ? 'text-center' : ''}`}>
@@ -388,13 +345,13 @@ const DashboardLayout = () => {
               © {new Date().getFullYear()} E Manager. All rights reserved.
             </div>
             <div className="flex space-x-6">
-              <Link to="/privacy" className="text-gray-400 hover:text-gray-500 transition-colors text-sm">
+              <Link to="/privacy" className="text-gray-600 hover:text-gray-800 transition-colors text-sm font-medium">
                 Privacy Policy
               </Link>
-              <Link to="/terms" className="text-gray-400 hover:text-gray-500 transition-colors text-sm">
+              <Link to="/terms" className="text-gray-600 hover:text-gray-800 transition-colors text-sm font-medium">
                 Terms of Service
               </Link>
-              <Link to="/support" className="text-gray-400 hover:text-gray-500 transition-colors text-sm">
+              <Link to="/support" className="text-gray-600 hover:text-gray-800 transition-colors text-sm font-medium">
                 Support
               </Link>
             </div>

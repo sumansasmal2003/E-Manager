@@ -2,11 +2,16 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axiosConfig';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, User, Mail, Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Save, User, Mail, Lock, CheckCircle, AlertCircle, LogOut, AlertTriangle, Loader2 } from 'lucide-react';
 import Input from './Input';
+import { useNavigate } from 'react-router-dom';
+import { useConfirm } from '../context/ConfirmContext';
 
 const AccountSettings = () => {
-  const { user, login } = useAuth();
+  const { user, login, logout } = useAuth();
+
+  const navigate = useNavigate();
+  const { confirm } = useConfirm();
 
   // State for profile form
   const [formData, setFormData] = useState({
@@ -26,6 +31,9 @@ const AccountSettings = () => {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState(null);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   const handleProfileChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -86,6 +94,43 @@ const AccountSettings = () => {
       setPasswordError(err.response?.data?.message || 'Failed to change password.');
     }
     setPasswordLoading(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteError(null);
+
+    // 1. Show confirmation dialog
+    const confirmed = await confirm({
+      title: 'Delete Your Account?',
+      description: 'This is permanent and cannot be undone. All your teams, tasks, notes, and other data will be deleted forever.',
+      confirmText: 'Yes, Delete My Account',
+      danger: true // This will use the red button style
+    });
+
+    // 2. If not confirmed, stop here
+    if (!confirmed) {
+      return;
+    }
+
+    // 3. If confirmed, proceed with deletion
+    setDeleteLoading(true);
+    try {
+      // 4. Call the new backend endpoint
+      await api.delete('/user/profile');
+
+      // 5. Log the user out and redirect
+      logout();
+      navigate('/login', { replace: true });
+
+    } catch (err) {
+      setDeleteError(err.response?.data?.message || 'Failed to delete account.');
+      setDeleteLoading(false);
+    }
   };
 
   return (
@@ -242,6 +287,58 @@ const AccountSettings = () => {
             </motion.button>
           </div>
         </form>
+      </div>
+      <div className="bg-white border border-red-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-red-200 bg-red-50">
+          <h2 className="text-lg font-semibold text-red-900">Danger Zone</h2>
+          <p className="text-sm text-red-700 mt-1">Be careful with these actions.</p>
+        </div>
+
+        {/* Logout Section */}
+        <div className="p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+          <div>
+            <h3 className="font-medium text-gray-900">Sign Out</h3>
+            <p className="text-sm text-gray-600">You will be logged out of your current session.</p>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+            onClick={handleLogout}
+            className="inline-flex items-center justify-center space-x-2 bg-gray-900 text-white font-medium py-2 px-4 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 w-full sm:w-auto"
+          >
+            <LogOut size={18} />
+            <span>Logout</span>
+          </motion.button>
+        </div>
+
+        {/* --- ADDED DELETE ACCOUNT SECTION --- */}
+        <div className="p-6 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+            <div>
+              <h3 className="font-medium text-red-900">Delete Account</h3>
+              <p className="text-sm text-gray-600">Permanently delete your account and all associated data.</p>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+              onClick={handleDeleteAccount}
+              disabled={deleteLoading}
+              className="inline-flex items-center justify-center space-x-2 bg-red-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 transition-all duration-200 w-full sm:w-auto disabled:opacity-50"
+            >
+              {deleteLoading ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <AlertTriangle size={18} />
+              )}
+              <span>Delete Account</span>
+            </motion.button>
+          </div>
+          {deleteError && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="text-red-700 text-sm font-medium text-center sm:text-right mt-3">
+              {deleteError}
+            </motion.div>
+          )}
+        </div>
+        {/* --- END DELETE ACCOUNT SECTION --- */}
       </div>
     </motion.div>
   );

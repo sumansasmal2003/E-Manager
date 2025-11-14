@@ -26,6 +26,7 @@ import Home from './components/Home'; // <-- IMPORT HOME
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import SupportPage from './pages/SupportPage';
+import NotificationPage from './pages/NotificationPage';
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
               <Route path="/members/details" element={<MemberDetailPage />} />
               <Route path="/attendance" element={<AttendancePage />} />
               <Route path="/support" element={<SupportPage />} />
+              <Route path="/notifications" element={<NotificationPage />} />
             </Route>
           </Route>
 
