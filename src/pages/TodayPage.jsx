@@ -68,46 +68,46 @@ const QuickAddNote = ({ onNoteAdded }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onSubmit={handleSubmit}
-          className="p-4"
+          className="p-4 flex flex-col"
         >
           <label className="block text-sm font-semibold text-gray-900 mb-3">
             Add Quick Note
           </label>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1">
-              <Input
-                icon={<FileText size={18} className="text-gray-400" />}
-                type="text"
-                placeholder="What's on your mind..."
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                autoComplete="off"
-                autoFocus
-                className="w-full"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex items-center justify-center space-x-2 bg-gray-900 text-white px-4 py-3 rounded-xl hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-xl min-w-[100px]"
-              >
-                {loading ? (
-                  <Loader2 size={16} className="animate-spin" />
-                ) : (
-                  <Send size={16} />
-                )}
-                <span className="hidden sm:inline">Add</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsExpanded(false)}
-                className="flex items-center justify-center px-4 py-3 rounded-xl border border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gray-400 transition-all duration-200"
-              >
-                <span className="text-sm font-medium">Cancel</span>
-              </button>
-            </div>
+            <div className="flex flex-col gap-3">
+              <div className="flex-1">
+                <Input
+                  icon={<FileText size={18} className="text-gray-400" />}
+                  type="text"
+                  placeholder="What's on your mind..."
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                  autoComplete="off"
+                  autoFocus
+                  className="w-full"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex items-center justify-center space-x-2 bg-gray-900 text-white px-4 py-3 rounded-xl hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 shadow-lg hover:shadow-xl min-w-[100px]"
+                >
+                  {loading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Send size={16} />
+                  )}
+                  <span className="hidden sm:inline">Add</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded(false)}
+                  className="flex items-center justify-center px-4 py-3 rounded-xl border border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gray-400 transition-all duration-200"
+                >
+                  <span className="text-sm font-medium">Cancel</span>
+                </button>
+              </div>
           </div>
           {error && (
             <motion.p
@@ -428,15 +428,15 @@ const TodayPage = () => {
                               <Link
                                 to={`/team/${task.team}`}
                                 key={task._id}
-                                className="block p-4 rounded-xl bg-red-50 border border-red-200 hover:bg-red-100 transition-all duration-200 group"
+                                className="block p-4 rounded-xl bg-red-50 border border-red-200 hover:border-red-100 transition-all duration-200 group"
                               >
-                                <div className="flex items-start space-x-3">
-                                  <AlertTriangle size={18} className="text-red-600 flex-shrink-0 mt-0.5" />
+                                <div className="flex items-center space-x-3">
+                                  <AlertTriangle size={18} className="text-gray-900 shrink-0 mt-0.5" />
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-red-800 group-hover:text-red-900 truncate">
+                                    <h3 className="font-semibold text-gray-900 group-hover:text-zinc-900 truncate">
                                       {task.title}
                                     </h3>
-                                    <p className="text-sm text-red-600">Overdue • {task.assignedTo}</p>
+                                    <p className="text-sm text-gray-900">Overdue • {task.assignedTo}</p>
                                   </div>
                                 </div>
                               </Link>
@@ -445,15 +445,15 @@ const TodayPage = () => {
                               <Link
                                 to={`/team/${task.team}`}
                                 key={task._id}
-                                className="block p-4 rounded-xl bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-all duration-200 group"
+                                className="block p-4 rounded-xl bg-amber-50 border border-amber-100 hover:border-red-100 transition-all duration-200 group"
                               >
-                                <div className="flex items-start space-x-3">
-                                  <CalendarCheck size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                                <div className="flex items-center space-x-3">
+                                  <CalendarCheck size={18} className="text-gray-900 shrink-0 mt-0.5" />
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-amber-800 group-hover:text-amber-900 truncate">
+                                    <h3 className="font-semibold text-gray-900 group-hover:text-zinc-900 truncate">
                                       {task.title}
                                     </h3>
-                                    <p className="text-sm text-amber-600">Due Today • {task.assignedTo}</p>
+                                    <p className="text-sm text-gray-900">Due Today • {task.assignedTo}</p>
                                   </div>
                                 </div>
                               </Link>

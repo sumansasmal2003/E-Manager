@@ -32,11 +32,14 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
 
     const finalParticipants = participants.length === 0 ? members : participants;
 
+    const localDate = new Date(meetingTime);
+    const meetingTimeISO = localDate.toISOString();
+
     try {
       const res = await api.post(`/meetings/${teamId}`, {
         title,
         agenda,
-        meetingTime,
+        meetingTime: meetingTimeISO,
         meetingLink,
         participants: finalParticipants,
       });
@@ -66,10 +69,22 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
     setZoomLoading(true);
     setError(null);
     try {
+      // --- THIS IS THE NEW FIX ---
+      // 1. Create a Date object from the local time string.
+      //    e.g., "2025-11-14T14:30" (local)
+      const localDate = new Date(meetingTime);
+
+      // 2. Convert it to a full UTC ISO string.
+      //    e.g., "2025-11-14T09:00:00.000Z" (if you are in IST)
+      const meetingTimeISO = localDate.toISOString();
+
+      // 3. Get the user's timezone for display purposes.
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       // Now, title and meetingTime are guaranteed to be set
       const res = await api.post('/meetings/generate-zoom', {
         title: title,
-        meetingTime: meetingTime,
+        meetingTime: meetingTimeISO,
+        timeZone: userTimezone
       });
 
       setMeetingLink(res.data.join_url);

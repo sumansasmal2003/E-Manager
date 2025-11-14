@@ -51,9 +51,10 @@ const TeamNoteCard = ({ note, onEdit, onDelete }) => {
 
       {/* Content */}
       <div className="space-y-2">
-        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
-          {note.content}
-        </p>
+        <div
+          className="prose prose-sm text-gray-700 leading-relaxed whitespace-pre-wrap"
+          dangerouslySetInnerHTML={{ __html: note.content }}
+        />
       </div>
     </motion.div>
   );

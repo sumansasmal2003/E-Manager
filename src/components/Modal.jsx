@@ -43,7 +43,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           onClick={onClose}
         >
           <motion.div
-            className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto"
             variants={modalVariants}
             initial="hidden"
             animate="visible"

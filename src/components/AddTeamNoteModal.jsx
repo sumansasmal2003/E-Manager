@@ -4,10 +4,11 @@ import Input from './Input';
 import { motion } from 'framer-motion';
 import { FileText } from 'lucide-react';
 import api from '../api/axiosConfig';
+import { Editor } from '@tinymce/tinymce-react'; // <-- IMPORT EDITOR
 
 const AddTeamNoteModal = ({ isOpen, onClose, teamId, onNoteAdded }) => {
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(''); // This will hold HTML
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +29,7 @@ const AddTeamNoteModal = ({ isOpen, onClose, teamId, onNoteAdded }) => {
 
   const handleClose = () => {
     setTitle('');
-    setContent('');
+    setContent(''); // <-- Reset content
     setError(null);
     onClose();
   };
@@ -52,19 +53,28 @@ const AddTeamNoteModal = ({ isOpen, onClose, teamId, onNoteAdded }) => {
           autoComplete="off"
         />
 
+        {/* --- REPLACE TEXTAREA WITH TINYMCE EDITOR --- */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Content
           </label>
-          <textarea
-            placeholder="Write your note content here... (Supports Markdown)"
+          <Editor
+            apiKey='btbqthaaki8gu807fixqn8vbiv7peb7wcoml3q320qnkfedf' // <-- PUT YOUR API KEY HERE
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-            rows={10}
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 resize-none"
+            onEditorChange={(newValue, editor) => setContent(newValue)}
+            init={{
+              height: 250, // Taller
+              menubar: false,
+              plugins: [
+                'lists', 'link', 'autolink', 'code', 'wordcount', 'textcolor'
+              ],
+              toolbar:
+                'undo redo | bold italic | bullist numlist | link | code | forecolor backcolor | removeformat',
+              content_style: 'body { font-family:Roboto,sans-serif; font-size:14px }',
+            }}
           />
         </div>
+        {/* --- END REPLACEMENT --- */}
 
         <div className="flex space-x-3 pt-4">
           <button

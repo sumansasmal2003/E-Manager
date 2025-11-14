@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import Input from './Input';
 import { motion } from 'framer-motion';
-import { FileText, Calendar, Tag } from 'lucide-react'; // <-- Import Tag
+import { FileText, Calendar, Tag } from 'lucide-react';
 import api from '../api/axiosConfig';
 import CustomSelect from './CustomSelect';
+import { Editor } from '@tinymce/tinymce-react'; // <-- IMPORT EDITOR
 
 const planPeriodOptions = [
   { value: 'General', label: 'General' },
@@ -17,16 +18,16 @@ const EditNoteModal = ({ isOpen, onClose, note, onNoteUpdated }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [planPeriod, setPlanPeriod] = useState('General');
-  const [category, setCategory] = useState(''); // <-- ADDED
+  const [category, setCategory] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (note) {
       setTitle(note.title);
-      setContent(note.content);
+      setContent(note.content); // This will render the saved HTML
       setPlanPeriod(note.planPeriod);
-      setCategory(note.category || 'Personal'); // <-- ADDED
+      setCategory(note.category || 'Personal');
     }
   }, [note]);
 
@@ -37,9 +38,9 @@ const EditNoteModal = ({ isOpen, onClose, note, onNoteUpdated }) => {
     try {
       const res = await api.put(`/notes/${note._id}`, {
         title,
-        content,
+        content, // Send the updated HTML content
         planPeriod,
-        category, // <-- ADDED
+        category,
       });
 
       onNoteUpdated(res.data);
@@ -77,22 +78,32 @@ const EditNoteModal = ({ isOpen, onClose, note, onNoteUpdated }) => {
           autoComplete="off"
         />
 
+        {/* --- REPLACE TEXTAREA WITH TINYMCE EDITOR --- */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Content
           </label>
-          <textarea
-            placeholder="Write your note content here..."
+          <Editor
+            apiKey='btbqthaaki8gu807fixqn8vbiv7peb7wcoml3q320qnkfedf' // <-- PUT YOUR API KEY HERE
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-            rows={6}
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 resize-none"
+            onEditorChange={(newValue, editor) => setContent(newValue)}
+            init={{
+              height: 250, // Taller
+              menubar: false,
+              plugins: [
+                'lists', 'link', 'autolink', 'code', 'wordcount', 'textcolor'
+              ],
+              toolbar:
+                'undo redo | bold italic | bullist numlist | link | code | forecolor backcolor | removeformat',
+              content_style: 'body { font-family:Roboto,sans-serif; font-size:14px }',
+            }}
           />
         </div>
+        {/* --- END REPLACEMENT --- */}
 
         {/* --- UPDATED SECTION --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          {/* (Removed pt-10) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Calendar size={16} className="inline mr-1" />

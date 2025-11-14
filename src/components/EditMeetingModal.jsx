@@ -62,9 +62,15 @@ const EditMeetingModal = ({ isOpen, onClose, meetingToEdit, teamMembers, onMeeti
 
     const finalParticipants = participants.length === 0 ? teamMembers : participants;
 
+    const dataToSend = { ...formData };
+    if (dataToSend.meetingTime) {
+      const localDate = new Date(dataToSend.meetingTime);
+      dataToSend.meetingTime = localDate.toISOString();
+    }
+
     try {
       const res = await api.put(`/meetings/meeting/${meetingToEdit._id}`, {
-        ...formData,
+        ...dataToSend,
         participants: finalParticipants,
       });
 
@@ -82,7 +88,16 @@ const EditMeetingModal = ({ isOpen, onClose, meetingToEdit, teamMembers, onMeeti
     setZoomLoading(true);
     setError(null);
     try {
-      const res = await api.post('/meetings/generate-zoom', { title, meetingTime });
+      // --- THIS IS THE NEW FIX ---
+      // 1. Create a Date object from the local time string.
+      const localDate = new Date(formData.meetingTime);
+
+      // 2. Convert it to a full UTC ISO string.
+      const meetingTimeISO = localDate.toISOString();
+
+      // 3. Get the user's timezone for display.
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const res = await api.post('/meetings/generate-zoom', { title, meetingTime: meetingTimeISO, timeZone: userTimezone });
       setFormData({ ...formData, meetingLink: res.data.join_url });
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to generate Zoom link');

@@ -85,9 +85,10 @@ const NoteCard = ({ note, onDelete, onEdit }) => {
 
       {/* Content */}
       <div className="space-y-2">
-        <p className="text-gray-700 text-sm leading-relaxed line-clamp-4">
-          {note.content}
-        </p>
+        <div
+          className="prose prose-sm text-gray-700 leading-relaxed line-clamp-4"
+          dangerouslySetInnerHTML={{ __html: note.content }}
+        />
       </div>
     </motion.div>
   );
