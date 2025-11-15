@@ -30,8 +30,8 @@ const LoginPage = () => {
     setError(null);
     try {
       const res = await axios.post(
-        // 'https://e-manager-backend-6vwv.onrender.com/api/auth/login',
-        'http://localhost:5000/api/auth/login',
+        'https://e-manager-backend-6vwv.onrender.com/api/auth/login',
+        // 'http://localhost:5000/api/auth/login',
         { email, password }
       );
       login(res.data);
