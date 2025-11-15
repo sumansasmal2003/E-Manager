@@ -16,10 +16,7 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
   const [loading, setLoading] = useState(false);
   const [zoomLoading, setZoomLoading] = useState(false);
 
-  // --- START OF FIX ---
-  // Determine if the Zoom button should be disabled
   const isZoomDisabled = !title || !meetingTime || zoomLoading;
-  // ------------------
 
   const handleParticipantChange = (selectedValues) => {
     setParticipants(selectedValues);
@@ -29,6 +26,12 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (!teamId) {
+      setError('Could not find a team. Please open this from a Team page.');
+      setLoading(false);
+      return;
+    }
 
     const finalParticipants = participants.length === 0 ? members : participants;
 
@@ -44,15 +47,12 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
         participants: finalParticipants,
       });
 
-      onMeetingCreated(res.data);
+      if (onMeetingCreated) {
+        onMeetingCreated(res.data);
+      }
+
       setLoading(false);
       onClose();
-      // Reset all fields
-      setTitle('');
-      setAgenda('');
-      setMeetingTime('');
-      setMeetingLink('');
-      setParticipants([]);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to schedule meeting');
       setLoading(false);
@@ -60,7 +60,6 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
   };
 
   const handleGenerateZoom = async () => {
-    // This check is redundant because the button is disabled, but it's good practice
     if (!title || !meetingTime) {
       setError('Please set a title and meeting time first.');
       return;
@@ -69,18 +68,10 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
     setZoomLoading(true);
     setError(null);
     try {
-      // --- THIS IS THE NEW FIX ---
-      // 1. Create a Date object from the local time string.
-      //    e.g., "2025-11-14T14:30" (local)
       const localDate = new Date(meetingTime);
-
-      // 2. Convert it to a full UTC ISO string.
-      //    e.g., "2025-11-14T09:00:00.000Z" (if you are in IST)
       const meetingTimeISO = localDate.toISOString();
-
-      // 3. Get the user's timezone for display purposes.
       const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      // Now, title and meetingTime are guaranteed to be set
+
       const res = await api.post('/meetings/generate-zoom', {
         title: title,
         meetingTime: meetingTimeISO,
@@ -96,7 +87,6 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
   };
 
   const handleClose = () => {
-    // Reset all fields on close
     setTitle('');
     setAgenda('');
     setMeetingTime('');
@@ -108,7 +98,10 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
     onClose();
   };
 
-  const memberOptions = members.map(name => ({ value: name, label: name }));
+  // --- THIS IS THE FIX ---
+  // If `members` is undefined, use an empty array as a fallback.
+  const memberOptions = (members || []).map(name => ({ value: name, label: name }));
+  // --- END OF FIX ---
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Schedule New Meeting">
@@ -128,7 +121,6 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
           </p>
         </div>
 
-        {/* 1. Title (User fills this first) */}
         <Input
           icon={<Calendar size={18} className="text-gray-400" />}
           type="text"
@@ -139,7 +131,6 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
           autoComplete="off"
         />
 
-        {/* 2. Agenda (Optional) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Agenda
@@ -153,7 +144,6 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
           />
         </div>
 
-        {/* 3. Meeting Time (User fills this second) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -169,7 +159,6 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
             />
           </div>
 
-          {/* 4. Participants (User fills this after) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Users size={16} className="inline mr-1" />
@@ -180,7 +169,8 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
               options={memberOptions}
               value={participants}
               onChange={handleParticipantChange}
-              placeholder="Select participants"
+              placeholder={!members ? "Open from a team page" : "Select participants"}
+              disabled={!members || members.length === 0}
             />
             <p className="text-xs text-gray-500 mt-1">
               Leave empty to invite all members.
@@ -188,7 +178,6 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
           </div>
         </div>
 
-        {/* 5. Meeting Link (User interacts with this last) */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">Meeting Link</label>
           <div className="flex items-center space-x-2">
@@ -202,14 +191,13 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
               autoComplete="off"
               className="flex-1"
             />
-            {/* Wrap button in a div to show tooltip even when disabled */}
             <div title={isZoomDisabled ? 'Please enter a title and meeting time first' : 'Generate Zoom Link'}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="button"
                 onClick={handleGenerateZoom}
-                disabled={isZoomDisabled} // <-- BUTTON IS NOW DISABLED
+                disabled={isZoomDisabled}
                 className="px-4 py-3 bg-gray-900 text-white rounded-lg flex items-center space-x-2 hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {zoomLoading ? (
@@ -223,7 +211,6 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
           </div>
         </div>
 
-        {/* --- FORM SUBMIT BUTTONS --- */}
         <div className="flex space-x-3 pt-4">
           <button
             type="button"
@@ -236,7 +223,7 @@ const CreateMeetingModal = ({ isOpen, onClose, teamId, members, onMeetingCreated
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             type="submit"
-            disabled={loading}
+            disabled={loading || !members}
             className="flex-1 bg-gray-900 text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (

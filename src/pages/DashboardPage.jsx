@@ -3,23 +3,19 @@ import api from '../api/axiosConfig';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import {
-  Notebook,
-  Users,
-  ClipboardList,
-  Calendar,
-  FileText,
-  Plus,
-  TrendingUp,
-  Clock,
-  CheckCircle2,
-  MoreHorizontal
+  Notebook, Users, ClipboardList, Calendar, FileText, Plus,
+  TrendingUp, Clock, CheckCircle2, MoreHorizontal, Activity, BarChart as BarIcon
 } from 'lucide-react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+// --- 1. IMPORT NEW RECHARTS COMPONENTS ---
+import {
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, LineChart, Line
+} from 'recharts';
 
-import AddNoteModal from '../components/AddNoteModal';
-import CreateTeamModal from '../components/CreateTeamModal';
+// --- 2. IMPORT useModal ---
+import { useModal } from '../context/ModalContext';
 
-// Enhanced Stat Card Component
+// (StatCard and ActivityItem sub-components remain unchanged)
 const StatCard = ({ title, value, icon, color, trend, subtitle }) => (
   <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-all duration-200 group">
     <div className="flex items-center justify-between mb-4">
@@ -42,8 +38,6 @@ const StatCard = ({ title, value, icon, color, trend, subtitle }) => (
     </div>
   </div>
 );
-
-// Activity Item Component
 const ActivityItem = ({ icon, title, subtitle, time, link, type = 'note' }) => (
   <Link
     to={link}
@@ -71,15 +65,18 @@ const ActivityItem = ({ icon, title, subtitle, time, link, type = 'note' }) => (
   </Link>
 );
 
+
 const DashboardPage = () => {
   const { user } = useAuth();
+  // --- 3. GET openModal ---
+  const { openModal } = useModal();
+
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
-  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+
   const [dataVersion, setDataVersion] = useState(0);
-  const [activeChart, setActiveChart] = useState('pie'); // 'pie' or 'bar'
+  const [activeChart, setActiveChart] = useState('pie');
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -95,6 +92,7 @@ const DashboardPage = () => {
     fetchStats();
   }, [dataVersion]);
 
+  // --- 4. DEFINE HANDLERS TO PASS TO MODAL CONTEXT ---
   const handleNoteAdded = (newNote) => {
     setData(prevData => ({
       ...prevData,
@@ -104,13 +102,14 @@ const DashboardPage = () => {
         totalNotes: prevData.stats.totalNotes + 1
       }
     }));
-    setDataVersion(v => v + 1);
   };
 
   const handleTeamCreated = (newTeam) => {
+    // Just refresh all stats
     setDataVersion(v => v + 1);
   };
 
+  // (Loading, error, and !data checks are unchanged)
   if (loading && !data) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -144,13 +143,20 @@ const DashboardPage = () => {
 
   if (!data) return null;
 
-  const { stats, taskChartData, recentNotes, upcomingMeetings } = data;
+  // --- 5. DESTRUCTURE NEW DATA ---
+  const {
+    stats,
+    taskChartData,
+    recentNotes,
+    upcomingMeetings,
+    workloadChartData,
+    activityChartData
+  } = data;
 
-  // Enhanced chart colors
   const CHART_COLORS = {
-    'Pending': '#f59e0b', // amber-500
-    'In Progress': '#6366f1', // indigo-500
-    'Completed': '#10b981', // emerald-500
+    'Pending': '#f59e0b',
+    'In Progress': '#6366f1',
+    'Completed': '#10b981',
   };
 
   return (
@@ -177,15 +183,16 @@ const DashboardPage = () => {
             </div>
 
             <div className="flex items-center space-x-3 w-full lg:w-auto">
+              {/* --- 6. UPDATE onClick HANDLERS --- */}
               <button
-                onClick={() => setIsNoteModalOpen(true)}
+                onClick={() => openModal('addNote', { onNoteAdded: handleNoteAdded })}
                 className="flex-1 lg:flex-none bg-white border border-gray-200 text-gray-900 px-6 py-3 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 <Plus size={18} />
                 <span className="font-semibold">New Note</span>
               </button>
               <button
-                onClick={() => setIsTeamModalOpen(true)}
+                onClick={() => openModal('createTeam', { onTeamCreated: handleTeamCreated })}
                 className="flex-1 lg:flex-none bg-gray-900 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <Users size={18} />
@@ -202,40 +209,38 @@ const DashboardPage = () => {
             value={stats.totalNotes}
             icon={<Notebook className="text-blue-600" size={24} />}
             color="bg-blue-100"
-            trend={12}
-            subtitle="+2 this week"
+            subtitle="All personal notes"
           />
           <StatCard
             title="Active Teams"
             value={stats.totalTeams}
             icon={<Users className="text-green-600" size={24} />}
             color="bg-green-100"
-            trend={8}
-            subtitle="+1 recently"
+            subtitle="Teams you own"
           />
           <StatCard
             title="Total Tasks"
             value={stats.totalTasks}
             icon={<ClipboardList className="text-purple-600" size={24} />}
             color="bg-purple-100"
-            trend={-3}
-            subtitle="2 completed"
+            subtitle="Across all teams"
           />
           <StatCard
             title="Upcoming Meetings"
             value={stats.upcomingMeetings}
             icon={<Calendar className="text-amber-600" size={24} />}
             color="bg-amber-100"
-            trend={25}
-            subtitle="Next: Today"
+            subtitle="In the future"
           />
         </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Left Column: Charts */}
+
+          {/* --- 7. UPDATED: Left Column (Charts) --- */}
           <div className="xl:col-span-2 space-y-6">
-            {/* Chart Container */}
+
+            {/* Task Status Overview (Existing) */}
             <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">Task Status Overview</h3>
@@ -243,9 +248,7 @@ const DashboardPage = () => {
                   <button
                     onClick={() => setActiveChart('pie')}
                     className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
-                      activeChart === 'pie'
-                        ? 'bg-white shadow-sm text-gray-900'
-                        : 'text-gray-600 hover:text-gray-900'
+                      activeChart === 'pie' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
                     Pie
@@ -253,9 +256,7 @@ const DashboardPage = () => {
                   <button
                     onClick={() => setActiveChart('bar')}
                     className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
-                      activeChart === 'bar'
-                        ? 'bg-white shadow-sm text-gray-900'
-                        : 'text-gray-600 hover:text-gray-900'
+                      activeChart === 'bar' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
                     Bar
@@ -306,11 +307,65 @@ const DashboardPage = () => {
                 </div>
               )}
             </div>
+
+            {/* --- 8. NEW: Workload Distribution Chart --- */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+              <div className="flex items-center space-x-3 mb-6">
+                <BarIcon size={20} className="text-gray-700" />
+                <h3 className="text-lg font-semibold text-gray-900">Active Workload Distribution</h3>
+              </div>
+              {workloadChartData && workloadChartData.length > 0 ? (
+                <div style={{ width: '100%', height: 300 }}>
+                  <ResponsiveContainer>
+                    <BarChart
+                      data={workloadChartData}
+                      margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="tasks" name="Active Tasks" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Users className="mx-auto text-gray-400 mb-4" size={48} />
+                  <p className="text-gray-500">No active tasks assigned to members.</p>
+                </div>
+              )}
+            </div>
+
+            {/* --- 9. NEW: Activity Line Chart --- */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+              <div className="flex items-center space-x-3 mb-6">
+                <Activity size={20} className="text-gray-700" />
+                <h3 className="text-lg font-semibold text-gray-900">Last 30 Days Activity</h3>
+              </div>
+              <div style={{ width: '100%', height: 300 }}>
+                <ResponsiveContainer>
+                  <LineChart
+                    data={activityChartData}
+                    margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="created" name="Tasks Created" stroke="#3b82f6" strokeWidth={2} />
+                    <Line type="monotone" dataKey="completed" name="Tasks Completed" stroke="#10b981" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
           </div>
 
-          {/* Right Column: Activity */}
+          {/* Right Column: Activity (unchanged) */}
           <div className="space-y-6">
-            {/* Recent Notes */}
             <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Recent Notes</h3>
@@ -343,7 +398,6 @@ const DashboardPage = () => {
               </div>
             </div>
 
-            {/* Upcoming Meetings */}
             <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Upcoming Meetings</h3>
@@ -374,17 +428,8 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      {/* Modals */}
-      <AddNoteModal
-        isOpen={isNoteModalOpen}
-        onClose={() => setIsNoteModalOpen(false)}
-        onNoteAdded={handleNoteAdded}
-      />
-      <CreateTeamModal
-        isOpen={isTeamModalOpen}
-        onClose={() => setIsTeamModalOpen(false)}
-        onTeamCreated={handleTeamCreated}
-      />
+      {/* --- 10. REMOVE MODALS FROM PAGE --- */}
+      {/* Modals are now in DashboardLayout.jsx */}
     </div>
   );
 };

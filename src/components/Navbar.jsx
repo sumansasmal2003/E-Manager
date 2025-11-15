@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react'; // <-- Removed useEffect, useRef
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   LogIn, UserPlus, LogOut, LayoutDashboard, Menu, X, User,
@@ -7,66 +7,25 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-
-import api from '../api/axiosConfig';
-import { useDebounce } from '../hooks/useDebounce';
-import GlobalSearchResults from './GlobalSearchResults';
-import Input from './Input';
+import { useModal } from '../context/ModalContext'; // <-- 1. IMPORT useModal
 
 const Navbar = () => {
   const { isLoggedIn, user, logout } = useAuth();
-  const navigate = useNavigate(); // Already here, which is great
+  const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [results, setResults] = useState(null);
-  const [isSearching, setIsSearching] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const debouncedQuery = useDebounce(searchQuery, 300);
-  const searchContainerRef = useRef(null);
+  // --- 2. GET openModal FROM THE CONTEXT ---
+  const { openModal } = useModal();
 
-  // This useEffect (for API calls) remains the same
-  useEffect(() => {
-    if (debouncedQuery.length > 1) {
-      setIsSearching(true);
-      api.get(`/search?q=${debouncedQuery}`)
-        .then(res => {
-          setResults(res.data);
-          setIsSearching(false);
-        })
-        .catch(err => {
-          console.error("Search failed:", err);
-          setIsSearching(false);
-          setResults(null);
-        });
-    } else {
-      setResults(null);
-      setIsSearching(false);
-    }
-  }, [debouncedQuery]);
+  // --- 3. ALL SEARCH-RELATED STATE, REFS, AND EFFECTS ARE REMOVED ---
 
-  // This useEffect (for clicking outside) remains the same
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-        setIsSearchFocused(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // This function remains the same
   const handleLogout = () => {
     logout();
     navigate('/login');
     setIsMobileMenuOpen(false);
   };
 
-  // This function remains the same (with the fix from before)
   const isActiveRoute = (path) => {
     const current = location.pathname;
     if (path === "/" || path === "/today") {
@@ -75,25 +34,13 @@ const Navbar = () => {
     return current === path;
   };
 
-  // --- *** MODIFICATION HERE *** ---
-  // We rename 'clearSearch' to 'handleResultClick'
-  // It now receives the 'link' and handles navigation
-  const handleResultClick = (link) => {
-    navigate(link); // 1. Navigate first
-
-    // 2. Then clear and close the search dropdown
-    setSearchQuery('');
-    setResults(null);
-    setIsSearching(false);
-    setIsSearchFocused(false);
-  };
-  // --- *** END MODIFICATION *** ---
+  // --- 4. handleResultClick IS REMOVED ---
 
   return (
     <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo (remains the same) */}
+          {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
             <Link
               to={isLoggedIn ? "/" : "/"}
@@ -108,33 +55,25 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Desktop Search Bar */}
+          {/* --- 5. DESKTOP SEARCH BAR REPLACED WITH BUTTON --- */}
           {isLoggedIn && (
-            <div className="hidden md:block w-full max-w-md mx-4" ref={searchContainerRef}>
-              <div className="relative">
-                <Input
-                  icon={<Search size={18} className="text-gray-400" />}
-                  type="text"
-                  placeholder="Search tasks, teams, members, notes..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchFocused(true)}
-                />
-                {isSearchFocused && (
-                  <GlobalSearchResults
-                    isLoading={isSearching}
-                    results={results}
-                    // --- *** MODIFICATION HERE *** ---
-                    // Pass the new handler down
-                    onResultClick={handleResultClick}
-                    // --- *** END MODIFICATION *** ---
-                  />
-                )}
-              </div>
+            <div className="hidden md:block">
+              <button
+                onClick={() => openModal('commandPalette')}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-all duration-200 border border-gray-300 hover:border-gray-400"
+              >
+                <Search size={16} />
+                <span>Search...</span>
+                <kbd className="ml-4 px-2 py-0.5 text-xs font-sans text-gray-400 border border-gray-300 rounded-md">
+                  Ctrl+K
+                </kbd>
+              </button>
             </div>
           )}
+          {/* --- END OF REPLACEMENT --- */}
 
-          {/* Desktop Navigation (remains the same) */}
+
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             {isLoggedIn ? (
               <>
@@ -183,7 +122,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile menu button (remains the same) */}
+          {/* Mobile menu button */}
           <div className="flex md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -194,33 +133,10 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Search Bar */}
-        {isLoggedIn && (
-          <div className="md:hidden pt-2 pb-4" ref={isMobileMenuOpen ? null : searchContainerRef}>
-            <div className="relative">
-              <Input
-                icon={<Search size={18} className="text-gray-400" />}
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-              />
-              {isSearchFocused && (
-                <GlobalSearchResults
-                  isLoading={isSearching}
-                  results={results}
-                  // --- *** MODIFICATION HERE *** ---
-                  // Pass the new handler down
-                  onResultClick={handleResultClick}
-                  // --- *** END MODIFICATION *** ---
-                />
-              )}
-            </div>
-          </div>
-        )}
+        {/* --- 6. MOBILE SEARCH BAR REMOVED --- */}
+        {/* The search bar that was here is now gone. */}
 
-        {/* Mobile Navigation (remains the same) */}
+        {/* Mobile Navigation */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
@@ -235,6 +151,20 @@ const Navbar = () => {
                     <User size={16} className="text-gray-400" />
                     <span className="text-sm text-gray-600">{user?.username}</span>
                   </div>
+
+                  {/* --- 7. ADDED MOBILE SEARCH BUTTON --- */}
+                  <button
+                    onClick={() => {
+                      openModal('commandPalette');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 w-full text-left"
+                  >
+                    <Search size={16} />
+                    <span>Search &amp; Actions</span>
+                  </button>
+                  {/* --- END OF ADDITION --- */}
+
                   <Link
                     to="/"
                     onClick={() => setIsMobileMenuOpen(false)}

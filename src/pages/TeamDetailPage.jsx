@@ -5,57 +5,79 @@ import { useAuth } from '../context/AuthContext';
 import {
   ArrowLeft, Plus, Users, ClipboardList, Calendar, Crown, User,
   ChevronDown, ChevronUp, Link2, Trash2, Github, X,
-  FileText, Activity, FilePieChart, ExternalLink, Mail, Loader2 // <-- ADD THIS
+  FileText, Activity, FilePieChart, ExternalLink, Mail, Loader2
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-import AddMemberModal from '../components/AddMemberModal';
-import CreateTaskModal from '../components/CreateTaskModal';
+import { useModal } from '../context/ModalContext';
 import TaskItem from '../components/TaskItem';
-import CreateMeetingModal from '../components/CreateMeetingModal';
 import MeetingItem from '../components/MeetingItem';
+import TeamNoteCard from '../components/TeamNoteCard';
+import TeamActivityEvent from '../components/TeamActivityEvent';
+import { useConfirm } from '../context/ConfirmContext.jsx';
+import AllActivityModal from '../components/AllActivityModal';
 import EditTaskModal from '../components/EditTaskModal';
+import EditTeamNoteModal from '../components/EditTeamNoteModal';
+import EditMeetingModal from '../components/EditMeetingModal';
+import CopyTasksModal from '../components/CopyTasksModal';
+import GenerateReportModal from '../components/GenerateReportModal';
 import AddFigmaModal from '../components/AddFigmaModal';
 import AddGithubModal from '../components/AddGithubModal';
-import TeamNoteCard from '../components/TeamNoteCard';
-import AddTeamNoteModal from '../components/AddTeamNoteModal';
-import EditTeamNoteModal from '../components/EditTeamNoteModal';
-import TeamActivityEvent from '../components/TeamActivityEvent';
-import GenerateReportModal from '../components/GenerateReportModal';
 import AddLiveProjectModal from '../components/AddLiveProjectModal';
-import CopyTasksModal from '../components/CopyTasksModal';
-import EditMeetingModal from '../components/EditMeetingModal';
-import { useConfirm } from '../context/ConfirmContext.jsx';
+import AddTeamNoteModal from '../components/AddTeamNoteModal';
+import AddMemberModal from '../components/AddMemberModal';
 
 const TeamDetailPage = () => {
   const { teamId } = useParams();
   const { user } = useAuth();
   const { confirm } = useConfirm();
+  const { openModal, setModalContext } = useModal();
 
   const [team, setTeam] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
-  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-  const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
+
+  // --- 1. STATE FOR TABS ---
+  const [activeTab, setActiveTab] = useState('tasks'); // Default to 'tasks'
+
+  // (All other state variables are unchanged)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isFigmaModalOpen, setIsFigmaModalOpen] = useState(false);
   const [isGithubModalOpen, setIsGithubModalOpen] = useState(false);
-  const [currentTask, setCurrentTask] = useState(null);
-  const [expandedAssignees, setExpandedAssignees] = useState(new Set());
-  const [teamNotes, setTeamNotes] = useState([]);
-  const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
   const [isEditNoteModalOpen, setIsEditNoteModalOpen] = useState(false);
-  const [currentTeamNote, setCurrentTeamNote] = useState(null);
-  const [activity, setActivity] = useState([]);
-  const [activityLoading, setActivityLoading] = useState(true);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isLiveProjectModalOpen, setIsLiveProjectModalOpen] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [isEditMeetingModalOpen, setIsEditMeetingModalOpen] = useState(false);
+  const [isAllActivityModalOpen, setIsAllActivityModalOpen] = useState(false);
+  const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
+  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+
+  const [currentTask, setCurrentTask] = useState(null);
+  const [expandedDates, setExpandedDates] = useState(new Set(['No Due Date']));
+  const [teamNotes, setTeamNotes] = useState([]);
+  const [currentTeamNote, setCurrentTeamNote] = useState(null);
+  const [activity, setActivity] = useState([]);
+  const [activityLoading, setActivityLoading] = useState(true);
   const [currentMeeting, setCurrentMeeting] = useState(null);
   const [sendingReport, setSendingReport] = useState(null);
+
+  // (useEffect for setting ModalContext is unchanged)
+  useEffect(() => {
+    if (team) {
+      setModalContext({
+        teamId: team._id,
+        teamMembers: team.members,
+        onTaskCreated: (newTasks) => handleTasksCreated(newTasks),
+        onMeetingCreated: (newMeeting) => handleMeetingCreated(newMeeting),
+        onMemberAdded: (updatedTeam) => handleMemberAdded(updatedTeam),
+      });
+    }
+    return () => setModalContext({});
+  }, [team, setModalContext]);
+
 
   const fetchTeamData = async () => {
     try {
@@ -83,6 +105,7 @@ const TeamDetailPage = () => {
     fetchTeamData();
   }, [teamId]);
 
+  // (All handler functions remain exactly the same)
   const handleMemberAdded = (updatedTeam) => {
     setTeam(updatedTeam);
     refreshActivities();
@@ -101,24 +124,50 @@ const TeamDetailPage = () => {
     refreshActivities();
   };
 
-  // Group tasks by assignee
-  const tasksByAssignee = tasks.reduce((acc, task) => {
+  const handleTeamNoteAdded = (newNote) => {
+    setTeamNotes([newNote, ...teamNotes]);
+    refreshActivities();
+    setIsAddNoteModalOpen(false);
+  };
+
+  const tasksByDate = tasks.reduce((acc, task) => {
+    const dateKey = task.dueDate ? task.dueDate.split('T')[0] : 'No Due Date';
     const assignee = task.assignedTo;
-    if (!acc[assignee]) {
-      acc[assignee] = [];
+
+    if (!acc[dateKey]) {
+      acc[dateKey] = {};
     }
-    acc[assignee].push(task);
+    if (!acc[dateKey][assignee]) {
+      acc[dateKey][assignee] = [];
+    }
+
+    acc[dateKey][assignee].push(task);
+    acc[dateKey][assignee].sort((a, b) => {
+      if (a.status === 'Pending' && b.status !== 'Pending') return -1;
+      if (a.status !== 'Pending' && b.status === 'Pending') return 1;
+      return 0;
+    });
+
     return acc;
   }, {});
 
-  // Sort tasks within each group
-  for (const assignee in tasksByAssignee) {
-    tasksByAssignee[assignee].sort((a, b) => {
-      if (a.status === 'Pending' && b.status !== 'Pending') return -1;
-      if (a.status !== 'Pending' && b.status === 'Pending') return 1;
-      return new Date(a.createdAt) - new Date(b.createdAt);
+  const sortedDateKeys = Object.keys(tasksByDate).sort((a, b) => {
+    if (a === 'No Due Date') return 1;
+    if (b === 'No Due Date') return -1;
+    return new Date(a) - new Date(b);
+  });
+
+  const toggleDate = (dateKey) => {
+    setExpandedDates(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(dateKey)) {
+        newSet.delete(dateKey);
+      } else {
+        newSet.add(dateKey);
+      }
+      return newSet;
     });
-  }
+  };
 
   const handleOpenEditModal = (task) => {
     setCurrentTask(task);
@@ -134,26 +183,21 @@ const TeamDetailPage = () => {
   };
 
   const handleDeleteTask = async (taskId) => {
-    try {
-      await api.delete(`/tasks/task/${taskId}`);
-      setTasks(tasks.filter(task => task._id !== taskId));
-      refreshActivities();
-    } catch (err) {
-      console.error("Failed to delete task", err);
-      setError(err.response?.data?.message || 'Failed to delete task');
-    }
-  };
-
-  const toggleAssignee = (assignee) => {
-    setExpandedAssignees(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(assignee)) {
-        newSet.delete(assignee);
-      } else {
-        newSet.add(assignee);
-      }
-      return newSet;
+    const confirmed = await confirm({
+      title: 'Delete Task?',
+      description: 'Are you sure you want to delete this task?',
+      confirmText: 'Delete'
     });
+    if (confirmed) {
+      try {
+        await api.delete(`/tasks/task/${taskId}`);
+        setTasks(tasks.filter(task => task._id !== taskId));
+        refreshActivities();
+      } catch (err) {
+        console.error("Failed to delete task", err);
+        setError(err.response?.data?.message || 'Failed to delete task');
+      }
+    }
   };
 
   const handleCopyTasks = () => {
@@ -216,10 +260,7 @@ const TeamDetailPage = () => {
 
     if (confirmed) {
       try {
-        // We don't need the response, we'll re-fetch for simplicity
         await api.put(`/teams/${teamId}/remove`, { name });
-
-        // Re-fetch all data to get updated task and meeting lists
         fetchTeamData();
         refreshActivities();
 
@@ -228,12 +269,6 @@ const TeamDetailPage = () => {
         setError(err.response?.data?.message || 'Failed to remove member');
       }
     }
-  };
-
-  const handleTeamNoteAdded = (newNote) => {
-    setTeamNotes([newNote, ...teamNotes]);
-    refreshActivities();
-
   };
 
   const handleOpenEditTeamNoteModal = (note) => {
@@ -337,27 +372,27 @@ const TeamDetailPage = () => {
       return;
     }
 
-    // Use the custom confirm dialog
     const confirmed = await confirm({
       title: 'Send Report?',
       description: `This will generate a PDF report and email it to ${memberName} at ${memberEmail}.`,
       confirmText: 'Send Email',
-      danger: false // This is not a destructive action
+      danger: false
     });
 
     if (confirmed) {
       setSendingReport(memberName);
       try {
         const res = await api.post('/members/send-report', { memberName });
-        alert(res.data.message); // Simple success alert
+        alert(res.data.message);
       } catch (err) {
-        // Use error from state if available, else generic message
         setError(err.response?.data?.message || 'Failed to send report');
       }
       setSendingReport(null);
     }
   };
 
+
+  // (Loading, Error, and !team checks are unchanged)
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -393,9 +428,24 @@ const TeamDetailPage = () => {
 
   const isOwner = team.owner._id === user._id;
 
+  // --- 2. DEFINE EXPANDED TABS FOR THE MAIN FEED ---
+  const resourceCount = (team?.figmaFiles?.length || 0) +
+                        (team?.githubRepos?.length || 0) +
+                        (team?.liveProjects?.length || 0);
+
+  const mainTabs = [
+    { id: 'tasks', name: 'Tasks', icon: ClipboardList, count: tasks.length },
+    { id: 'meetings', name: 'Meetings', icon: Calendar, count: meetings.length },
+    { id: 'members', name: 'Members', icon: Users, count: team?.members?.length || 0 },
+    { id: 'notes', name: 'Team Notes', icon: FileText, count: teamNotes.length },
+    { id: 'resources', name: 'Resources', icon: Link2, count: resourceCount },
+    { id: 'activity', name: 'Activity', icon: Activity, count: activity.length }
+  ];
+  // --- END OF TAB DEFINITION ---
+
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header (unchanged) */}
       <div className="flex flex-col space-y-4">
         <Link
           to="/teams"
@@ -425,7 +475,6 @@ const TeamDetailPage = () => {
             </div>
           </div>
           <div className="flex items-center space-x-3 w-full lg:w-auto">
-            {/* --- 4. ADD THE NEW BUTTON --- */}
             <button
               onClick={() => setIsReportModalOpen(true)}
               className="w-full lg:w-auto bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
@@ -435,7 +484,7 @@ const TeamDetailPage = () => {
             </button>
             {isOwner && (
               <button
-                onClick={() => setIsMemberModalOpen(true)}
+                onClick={() => openModal('addMember')}
                 className="w-full lg:w-auto bg-gray-900 text-white px-6 py-3 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
               >
                 <Plus size={20} />
@@ -446,434 +495,552 @@ const TeamDetailPage = () => {
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Left Column: Members, Figma, GitHub */}
-        <div className="xl:col-span-1 space-y-6">
-          {/* Team Members Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div className="flex items-center space-x-2 mb-4">
-              <Users className="text-gray-700" size={20} />
-              <h2 className="text-lg font-semibold text-gray-900">Team Members</h2>
-            </div>
-            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600">
-                Owned by: <span className="font-medium text-gray-900">{team.owner.username}</span>
-              </p>
-            </div>
-            <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
-              <div className="space-y-3 pr-2">
-                {team.members.map((memberName, index) => (
-                <div
-                  key={index}
-                  className="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+      {/* --- 3. REMOVED Main Content Grid and Sidebar --- */}
+      {/* The <div className="grid grid-cols-1 xl:grid-cols-3 gap-6"> is GONE */}
+      {/* The <div className="xl:col-span-1 space-y-6"> (sidebar) is GONE */}
+
+      {/* --- 4. MAIN CONTENT AREA (Full Width) --- */}
+      <div className="space-y-6">
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <nav className="flex space-x-4 px-4 overflow-x-auto">
+            {mainTabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? 'border-gray-900 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
                 >
-                  {/* Wrap the member info in a Link */}
-                  <Link
-                    to={`/members/details?name=${encodeURIComponent(memberName)}`}
-                    className="flex-1 flex items-center space-x-3 min-w-0" // Added flex-1 and min-w-0 for proper text truncation
-                  >
-                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm font-medium text-gray-600">
-                        {memberName.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    {/* Added truncate and title for long names */}
-                    <span className="font-medium text-gray-900 truncate" title={memberName}>
-                      {memberName}
-                    </span>
-                  </Link>
-
-                  {/* The delete button remains a separate element */}
-                  <div className="flex items-center flex-shrink-0 ml-2 z-10">
-                        {isOwner && (
-                          <button
-                            onClick={() => handleSendMemberReport(memberName)}
-                            disabled={sendingReport === memberName}
-                            title={sendingReport === memberName ? "Sending..." : "Send PDF Report"}
-                            className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                          >
-                            {sendingReport === memberName ? (
-                              <Loader2 size={16} className="animate-spin" />
-                            ) : (
-                              <Mail size={16} />
-                            )}
-                          </button>
-                        )}
-                        {isOwner && (
-                          <button
-                            onClick={() => handleRemoveMember(memberName)}
-                            title={`Remove ${memberName}`}
-                            className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                          >
-                            <X size={16} />
-                          </button>
-                        )}
-                      </div>
-                </div>
-              ))}
-                {team.members.length === 0 && (
-                  <div className="text-center py-4">
-                    <Users className="mx-auto text-gray-400 mb-2" size={24} />
-                    <p className="text-sm text-gray-600">No members yet</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Figma Files Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center space-x-2">
-                <Link2 className="text-gray-700" size={20} />
-                <h2 className="text-lg font-semibold text-gray-900">Figma Files</h2>
-              </div>
-              <button
-                onClick={() => setIsFigmaModalOpen(true)}
-                className="bg-gray-900 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-            <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
-              <div className="space-y-3 pr-2">
-                {team.figmaFiles && team.figmaFiles.length > 0 ? (
-                  team.figmaFiles.map((file) => (
-                    <div
-                      key={file._id}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                    >
-                      <a
-                        href={file.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-3"
-                      >
-                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                          <Link2 size={16} className="text-gray-600" />
-                        </div>
-                        <span className="font-medium text-gray-900">{file.name}</span>
-                      </a>
-                      <button
-                        onClick={() => handleDeleteFigmaLink(file._id)}
-                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-4">
-                    <Link2 className="mx-auto text-gray-400 mb-2" size={24} />
-                    <p className="text-sm text-gray-600">No Figma files added</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* GitHub Repos Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center space-x-2">
-                <Github className="text-gray-700" size={20} />
-                <h2 className="text-lg font-semibold text-gray-900">GitHub Repos</h2>
-              </div>
-              <button
-                onClick={() => setIsGithubModalOpen(true)}
-                className="bg-gray-900 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-            <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
-              <div className="space-y-3 pr-2">
-                {team.githubRepos && team.githubRepos.length > 0 ? (
-                  team.githubRepos.map((repo) => (
-                    <div
-                      key={repo._id}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                    >
-                      <a
-                        href={repo.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-3"
-                      >
-                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                          <Github size={16} className="text-gray-600" />
-                        </div>
-                        <span className="font-medium text-gray-900">{repo.name}</span>
-                      </a>
-                      <button
-                        onClick={() => handleDeleteGithubRepo(repo._id)}
-                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-4">
-                    <Github className="mx-auto text-gray-400 mb-2" size={24} />
-                    <p className="text-sm text-gray-600">No repos linked yet</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center space-x-2">
-                <FileText className="text-gray-700" size={20} />
-                <h2 className="text-lg font-semibold text-gray-900">Team Notes</h2>
-              </div>
-              <button
-                onClick={() => setIsAddNoteModalOpen(true)}
-                className="bg-gray-900 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-            <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
-              <div className="space-y-4 pr-2">
-                {teamNotes.length > 0 ? (
-                  teamNotes.map((note) => (
-                    <TeamNoteCard
-                      key={note._id}
-                      note={note}
-                      onEdit={handleOpenEditTeamNoteModal}
-                      onDelete={handleDeleteTeamNote}
-                    />
-                  ))
-                ) : (
-                  <div className="text-center py-4">
-                    <FileText className="mx-auto text-gray-400 mb-2" size={24} />
-                    <p className="text-sm text-gray-600">No team notes yet.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center space-x-2">
-                <ExternalLink className="text-gray-700" size={20} /> {/* <-- New icon */}
-                <h2 className="text-lg font-semibold text-gray-900">Live Projects</h2> {/* <-- New title */}
-              </div>
-              <button
-                onClick={() => setIsLiveProjectModalOpen(true)} // <-- Use new state
-                className="bg-gray-900 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-            <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
-              <div className="space-y-3 pr-2">
-                {team.liveProjects && team.liveProjects.length > 0 ? ( // <-- Use new array
-                  team.liveProjects.map((project) => ( // <-- Use new array
-                    <div
-                      key={project._id}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                    >
-                      <a
-                        href={project.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-3"
-                      >
-                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                          <ExternalLink size={16} className="text-gray-600" /> {/* <-- New icon */}
-                        </div>
-                        <span className="font-medium text-gray-900">{project.name}</span>
-                      </a>
-                      <button
-                        onClick={() => handleDeleteLiveProject(project._id)} // <-- Use new handler
-                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-4">
-                    <ExternalLink className="mx-auto text-gray-400 mb-2" size={24} /> {/* <-- New icon */}
-                    <p className="text-sm text-gray-600">No live projects linked yet</p> {/* <-- New text */}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+                  <Icon size={16} />
+                  <span>{tab.name}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium min-w-[24px] ${
+                    activeTab === tab.id
+                      ? 'bg-gray-900 text-white'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Right Column: Tasks & Meetings */}
-        <div className="xl:col-span-2 space-y-6">
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div className="flex items-center space-x-2 mb-4">
-              <Activity className="text-gray-700" size={20} />
-              <h2 className="text-lg font-semibold text-gray-900">Activity Feed</h2>
-            </div>
-            <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
-              <div className="space-y-2 pr-2 divide-y divide-gray-100">
-                {activityLoading ? (
-                  <div className="text-center py-4">
-                    <p className="text-sm text-gray-500">Loading feed...</p>
-                  </div>
-                ) : activity.length > 0 ? (
-                  activity.map((item) => (
-                    <TeamActivityEvent key={item._id} activity={item} />
-                  ))
-                ) : (
-                  <div className="text-center py-4">
-                    <Activity className="mx-auto text-gray-400 mb-2" size={24} />
-                    <p className="text-sm text-gray-600">No activity yet.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+        {/* Tab Content */}
+        <AnimatePresence mode="wait">
           {/* Tasks Section */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div className="flex items-center space-x-2">
-                  <ClipboardList className="text-gray-700" size={20} />
-                  <h2 className="text-lg font-semibold text-gray-900">Team Tasks</h2>
-                  <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm font-medium">
-                    {tasks.length}
-                  </span>
+          {activeTab === 'tasks' && (
+            <motion.div
+              key="tasks"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex items-center space-x-2">
+                      <ClipboardList className="text-gray-700" size={20} />
+                      <h2 className="text-lg font-semibold text-gray-900">Team Tasks</h2>
+                      <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm font-medium">
+                        {tasks.length}
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                      <button
+                        onClick={handleCopyTasks}
+                        disabled={tasks.length === 0}
+                        className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ClipboardList size={16} />
+                        <span>Copy Tasks...</span>
+                      </button>
+                      <button
+                        onClick={() => openModal('createTask')}
+                        className="w-full sm:w-auto bg-gray-900 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+                      >
+                        <Plus size={16} />
+                        <span>New Task</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+
+                <div className="p-6 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                  {tasks.length > 0 ? (
+                    <div className="space-y-8">
+                      {sortedDateKeys.map(dateKey => {
+                        const tasksForDate = tasksByDate[dateKey];
+                        const isExpanded = expandedDates.has(dateKey);
+                        const formattedDate = dateKey === 'No Due Date'
+                          ? 'No Due Date'
+                          : new Date(dateKey).toLocaleDateString('en-US', {
+                              weekday: 'long',
+                              month: 'long',
+                              day: 'numeric',
+                              timeZone: 'UTC'
+                            });
+                        const totalTasksForDate = Object.values(tasksForDate).reduce(
+                          (sum, memberTasks) => sum + memberTasks.length, 0
+                        );
+
+                        return (
+                          <div key={dateKey} className="border border-gray-200 rounded-lg overflow-hidden">
+                            <button
+                              onClick={() => toggleDate(dateKey)}
+                              className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                            >
+                              <div className="flex items-center space-x-3">
+                                <Calendar size={16} className="text-gray-600" />
+                                <h3 className="font-semibold text-gray-900">{formattedDate}</h3>
+                                <span className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs font-medium">
+                                  {totalTasksForDate} task{totalTasksForDate !== 1 ? 's' : ''}
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm text-gray-500 hidden sm:block">
+                                  {isExpanded ? 'Collapse' : 'Expand'}
+                                </span>
+                                {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                              </div>
+                            </button>
+
+                            <AnimatePresence>
+                              {isExpanded && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="divide-y divide-gray-100">
+                                    {Object.entries(tasksForDate).map(([assignee, assigneeTasks]) => (
+                                      <div key={assignee} className="p-4">
+                                        <div className="flex items-center space-x-3 mb-3">
+                                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <span className="text-sm font-medium text-gray-600">
+                                              {assignee.charAt(0).toUpperCase()}
+                                            </span>
+                                          </div>
+                                          <h4 className="font-medium text-gray-800">{assignee}</h4>
+                                        </div>
+                                        <div className="space-y-3 pl-11">
+                                          {assigneeTasks.map(task => (
+                                            <TaskItem
+                                              key={task._id}
+                                              task={task}
+                                              onEdit={handleOpenEditModal}
+                                              onDelete={() => handleDeleteTask(task._id)}
+                                            />
+                                          ))}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <ClipboardList className="mx-auto text-gray-400 mb-3" size={32} />
+                      <h3 className="text-sm font-medium text-gray-900 mb-1">No tasks yet</h3>
+                      <p className="text-sm text-gray-600">Create the first task for this team</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Meetings Section */}
+          {activeTab === 'meetings' && (
+            <motion.div
+              key="meetings"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="text-gray-700" size={20} />
+                    <h2 className="text-lg font-semibold text-gray-900">Upcoming Meetings</h2>
+                  </div>
                   <button
-                onClick={handleCopyTasks}
-                disabled={tasks.length === 0}
-                className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {/* The "Copied!" logic is gone from here, which is correct */}
-                <ClipboardList size={16} /> {/* <-- Use ClipboardList for consistency */}
-                <span>Copy Tasks...</span>
-              </button>
-                  <button
-                    onClick={() => setIsTaskModalOpen(true)}
+                    onClick={() => openModal('createMeeting')}
                     className="w-full sm:w-auto bg-gray-900 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
                   >
                     <Plus size={16} />
-                    <span>New Task</span>
+                    <span>New Meeting</span>
                   </button>
                 </div>
+
+                <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                  <div className="space-y-4 pr-2">
+                    {meetings.length > 0 ? (
+                      meetings.map(meeting => (
+                        <MeetingItem
+                          key={meeting._id}
+                          meeting={meeting}
+                          onEdit={handleOpenEditMeetingModal}
+                          onDelete={handleDeleteMeeting}
+                        />
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <Calendar className="mx-auto text-gray-400 mb-3" size={32} />
+                        <h3 className="text-sm font-medium text-gray-900 mb-1">No meetings scheduled</h3>
+                        <p className="text-sm text-gray-600">Schedule your first team meeting</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
+            </motion.div>
+          )}
 
-            {/* Scrollable Tasks Container */}
-            <div className="p-6 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
-              {tasks.length > 0 ? (
-                <div className="space-y-8">
-                  {Object.entries(tasksByAssignee).map(([assignee, assigneeTasks]) => {
-                    const isExpanded = expandedAssignees.has(assignee);
-                    const visibleTasks = isExpanded ? assigneeTasks : assigneeTasks.slice(0, 3);
-                    const hasMoreTasks = assigneeTasks.length > 3;
-
-                    return (
-                      <div key={assignee} className="border border-gray-200 rounded-lg overflow-hidden">
-                        {/* Assignee Header */}
-                        <button
-                          onClick={() => toggleAssignee(assignee)}
-                          className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+          {/* --- 5. NEW TAB CONTENT: MEMBERS --- */}
+          {activeTab === 'members' && (
+            <motion.div
+              key="members"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div className="flex items-center space-x-2 mb-4">
+                  <Users className="text-gray-700" size={20} />
+                  <h2 className="text-lg font-semibold text-gray-900">Team Members</h2>
+                </div>
+                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600">
+                    Owned by: <span className="font-medium text-gray-900">{team.owner.username}</span>
+                  </p>
+                </div>
+                <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                  <div className="space-y-3 pr-2">
+                    {team.members.map((memberName, index) => (
+                      <div
+                        key={index}
+                        className="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <Link
+                          to={`/members/details?name=${encodeURIComponent(memberName)}`}
+                          className="flex-1 flex items-center space-x-3 min-w-0"
                         >
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                              <User size={16} className="text-gray-600" />
-                            </div>
-                            <div className="text-left">
-                              <h3 className="font-semibold text-gray-900">{assignee}</h3>
-                              <p className="text-sm text-gray-600">
-                                {assigneeTasks.length} task{assigneeTasks.length !== 1 ? 's' : ''}
-                                {hasMoreTasks && !isExpanded && ` • ${assigneeTasks.length - 3} more`}
-                              </p>
-                            </div>
+                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-sm font-medium text-gray-600">
+                              {memberName.charAt(0).toUpperCase()}
+                            </span>
                           </div>
-                          {hasMoreTasks && (
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm text-gray-500">
-                                {isExpanded ? 'Show less' : 'Show all'}
-                              </span>
-                              {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                            </div>
-                          )}
-                        </button>
+                          <span className="font-medium text-gray-900 truncate" title={memberName}>
+                            {memberName}
+                          </span>
+                        </Link>
 
-                        {/* Tasks List */}
-                        <div className="divide-y divide-gray-100">
-                          {visibleTasks.map(task => (
-                            <div key={task._id} className="p-4 hover:bg-gray-50 transition-colors">
-                              <TaskItem
-                                task={task}
-                                onEdit={handleOpenEditModal}
-                                onDelete={handleDeleteTask}
-                              />
-                            </div>
-                          ))}
+                        <div className="flex items-center flex-shrink-0 ml-2 z-10">
+                          {isOwner && (
+                            <button
+                              onClick={() => handleSendMemberReport(memberName)}
+                              disabled={sendingReport === memberName}
+                              title={sendingReport === memberName ? "Sending..." : "Send PDF Report"}
+                              className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                            >
+                              {sendingReport === memberName ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <Mail size={16} />
+                              )}
+                            </button>
+                          )}
+                          {isOwner && (
+                            <button
+                              onClick={() => handleRemoveMember(memberName)}
+                              title={`Remove ${memberName}`}
+                              className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                            >
+                              <X size={16} />
+                            </button>
+                          )}
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <ClipboardList className="mx-auto text-gray-400 mb-3" size={32} />
-                  <h3 className="text-sm font-medium text-gray-900 mb-1">No tasks yet</h3>
-                  <p className="text-sm text-gray-600">Create the first task for this team</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Meetings Section */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-              <div className="flex items-center space-x-2">
-                <Calendar className="text-gray-700" size={20} />
-                <h2 className="text-lg font-semibold text-gray-900">Upcoming Meetings</h2>
-                <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm font-medium">
-                  {meetings.length}
-                </span>
-              </div>
-              <button
-                onClick={() => setIsMeetingModalOpen(true)}
-                className="w-full sm:w-auto bg-gray-900 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
-              >
-                <Plus size={16} />
-                <span>New Meeting</span>
-              </button>
-            </div>
-
-            {/* Scrollable Meetings Container */}
-            <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
-              <div className="space-y-4 pr-2">
-                {meetings.length > 0 ? (
-                  meetings.map(meeting => (
-                    <MeetingItem
-                    key={meeting._id}
-                    meeting={meeting}
-                    onEdit={handleOpenEditMeetingModal} // <-- PASS PROP
-                    onDelete={handleDeleteMeeting}     // <-- PASS PROP
-                  />
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <Calendar className="mx-auto text-gray-400 mb-3" size={32} />
-                    <h3 className="text-sm font-medium text-gray-900 mb-1">No meetings scheduled</h3>
-                    <p className="text-sm text-gray-600">Schedule your first team meeting</p>
+                    ))}
+                    {team.members.length === 0 && (
+                      <div className="text-center py-4">
+                        <Users className="mx-auto text-gray-400 mb-2" size={24} />
+                        <p className="text-sm text-gray-600">No members yet</p>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          )}
+
+          {/* --- 6. NEW TAB CONTENT: TEAM NOTES --- */}
+          {activeTab === 'notes' && (
+            <motion.div
+              key="notes"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center space-x-2">
+                    <FileText className="text-gray-700" size={20} />
+                    <h2 className="text-lg font-semibold text-gray-900">Team Notes</h2>
+                  </div>
+                  <button
+                    onClick={() => setIsAddNoteModalOpen(true)}
+                    className="bg-gray-900 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                  <div className="space-y-4 pr-2">
+                    {teamNotes.length > 0 ? (
+                      teamNotes.map((note) => (
+                        <TeamNoteCard
+                          key={note._id}
+                          note={note}
+                          onEdit={handleOpenEditTeamNoteModal}
+                          onDelete={handleDeleteTeamNote}
+                        />
+                      ))
+                    ) : (
+                      <div className="text-center py-4">
+                        <FileText className="mx-auto text-gray-400 mb-2" size={24} />
+                        <p className="text-sm text-gray-600">No team notes yet.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* --- 7. NEW TAB CONTENT: RESOURCES --- */}
+          {activeTab === 'resources' && (
+            <motion.div
+              key="resources"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              {/* Figma Files Section */}
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center space-x-2">
+                    <Link2 className="text-gray-700" size={20} />
+                    <h2 className="text-lg font-semibold text-gray-900">Figma Files</h2>
+                  </div>
+                  <button
+                    onClick={() => setIsFigmaModalOpen(true)}
+                    className="bg-gray-900 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                  <div className="space-y-3 pr-2">
+                    {team.figmaFiles && team.figmaFiles.length > 0 ? (
+                      team.figmaFiles.map((file) => (
+                        <div
+                          key={file._id}
+                          className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                        >
+                          <a
+                            href={file.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center space-x-3"
+                          >
+                            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                              <Link2 size={16} className="text-gray-600" />
+                            </div>
+                            <span className="font-medium text-gray-900">{file.name}</span>
+                          </a>
+                          <button
+                            onClick={() => handleDeleteFigmaLink(file._id)}
+                            className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4">
+                        <Link2 className="mx-auto text-gray-400 mb-2" size={24} />
+                        <p className="text-sm text-gray-600">No Figma files added</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* GitHub Repos Section */}
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center space-x-2">
+                    <Github className="text-gray-700" size={20} />
+                    <h2 className="text-lg font-semibold text-gray-900">GitHub Repos</h2>
+                  </div>
+                  <button
+                    onClick={() => setIsGithubModalOpen(true)}
+                    className="bg-gray-900 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                  <div className="space-y-3 pr-2">
+                    {team.githubRepos && team.githubRepos.length > 0 ? (
+                      team.githubRepos.map((repo) => (
+                        <div
+                          key={repo._id}
+                          className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                        >
+                          <a
+                            href={repo.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center space-x-3"
+                          >
+                            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                              <Github size={16} className="text-gray-600" />
+                            </div>
+                            <span className="font-medium text-gray-900">{repo.name}</span>
+                          </a>
+                          <button
+                            onClick={() => handleDeleteGithubRepo(repo._id)}
+                            className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4">
+                        <Github className="mx-auto text-gray-400 mb-2" size={24} />
+                        <p className="text-sm text-gray-600">No repos linked yet</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Live Projects Section */}
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center space-x-2">
+                    <ExternalLink className="text-gray-700" size={20} />
+                    <h2 className="text-lg font-semibold text-gray-900">Live Projects</h2>
+                  </div>
+                  <button
+                    onClick={() => setIsLiveProjectModalOpen(true)}
+                    className="bg-gray-900 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                  <div className="space-y-3 pr-2">
+                    {team.liveProjects && team.liveProjects.length > 0 ? (
+                      team.liveProjects.map((project) => (
+                        <div
+                          key={project._id}
+                          className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                        >
+                          <a
+                            href={project.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center space-x-3"
+                          >
+                            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                              <ExternalLink size={16} className="text-gray-600" />
+                            </div>
+                            <span className="font-medium text-gray-900">{project.name}</span>
+                          </a>
+                          <button
+                            onClick={() => handleDeleteLiveProject(project._id)}
+                            className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4">
+                        <ExternalLink className="mx-auto text-gray-400 mb-2" size={24} />
+                        <p className="text-sm text-gray-600">No live projects linked yet</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Activity Section */}
+          {activeTab === 'activity' && (
+            <motion.div
+              key="activity"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2">
+                    <Activity className="text-gray-700" size={20} />
+                    <h2 className="text-lg font-semibold text-gray-900">Activity Feed</h2>
+                  </div>
+                  <button
+                    onClick={() => setIsAllActivityModalOpen(true)}
+                    className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    View all
+                  </button>
+                </div>
+                <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                  <div className="space-y-2 pr-2 divide-y divide-gray-100">
+                    {activityLoading ? (
+                      <div className="text-center py-4">
+                        <p className="text-sm text-gray-500">Loading feed...</p>
+                      </div>
+                    ) : activity.length > 0 ? (
+                      activity.map((item) => (
+                        <TeamActivityEvent key={item._id} activity={item} />
+                      ))
+                    ) : (
+                      <div className="text-center py-4">
+                        <Activity className="mx-auto text-gray-400 mb-2" size={24} />
+                        <p className="text-sm text-gray-600">No activity yet.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Modals */}
+      {/* --- MODALS (Unchanged) --- */}
+      {/* All modals remain here as they are specific to this page's context */}
       <AddMemberModal
         isOpen={isMemberModalOpen}
         onClose={() => setIsMemberModalOpen(false)}
@@ -881,21 +1048,25 @@ const TeamDetailPage = () => {
         onMemberAdded={handleMemberAdded}
       />
 
-      {team && (
-        <CreateTaskModal
-          isOpen={isTaskModalOpen}
-          onClose={() => setIsTaskModalOpen(false)}
-          teamId={teamId}
-          members={team.members}
-          onTasksCreated={handleTasksCreated}
-        />
-      )}
+      <AddTeamNoteModal
+        isOpen={isAddNoteModalOpen}
+        onClose={() => setIsAddNoteModalOpen(false)}
+        teamId={teamId}
+        onNoteAdded={handleTeamNoteAdded}
+      />
+
+      <AllActivityModal
+        isOpen={isAllActivityModalOpen}
+        onClose={() => setIsAllActivityModalOpen(false)}
+        teamId={teamId}
+        teamName={team?.teamName}
+      />
 
       <CopyTasksModal
         isOpen={isCopyModalOpen}
         onClose={() => setIsCopyModalOpen(false)}
         tasks={tasks}
-        teamName={team.teamName}
+        teamName={team?.teamName}
       />
 
       {team && (
@@ -908,32 +1079,18 @@ const TeamDetailPage = () => {
         />
       )}
 
-      {team && (
-        <CreateMeetingModal
-          isOpen={isMeetingModalOpen}
-          onClose={() => setIsMeetingModalOpen(false)}
-          teamId={teamId}
-          members={team.members}
-          onMeetingCreated={handleMeetingCreated}
-        />
-      )}
       <AddFigmaModal
         isOpen={isFigmaModalOpen}
         onClose={() => setIsFigmaModalOpen(false)}
         teamId={teamId}
         onFigmaLinkAdded={handleFigmaLinkAdded}
       />
+
       <AddGithubModal
         isOpen={isGithubModalOpen}
         onClose={() => setIsGithubModalOpen(false)}
         teamId={teamId}
         onGithubRepoAdded={handleGithubRepoAdded}
-      />
-      <AddTeamNoteModal
-        isOpen={isAddNoteModalOpen}
-        onClose={() => setIsAddNoteModalOpen(false)}
-        teamId={teamId}
-        onNoteAdded={handleTeamNoteAdded}
       />
 
       <EditTeamNoteModal
@@ -942,6 +1099,7 @@ const TeamDetailPage = () => {
         note={currentTeamNote}
         onNoteUpdated={handleTeamNoteUpdated}
       />
+
       {team && (
         <GenerateReportModal
           isOpen={isReportModalOpen}
@@ -957,6 +1115,7 @@ const TeamDetailPage = () => {
         teamId={teamId}
         onLiveProjectAdded={handleLiveProjectAdded}
       />
+
       {team && (
         <EditMeetingModal
           isOpen={isEditMeetingModalOpen}

@@ -5,7 +5,7 @@ import api from '../api/axiosConfig';
 import {
   Loader2, AlertCircle, User, ClipboardList, Calendar, Activity, ArrowLeft, Edit,
   Users as UsersIcon, Mail, MoreVertical, TrendingUp, FileText, Clock,
-  CheckCircle, XCircle, AlertTriangle
+  CheckCircle, XCircle, AlertTriangle, Zap
 } from 'lucide-react';
 import TaskItem from '../components/TaskItem';
 import MeetingItem from '../components/MeetingItem';
@@ -35,6 +35,8 @@ const MemberDetailPage = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
   const [allTeams, setAllTeams] = useState([]);
+  const [aiTalkingPoints, setAiTalkingPoints] = useState('');
+  const [isAILoading, setIsAILoading] = useState(false);
 
   // Stats calculations
   const calculateStats = () => {
@@ -114,6 +116,19 @@ const MemberDetailPage = () => {
       }
       setIsSendingReport(false);
     }
+  };
+
+  const handleGenerateTalkingPoints = async () => {
+    setIsAILoading(true);
+    setError(null);
+    try {
+      const res = await api.get(`/members/talking-points?name=${encodeURIComponent(memberName)}`);
+      setAiTalkingPoints(res.data.talkingPoints); // Store the AI text
+      setIsOneOnOneModalOpen(true); // Open the modal *after* getting the text
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to generate talking points');
+    }
+    setIsAILoading(false);
   };
 
   const handleOpenEditModal = (task) => {
@@ -566,13 +581,31 @@ const MemberDetailPage = () => {
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
                   <h2 className="text-xl font-semibold text-gray-900">1-on-1 Records</h2>
-                  <button
-                    onClick={() => setIsOneOnOneModalOpen(true)}
-                    className="bg-gray-900 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl flex items-center space-x-2 hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto justify-center"
-                  >
-                    <Plus size={16} />
-                    <span>Schedule 1-on-1</span>
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={handleGenerateTalkingPoints}
+                      disabled={isAILoading}
+                      className="bg-white border border-gray-300 text-gray-700 px-3 py-2 sm:px-4 sm:py-2 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-50 transition-all duration-200"
+                    >
+                      {isAILoading ? (
+                         <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                         <Zap size={16} className="text-amber-500" />
+                      )}
+                      <span>{isAILoading ? 'Generating...' : 'AI Talking Points'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setAiTalkingPoints(''); // Ensure points are empty
+                        setIsOneOnOneModalOpen(true);
+                      }}
+                      className="bg-gray-900 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      <Plus size={16} />
+                      <span>Schedule 1-on-1</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-3 sm:space-y-4">
@@ -652,9 +685,13 @@ const MemberDetailPage = () => {
 
       <AddOneOnOneModal
         isOpen={isOneOnOneModalOpen}
-        onClose={() => setIsOneOnOneModalOpen(false)}
+        onClose={() => {
+          setIsOneOnOneModalOpen(false);
+          setAiTalkingPoints(''); // Clear the points when modal is closed
+        }}
         memberName={memberName}
         onOneOnOneCreated={handleOneOnOneCreated}
+        initialDiscussionPoints={aiTalkingPoints} // Pass the AI text
       />
     </div>
   );

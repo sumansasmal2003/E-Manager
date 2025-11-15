@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
 import NoteCard from '../components/NoteCard';
 import { Plus, FileText, Tag, Search, Filter, Grid, List } from 'lucide-react';
-import AddNoteModal from '../components/AddNoteModal';
+// --- 1. IMPORT useModal ---
+import { useModal } from '../context/ModalContext';
+// --- 2. REMOVE MODAL IMPORTS ---
+// import AddNoteModal from '../components/AddNoteModal';
 import EditNoteModal from '../components/EditNoteModal';
 import Input from '../components/Input';
 import CustomSelect from '../components/CustomSelect';
@@ -14,18 +17,25 @@ const sortOptions = [
 ];
 
 const NotesPage = () => {
+  // --- 3. GET openModal ---
+  const { openModal } = useModal();
+
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // --- 4. REMOVE MODAL STATE ---
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // (Edit modal state remains, as it's page-specific)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentNote, setCurrentNote] = useState(null);
 
   const [categories, setCategories] = useState(['All']);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
-  const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'title'
+  const [viewMode, setViewMode] = useState('grid');
+  const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -33,8 +43,6 @@ const NotesPage = () => {
         setLoading(true);
         const res = await api.get('/notes');
         setNotes(res.data);
-
-        // Get unique categories
         const uniqueCategories = [
           'All',
           ...new Set(res.data.map(note => note.category || 'Personal'))
@@ -49,6 +57,7 @@ const NotesPage = () => {
     fetchNotes();
   }, []);
 
+  // --- 5. DEFINE HANDLER TO PASS TO MODAL CONTEXT ---
   const handleNoteAdded = (newNote) => {
     setNotes([newNote, ...notes]);
     const category = newNote.category || 'Personal';
@@ -57,6 +66,7 @@ const NotesPage = () => {
     }
   };
 
+  // (All other handlers remain the same)
   const handleDeleteNote = async (noteId) => {
     if (!window.confirm('Are you sure you want to delete this note?')) {
       return;
@@ -86,7 +96,6 @@ const NotesPage = () => {
     }
   };
 
-  // Enhanced filtering and sorting
   const filteredAndSortedNotes = notes
     .filter(note => {
       const category = note.category || 'Personal';
@@ -136,8 +145,9 @@ const NotesPage = () => {
               </div>
             </div>
 
+            {/* --- 6. UPDATE onClick HANDLER --- */}
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => openModal('addNote', { onNoteAdded: handleNoteAdded })}
               className="group bg-gray-900 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               <Plus size={20} className="transition-transform group-hover:rotate-90" />
@@ -146,6 +156,7 @@ const NotesPage = () => {
           </div>
         </div>
 
+        {/* ... (Rest of the page: Controls, Loading, Error, Grid... all unchanged) ... */}
         {/* Controls Section */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -279,7 +290,7 @@ const NotesPage = () => {
               </p>
               {!searchTerm && activeCategory === 'All' && (
                 <button
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={() => openModal('addNote', { onNoteAdded: handleNoteAdded })}
                   className="bg-gray-900 text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors font-semibold"
                 >
                   Create Your First Note
@@ -290,12 +301,7 @@ const NotesPage = () => {
         )}
       </div>
 
-      {/* Modals */}
-      <AddNoteModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onNoteAdded={handleNoteAdded}
-      />
+      {/* --- 7. REMOVE AddNoteModal, KEEP EditNoteModal --- */}
       <EditNoteModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}

@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'; // <-- 1. IMPORT useNavigate
 import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar, Menu, X, Sunrise, UserCheck, CheckSquare, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// --- 2. IMPORT MODALS AND HOOK ---
+import { useModal } from '../context/ModalContext';
+import CommandPalette from '../components/CommandPalette';
+import AddNoteModal from '../components/AddNoteModal';
+import CreateTeamModal from '../components/CreateTeamModal';
+import CreateTaskModal from '../components/CreateTaskModal';
+import CreateMeetingModal from '../components/CreateMeetingModal';
+import AddMemberModal from '../components/AddMemberModal';
+
+// (SidebarLink component remains the same)
 const SidebarLink = ({ to, icon, children, isCollapsed, onNavigate }) => {
   const location = useLocation();
   const isActive = location.pathname === to;
@@ -45,29 +55,44 @@ const DashboardLayout = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [sidebarHeight, setSidebarHeight] = useState(0);
   const location = useLocation();
+  const navigate = useNavigate(); // <-- 3. GET navigate
 
-  // Close mobile sidebar when route changes
+  // --- 4. GET MODAL CONTROLS ---
+  const { modalState, openModal, closeModal, modalContext } = useModal();
+
+  // (useEffect for mobile sidebar, useEffect for sidebar height remain the same)
   useEffect(() => {
     setIsMobileSidebarOpen(false);
   }, [location.pathname]);
 
-  // Calculate sidebar height based on viewport
   useEffect(() => {
     const updateSidebarHeight = () => {
-      const navbarHeight = 64; // h-16 = 64px
-      const footerHeight = 60; // Footer height
-      const containerPadding = 32; // py-8 = 32px top + 32px bottom
+      const navbarHeight = 64;
+      const footerHeight = 60;
+      const containerPadding = 32;
       const viewportHeight = window.innerHeight;
       const calculatedHeight = viewportHeight - navbarHeight - footerHeight - containerPadding;
       setSidebarHeight(calculatedHeight);
     };
-
     updateSidebarHeight();
     window.addEventListener('resize', updateSidebarHeight);
-
     return () => window.removeEventListener('resize', updateSidebarHeight);
   }, []);
 
+  // --- 5. ADD KEYBOARD SHORTCUT LISTENER ---
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        openModal('commandPalette');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [openModal]);
+
+
+  // (getPageTitle, getPageDescription, handleNavigate, renderSidebarLinks remain the same)
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === '/today' || path === '/') return 'Today\'s Command Center';
@@ -102,88 +127,22 @@ const DashboardLayout = () => {
 
   const renderSidebarLinks = (isCollapsed) => (
     <>
-      <SidebarLink
-        to="/today"
-        icon={<Sunrise size={isCollapsed ? 22 : 20} />}
-        isCollapsed={isCollapsed}
-        onNavigate={handleNavigate}
-      >
-        Today
-      </SidebarLink>
-      <SidebarLink
-        to="/dashboard"
-        icon={<LayoutDashboard size={isCollapsed ? 22 : 20} />}
-        isCollapsed={isCollapsed}
-        onNavigate={handleNavigate}
-      >
-        Overview
-      </SidebarLink>
-      <SidebarLink
-        to="/notes"
-        icon={<Notebook size={isCollapsed ? 22 : 20} />}
-        isCollapsed={isCollapsed}
-        onNavigate={handleNavigate}
-      >
-        My Notes
-      </SidebarLink>
-      <SidebarLink
-        to="/teams"
-        icon={<Users size={isCollapsed ? 22 : 20} />}
-        isCollapsed={isCollapsed}
-        onNavigate={handleNavigate}
-      >
-        My Teams
-      </SidebarLink>
-      <SidebarLink
-        to="/members"
-        icon={<UserCheck size={isCollapsed ? 22 : 20} />}
-        isCollapsed={isCollapsed}
-        onNavigate={handleNavigate}
-      >
-        Members
-      </SidebarLink>
-      <SidebarLink
-        to="/attendance"
-        icon={<CheckSquare size={isCollapsed ? 22 : 20} />}
-        isCollapsed={isCollapsed}
-        onNavigate={handleNavigate}
-      >
-        Attendance
-      </SidebarLink>
-      <SidebarLink
-        to="/calendar"
-        icon={<Calendar size={isCollapsed ? 22 : 20} />}
-        isCollapsed={isCollapsed}
-        onNavigate={handleNavigate}
-      >
-        Calendar
-      </SidebarLink>
-
-      {/* --- 5. ADD NEW NOTIFICATION LINK --- */}
-      <SidebarLink
-        to="/notifications"
-        icon={<Bell size={isCollapsed ? 22 : 20} />}
-        isCollapsed={isCollapsed}
-        onNavigate={handleNavigate}
-      >
-        Notifications
-      </SidebarLink>
-      {/* ---------------------------------- */}
-
-      <SidebarLink
-        to="/settings"
-        icon={<Settings size={isCollapsed ? 22 : 20} />}
-        isCollapsed={isCollapsed}
-        onNavigate={handleNavigate}
-      >
-        Settings
-      </SidebarLink>
+      <SidebarLink to="/today" icon={<Sunrise size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Today</SidebarLink>
+      <SidebarLink to="/dashboard" icon={<LayoutDashboard size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Overview</SidebarLink>
+      <SidebarLink to="/notes" icon={<Notebook size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>My Notes</SidebarLink>
+      <SidebarLink to="/teams" icon={<Users size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>My Teams</SidebarLink>
+      <SidebarLink to="/members" icon={<UserCheck size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Members</SidebarLink>
+      <SidebarLink to="/attendance" icon={<CheckSquare size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Attendance</SidebarLink>
+      <SidebarLink to="/calendar" icon={<Calendar size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Calendar</SidebarLink>
+      <SidebarLink to="/notifications" icon={<Bell size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Notifications</SidebarLink>
+      <SidebarLink to="/settings" icon={<Settings size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Settings</SidebarLink>
     </>
   );
 
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Mobile Header */}
+      {/* ... (Mobile Header & Sidebar logic remains the same) ... */}
       <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="flex items-center justify-between p-4">
           <div>
@@ -205,7 +164,6 @@ const DashboardLayout = () => {
 
       <div className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 h-full">
-          {/* Mobile Sidebar Overlay */}
           <AnimatePresence>
             {isMobileSidebarOpen && (
               <>
@@ -224,7 +182,6 @@ const DashboardLayout = () => {
                   className="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-50 lg:hidden flex flex-col"
                 >
                   <div className="p-4 flex flex-col h-full">
-                    {/* Mobile Sidebar Header */}
                     <div className="flex items-center justify-between mb-6">
                       <h2 className="text-lg font-semibold text-gray-900">
                         Navigation
@@ -236,12 +193,9 @@ const DashboardLayout = () => {
                         <X size={20} />
                       </button>
                     </div>
-
-                    {/* Navigation Links - Scrollable */}
                     <nav className="space-y-2 flex-1 overflow-y-auto">
                       {renderSidebarLinks(false)}
                     </nav>
-
                     <div className="pt-4 border-t border-gray-200 mt-4">
                       <p className="text-xs text-gray-500">
                         E Manager v1.0
@@ -253,7 +207,7 @@ const DashboardLayout = () => {
             )}
           </AnimatePresence>
 
-          {/* Desktop Sidebar */}
+          {/* ... (Desktop Sidebar logic remains the same) ... */}
           <div
             className={`hidden lg:block shrink-0 ${
               isSidebarCollapsed ? 'lg:w-25' : 'lg:w-64'
@@ -266,7 +220,6 @@ const DashboardLayout = () => {
               animate={{ opacity: 1, x: 0 }}
             >
               <div className="p-4 flex flex-col h-full">
-                {/* Sidebar Header */}
                 <div className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'} mb-6`}>
                   {!isSidebarCollapsed && (
                     <motion.h2
@@ -284,12 +237,9 @@ const DashboardLayout = () => {
                     {isSidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
                   </button>
                 </div>
-
-                {/* Navigation Links - Scrollable */}
                 <nav className="space-y-2 flex-1 overflow-y-auto">
                   {renderSidebarLinks(isSidebarCollapsed)}
                 </nav>
-
                 <div className={`pt-4 border-t border-gray-200 mt-4 ${isSidebarCollapsed ? 'text-center' : ''}`}>
                   {!isSidebarCollapsed && (
                     <motion.p
@@ -305,9 +255,8 @@ const DashboardLayout = () => {
             </motion.aside>
           </div>
 
-          {/* Main Content Area */}
+          {/* ... (Main Content Area logic remains the same) ... */}
           <main className="flex-1 min-w-0 lg:mt-0 flex flex-col">
-            {/* Desktop Page Header - Hidden on mobile */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -320,8 +269,6 @@ const DashboardLayout = () => {
                 {getPageDescription()}
               </p>
             </motion.div>
-
-            {/* Page Content - Scrollable */}
             <motion.div
               key={location.pathname}
               initial={{ opacity: 0, y: 20 }}
@@ -337,7 +284,7 @@ const DashboardLayout = () => {
         </div>
       </div>
 
-      {/* Footer */}
+      {/* ... (Footer logic remains the same) ... */}
       <footer className="bg-white border-t border-gray-200 py-4 sticky bottom-0 z-30">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
@@ -358,6 +305,73 @@ const DashboardLayout = () => {
           </div>
         </div>
       </footer>
+
+      {/* --- 6. ADD ALL GLOBAL MODALS HERE --- */}
+      <CommandPalette />
+
+      <CreateTeamModal
+        isOpen={modalState.createTeam}
+        onClose={() => closeModal('createTeam')}
+        onTeamCreated={(newTeam) => {
+          if (modalContext?.onTeamCreated) {
+            modalContext.onTeamCreated(newTeam);
+          } else {
+            navigate('/teams'); // Default action
+          }
+          closeModal('createTeam');
+        }}
+      />
+
+      <AddNoteModal
+        isOpen={modalState.addNote}
+        onClose={() => closeModal('addNote')}
+        onNoteAdded={(newNote) => {
+          if (modalContext?.onNoteAdded) {
+            modalContext.onNoteAdded(newNote);
+          } else {
+            navigate('/notes'); // Default action
+          }
+          closeModal('addNote');
+        }}
+      />
+
+      <CreateTaskModal
+        isOpen={modalState.createTask}
+        onClose={() => closeModal('createTask')}
+        teamId={modalContext?.teamId} // Get teamId from context
+        members={modalContext?.teamMembers} // Get members from context
+        onTasksCreated={(newTasks) => {
+          if (modalContext?.onTasksCreated) {
+            modalContext.onTasksCreated(newTasks);
+          }
+          closeModal('createTask');
+        }}
+      />
+
+      <CreateMeetingModal
+        isOpen={modalState.createMeeting}
+        onClose={() => closeModal('createMeeting')}
+        teamId={modalContext?.teamId}
+        members={modalContext?.teamMembers}
+        onMeetingCreated={(newMeeting) => {
+          if (modalContext?.onMeetingCreated) {
+            modalContext.onMeetingCreated(newMeeting);
+          }
+          closeModal('createMeeting');
+        }}
+      />
+
+      <AddMemberModal
+        isOpen={modalState.addMember}
+        onClose={() => closeModal('addMember')}
+        teamId={modalContext?.teamId}
+        onMemberAdded={(updatedTeam) => {
+          if (modalContext?.onMemberAdded) {
+            modalContext.onMemberAdded(updatedTeam);
+          }
+          closeModal('addMember');
+        }}
+      />
     </div>
   );
 };

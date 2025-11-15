@@ -1,17 +1,34 @@
 // src/components/AddOneOnOneModal.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import Input from './Input';
 import { motion } from 'framer-motion';
 import api from '../api/axiosConfig';
 import { Calendar, MessageSquare } from 'lucide-react';
 
-const AddOneOnOneModal = ({ isOpen, onClose, memberName, onOneOnOneCreated }) => {
+const AddOneOnOneModal = ({ isOpen, onClose, memberName, onOneOnOneCreated, initialDiscussionPoints = '' }) => {
   const [meetingDate, setMeetingDate] = useState('');
-  const [discussionPoints, setDiscussionPoints] = useState('');
+  const [discussionPoints, setDiscussionPoints] = useState(initialDiscussionPoints);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      // When the modal opens, set the discussion points from the prop
+      setDiscussionPoints(initialDiscussionPoints);
+
+      // Set default date to today
+      const today = new Date().toISOString().split('T')[0];
+      setMeetingDate(today);
+
+    } else {
+      // Reset fields when closing
+      setMeetingDate('');
+      setDiscussionPoints('');
+      setError(null);
+    }
+  }, [isOpen, initialDiscussionPoints]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,15 +49,8 @@ const AddOneOnOneModal = ({ isOpen, onClose, memberName, onOneOnOneCreated }) =>
     }
   };
 
-  const handleClose = () => {
-    setMeetingDate('');
-    setDiscussionPoints('');
-    setError(null);
-    onClose();
-  };
-
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={`Schedule 1-on-1 for ${memberName}`}>
+    <Modal isOpen={isOpen} onClose={onClose} title={`Schedule 1-on-1 for ${memberName}`}>
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
@@ -74,7 +84,7 @@ const AddOneOnOneModal = ({ isOpen, onClose, memberName, onOneOnOneCreated }) =>
         <div className="flex space-x-3 pt-4">
           <button
             type="button"
-            onClick={handleClose}
+            onClick={onClose}
             className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50"
           >
             Cancel
