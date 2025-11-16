@@ -19,6 +19,9 @@ import MemberDetailPage from './pages/MemberDetailPage';
 import TodayPage from './pages/TodayPage';
 import AttendancePage from './pages/AttendancePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ProfilePage from './pages/ProfilePage';
+import GamePage from './pages/GamePage';
+import AiChatPage from './pages/AiChatPage';
 
 // --- IMPORT NAVBAR AND NEW COMPONENTS ---
 import Navbar from './components/Navbar';
@@ -55,12 +58,15 @@ function App() {
               <Route path="/teams" element={<TeamsPage />} />
               <Route path="/team/:teamId" element={<TeamDetailPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/members" element={<MembersPage />} />
               <Route path="/members/details" element={<MemberDetailPage />} />
               <Route path="/attendance" element={<AttendancePage />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/notifications" element={<NotificationPage />} />
+              <Route path="/games" element={<GamePage />} />
+              <Route path="/ai-chat" element={<AiChatPage />} />
             </Route>
           </Route>
 

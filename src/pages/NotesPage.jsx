@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axiosConfig';
 import NoteCard from '../components/NoteCard';
 import { Plus, FileText, Tag, Search, Filter, Grid, List } from 'lucide-react';
@@ -58,13 +58,32 @@ const NotesPage = () => {
   }, []);
 
   // --- 5. DEFINE HANDLER TO PASS TO MODAL CONTEXT ---
-  const handleNoteAdded = (newNote) => {
-    setNotes([newNote, ...notes]);
+  const handleNoteAdded = useCallback((newNote) => {
+    setNotes((prevNotes) => [newNote, ...prevNotes]);
     const category = newNote.category || 'Personal';
-    if (!categories.includes(category)) {
-      setCategories([...categories, category]);
-    }
-  };
+    setCategories((prevCategories) =>
+      prevCategories.includes(category) ? prevCategories : [...prevCategories, category]
+    );
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger while typing in an input
+      const isTyping = e.target.tagName === 'INPUT' ||
+                       e.target.tagName === 'TEXTAREA' ||
+                       e.target.isContentEditable;
+
+      if (e.key.toLowerCase() === 'n' && !isTyping) {
+        e.preventDefault();
+        // We pass handleNoteAdded to ensure the modal can update the page state
+        openModal('addNote', { onNoteAdded: handleNoteAdded });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [openModal, handleNoteAdded]);
+
 
   // (All other handlers remain the same)
   const handleDeleteNote = async (noteId) => {

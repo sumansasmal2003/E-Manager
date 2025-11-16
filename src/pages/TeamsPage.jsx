@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
 import TeamCard from '../components/TeamCard';
-import CreateTeamModal from '../components/CreateTeamModal';
+// 1. REMOVE local CreateTeamModal import
+// import CreateTeamModal from '../components/CreateTeamModal';
 import { Plus, Users, AlertCircle, Grid, Table, Trash2, Calendar, User, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useModal } from '../context/ModalContext'; // 2. IMPORT useModal
 
 const TeamsPage = () => {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
+  // 3. REMOVE local modal state
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('grid');
+
+  const { openModal } = useModal(); // 4. GET openModal from context
 
   useEffect(() => {
     const fetchTeams = async () => {
@@ -26,8 +31,31 @@ const TeamsPage = () => {
     fetchTeams();
   }, []);
 
+  // 5. ADD useEffect for 'T' key shortcut
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger while typing
+      const isTyping = e.target.tagName === 'INPUT' ||
+                       e.target.tagName === 'TEXTAREA' ||
+                       e.target.isContentEditable;
+
+      if (e.key.toLowerCase() === 't' && !isTyping) {
+        e.preventDefault();
+        // Call the global modal, passing the local function to update state
+        openModal('createTeam', { onTeamCreated: handleTeamCreated });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [openModal, teams]); // Pass 'teams' so handleTeamCreated has the current list
+  // --- END OF NEW CODE ---
+
+  // 6. SIMPLIFY handleTeamCreated
+  // This function is now a callback for the global modal
   const handleTeamCreated = (newTeam) => {
     setTeams([newTeam, ...teams]);
+    // No need to close the modal, DashboardLayout does that.
   };
 
   const handleDeleteTeam = async (teamId) => {
@@ -57,7 +85,7 @@ const TeamsPage = () => {
   return (
     <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Enhanced Header */}
+        {/* ... (Header JSX is the same) ... */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex items-center space-x-4">
@@ -79,7 +107,6 @@ const TeamsPage = () => {
             </div>
 
             <div className="flex items-center space-x-3 w-full lg:w-auto">
-              {/* View Toggle */}
               <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
                 <button
                   onClick={() => setViewMode('grid')}
@@ -103,8 +130,9 @@ const TeamsPage = () => {
                 </button>
               </div>
 
+              {/* 7. UPDATE onClick to use global modal */}
               <button
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => openModal('createTeam', { onTeamCreated: handleTeamCreated })}
                 className="flex-1 lg:flex-none bg-gray-900 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <Plus size={20} />
@@ -114,7 +142,7 @@ const TeamsPage = () => {
           </div>
         </div>
 
-        {/* Loading State */}
+        {/* ... (Loading State is the same) ... */}
         {loading && (
           <div className="flex justify-center items-center py-20">
             <div className="flex flex-col items-center space-y-4">
@@ -124,7 +152,7 @@ const TeamsPage = () => {
           </div>
         )}
 
-        {/* Error State */}
+        {/* ... (Error State is the same) ... */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center shadow-sm">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -141,7 +169,7 @@ const TeamsPage = () => {
           </div>
         )}
 
-        {/* Teams Content */}
+        {/* ... (Teams Content is the same) ... */}
         {!loading && !error && (
           teams.length > 0 ? (
             viewMode === 'grid' ? (
@@ -156,10 +184,11 @@ const TeamsPage = () => {
                 ))}
               </div>
             ) : (
-              // Table View - With View Team Button
+              // Table View
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
+                    {/* ... (table head) ... */}
                     <thead>
                       <tr className="border-b border-gray-200">
                         <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">Team</th>
@@ -169,6 +198,7 @@ const TeamsPage = () => {
                         <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">Actions</th>
                       </tr>
                     </thead>
+                    {/* ... (table body) ... */}
                     <tbody className="divide-y divide-gray-200">
                       {teams.map((team) => (
                         <tr
@@ -245,7 +275,7 @@ const TeamsPage = () => {
                 Create your first team to start collaborating with others on projects and tasks.
               </p>
               <button
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => openModal('createTeam', { onTeamCreated: handleTeamCreated })}
                 className="bg-gray-900 text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors font-semibold inline-flex items-center space-x-2"
               >
                 <Plus size={20} />
@@ -256,12 +286,13 @@ const TeamsPage = () => {
         )}
       </div>
 
-      {/* Create Team Modal */}
-      <CreateTeamModal
+      {/* 8. REMOVE the local modal */}
+      {/* <CreateTeamModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onTeamCreated={handleTeamCreated}
       />
+      */}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'; // <-- 1. IMPORT useNavigate
-import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar, Menu, X, Sunrise, UserCheck, CheckSquare, Bell } from 'lucide-react';
+import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar, Menu, X, Sunrise, UserCheck, CheckSquare, Bell, User, Gamepad2, Brain } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- 2. IMPORT MODALS AND HOOK ---
@@ -11,6 +11,7 @@ import CreateTeamModal from '../components/CreateTeamModal';
 import CreateTaskModal from '../components/CreateTaskModal';
 import CreateMeetingModal from '../components/CreateMeetingModal';
 import AddMemberModal from '../components/AddMemberModal';
+import ShortcutsModal from '../components/ShortcutsModal';
 
 // (SidebarLink component remains the same)
 const SidebarLink = ({ to, icon, children, isCollapsed, onNavigate }) => {
@@ -82,14 +83,33 @@ const DashboardLayout = () => {
   // --- 5. ADD KEYBOARD SHORTCUT LISTENER ---
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Check if we're in an input, textarea, or content-editable field
+      const isTyping = e.target.tagName === 'INPUT' ||
+                       e.target.tagName === 'TEXTAREA' ||
+                       e.target.isContentEditable;
+
+      // Ctrl+K for Command Palette (works even in inputs)
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         openModal('commandPalette');
+        return;
+      }
+
+      // '?' for Shortcuts (only if NOT typing)
+      // We also allow '/' as it's the same key
+      if ((e.key === '?' || e.key === '/') && !isTyping) {
+        e.preventDefault();
+        // Check if another modal is already open before opening
+        if (!Object.values(modalState).some(isOpen => isOpen)) {
+          openModal('shortcuts');
+        }
+        return;
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [openModal]);
+  }, [openModal, modalState]);
 
 
   // (getPageTitle, getPageDescription, handleNavigate, renderSidebarLinks remain the same)
@@ -129,12 +149,15 @@ const DashboardLayout = () => {
     <>
       <SidebarLink to="/today" icon={<Sunrise size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Today</SidebarLink>
       <SidebarLink to="/dashboard" icon={<LayoutDashboard size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Overview</SidebarLink>
+      <SidebarLink to="/ai-chat" icon={<Brain size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Get Your Ans</SidebarLink>
       <SidebarLink to="/notes" icon={<Notebook size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>My Notes</SidebarLink>
       <SidebarLink to="/teams" icon={<Users size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>My Teams</SidebarLink>
       <SidebarLink to="/members" icon={<UserCheck size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Members</SidebarLink>
       <SidebarLink to="/attendance" icon={<CheckSquare size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Attendance</SidebarLink>
       <SidebarLink to="/calendar" icon={<Calendar size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Calendar</SidebarLink>
+      <SidebarLink to="/games" icon={<Gamepad2 size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Game Space</SidebarLink>
       <SidebarLink to="/notifications" icon={<Bell size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Notifications</SidebarLink>
+      <SidebarLink to="/profile" icon={<User size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>My Profile</SidebarLink>
       <SidebarLink to="/settings" icon={<Settings size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Settings</SidebarLink>
     </>
   );
@@ -308,6 +331,7 @@ const DashboardLayout = () => {
 
       {/* --- 6. ADD ALL GLOBAL MODALS HERE --- */}
       <CommandPalette />
+      <ShortcutsModal />
 
       <CreateTeamModal
         isOpen={modalState.createTeam}

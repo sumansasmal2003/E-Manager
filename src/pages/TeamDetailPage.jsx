@@ -39,10 +39,8 @@ const TeamDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // --- 1. STATE FOR TABS ---
-  const [activeTab, setActiveTab] = useState('tasks'); // Default to 'tasks'
+  const [activeTab, setActiveTab] = useState('tasks');
 
-  // (All other state variables are unchanged)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isFigmaModalOpen, setIsFigmaModalOpen] = useState(false);
   const [isGithubModalOpen, setIsGithubModalOpen] = useState(false);
@@ -64,7 +62,6 @@ const TeamDetailPage = () => {
   const [currentMeeting, setCurrentMeeting] = useState(null);
   const [sendingReport, setSendingReport] = useState(null);
 
-  // (useEffect for setting ModalContext is unchanged)
   useEffect(() => {
     if (team) {
       setModalContext({
@@ -105,7 +102,27 @@ const TeamDetailPage = () => {
     fetchTeamData();
   }, [teamId]);
 
-  // (All handler functions remain exactly the same)
+  // --- 1. ADD THIS NEW useEffect HOOK ---
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger while typing
+      const isTyping = e.target.tagName === 'INPUT' ||
+                       e.target.tagName === 'TEXTAREA' ||
+                       e.target.isContentEditable;
+
+      if (e.key.toLowerCase() === 'c' && !isTyping) {
+        e.preventDefault();
+        // The context is already set by the other useEffect,
+        // so we can just open the modal.
+        openModal('createTask');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [openModal]); // Add dependency
+  // --- END OF NEW CODE ---
+
   const handleMemberAdded = (updatedTeam) => {
     setTeam(updatedTeam);
     refreshActivities();
@@ -392,7 +409,6 @@ const TeamDetailPage = () => {
   };
 
 
-  // (Loading, Error, and !team checks are unchanged)
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -428,7 +444,6 @@ const TeamDetailPage = () => {
 
   const isOwner = team.owner._id === user._id;
 
-  // --- 2. DEFINE EXPANDED TABS FOR THE MAIN FEED ---
   const resourceCount = (team?.figmaFiles?.length || 0) +
                         (team?.githubRepos?.length || 0) +
                         (team?.liveProjects?.length || 0);
@@ -441,11 +456,10 @@ const TeamDetailPage = () => {
     { id: 'resources', name: 'Resources', icon: Link2, count: resourceCount },
     { id: 'activity', name: 'Activity', icon: Activity, count: activity.length }
   ];
-  // --- END OF TAB DEFINITION ---
 
   return (
     <div className="space-y-6">
-      {/* Header (unchanged) */}
+      {/* Header */}
       <div className="flex flex-col space-y-4">
         <Link
           to="/teams"
@@ -495,15 +509,11 @@ const TeamDetailPage = () => {
         </div>
       </div>
 
-      {/* --- 3. REMOVED Main Content Grid and Sidebar --- */}
-      {/* The <div className="grid grid-cols-1 xl:grid-cols-3 gap-6"> is GONE */}
-      {/* The <div className="xl:col-span-1 space-y-6"> (sidebar) is GONE */}
-
-      {/* --- 4. MAIN CONTENT AREA (Full Width) --- */}
+      {/* MAIN CONTENT AREA (Full Width) */}
       <div className="space-y-6">
         {/* Tab Navigation */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          <nav className="flex space-x-4 px-4 overflow-x-auto">
+          <nav className="flex space-x-4 px-4 overflow-x-auto items-center justify-center">
             {mainTabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -661,6 +671,7 @@ const TeamDetailPage = () => {
             </motion.div>
           )}
 
+          {/* ... (All other tabs: Meetings, Members, Notes, Resources, Activity) ... */}
           {/* Meetings Section */}
           {activeTab === 'meetings' && (
             <motion.div
@@ -708,7 +719,7 @@ const TeamDetailPage = () => {
             </motion.div>
           )}
 
-          {/* --- 5. NEW TAB CONTENT: MEMBERS --- */}
+          {/* Members Section */}
           {activeTab === 'members' && (
             <motion.div
               key="members"
@@ -786,7 +797,7 @@ const TeamDetailPage = () => {
             </motion.div>
           )}
 
-          {/* --- 6. NEW TAB CONTENT: TEAM NOTES --- */}
+          {/* Team Notes Section */}
           {activeTab === 'notes' && (
             <motion.div
               key="notes"
@@ -830,7 +841,7 @@ const TeamDetailPage = () => {
             </motion.div>
           )}
 
-          {/* --- 7. NEW TAB CONTENT: RESOURCES --- */}
+          {/* Resources Section */}
           {activeTab === 'resources' && (
             <motion.div
               key="resources"
@@ -1039,8 +1050,7 @@ const TeamDetailPage = () => {
         </AnimatePresence>
       </div>
 
-      {/* --- MODALS (Unchanged) --- */}
-      {/* All modals remain here as they are specific to this page's context */}
+      {/* --- MODALS --- */}
       <AddMemberModal
         isOpen={isMemberModalOpen}
         onClose={() => setIsMemberModalOpen(false)}

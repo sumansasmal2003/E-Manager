@@ -17,17 +17,25 @@ export const AuthProvider = ({ children }) => {
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
 
-        // For backwards compatibility with connecteamAccounts
+        // ... (existing backwards compatibility checks)
         if (parsedUser.connecteamAccounts === undefined) {
           parsedUser.connecteamAccounts = [];
         }
-
-        // --- THIS IS THE FIX ---
-        // For backwards compatibility with googleCalendarConnected
         if (parsedUser.googleCalendarConnected === undefined) {
           parsedUser.googleCalendarConnected = false;
         }
-        // -----------------------
+        if (parsedUser.companyName === undefined) parsedUser.companyName = '';
+        if (parsedUser.companyAddress === undefined) parsedUser.companyAddress = '';
+        if (parsedUser.companyWebsite === undefined) parsedUser.companyWebsite = '';
+        if (parsedUser.ceoName === undefined) parsedUser.ceoName = '';
+        if (parsedUser.hrName === undefined) parsedUser.hrName = '';
+        if (parsedUser.hrEmail === undefined) parsedUser.hrEmail = '';
+
+        // --- ADD DEFAULT FOR createdAt ---
+        if (parsedUser.createdAt === undefined) {
+          parsedUser.createdAt = null; // Use null as a fallback
+        }
+        // --- END DEFAULT ---
 
         setUser(parsedUser);
       }
@@ -58,6 +66,13 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout,
+    companyName: user?.companyName || '',
+    companyAddress: user?.companyAddress || '',
+    companyWebsite: user?.companyWebsite || '',
+    ceoName: user?.ceoName || '',
+    hrName: user?.hrName || '',
+    hrEmail: user?.hrEmail || '',
+    // No need to expose createdAt here, components can get it from the 'user' object
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
