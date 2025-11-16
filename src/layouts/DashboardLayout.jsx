@@ -182,7 +182,7 @@ const DashboardLayout = () => {
               exit={{ opacity: 0, width: 0 }}
               className="font-medium whitespace-nowrap overflow-hidden"
             >
-              Get Your Ans
+              AI Assistance
             </motion.span>
           )}
         </AnimatePresence>
