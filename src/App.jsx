@@ -21,7 +21,6 @@ import AttendancePage from './pages/AttendancePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ProfilePage from './pages/ProfilePage';
 import GamePage from './pages/GamePage';
-import AiChatPage from './pages/AiChatPage';
 
 // --- IMPORT NAVBAR AND NEW COMPONENTS ---
 import Navbar from './components/Navbar';
@@ -30,6 +29,7 @@ import TermsOfServicePage from './pages/TermsOfServicePage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import SupportPage from './pages/SupportPage';
 import NotificationPage from './pages/NotificationPage';
+import AiUsagePage from './pages/AiUsagePage';
 
 function App() {
   return (
@@ -66,7 +66,7 @@ function App() {
               <Route path="/support" element={<SupportPage />} />
               <Route path="/notifications" element={<NotificationPage />} />
               <Route path="/games" element={<GamePage />} />
-              <Route path="/ai-chat" element={<AiChatPage />} />
+              <Route path="/ai-usage" element={<AiUsagePage />} />
             </Route>
           </Route>
 

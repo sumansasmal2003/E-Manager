@@ -13,6 +13,7 @@ export const ModalProvider = ({ children }) => {
     createMeeting: false,
     addMember: false,
     shortcuts: false,
+    aiChat: false,
   });
 
   // This state is fine

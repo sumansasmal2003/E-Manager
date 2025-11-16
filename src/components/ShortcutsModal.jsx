@@ -38,6 +38,12 @@ const ShortcutsModal = () => {
           keys={['Ctrl', 'K']}
           description="Open Command Palette"
         />
+        {/* --- ADDED THIS LINE --- */}
+        <ShortcutItem
+          keys={['Ctrl', 'J']}
+          description="Open AI Chat"
+        />
+        {/* --- END OF ADDITION --- */}
         <ShortcutItem
           keys={['N']}
           description="Create a new Note (from Notes page)"

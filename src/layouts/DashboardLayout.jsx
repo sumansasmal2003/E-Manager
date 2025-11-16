@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'; // <-- 1. IMPORT useNavigate
-import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar, Menu, X, Sunrise, UserCheck, CheckSquare, Bell, User, Gamepad2, Brain } from 'lucide-react';
+import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar, Menu, X, Sunrise, UserCheck, CheckSquare, Bell, User, Gamepad2, Brain, BarChart3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- 2. IMPORT MODALS AND HOOK ---
@@ -12,6 +12,7 @@ import CreateTaskModal from '../components/CreateTaskModal';
 import CreateMeetingModal from '../components/CreateMeetingModal';
 import AddMemberModal from '../components/AddMemberModal';
 import ShortcutsModal from '../components/ShortcutsModal';
+import AiChatModal from '../components/AiChatModal';
 
 // (SidebarLink component remains the same)
 const SidebarLink = ({ to, icon, children, isCollapsed, onNavigate }) => {
@@ -95,6 +96,12 @@ const DashboardLayout = () => {
         return;
       }
 
+      if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
+        e.preventDefault();
+        openModal('aiChat');
+        return;
+      }
+
       // '?' for Shortcuts (only if NOT typing)
       // We also allow '/' as it's the same key
       if ((e.key === '?' || e.key === '/') && !isTyping) {
@@ -149,7 +156,38 @@ const DashboardLayout = () => {
     <>
       <SidebarLink to="/today" icon={<Sunrise size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Today</SidebarLink>
       <SidebarLink to="/dashboard" icon={<LayoutDashboard size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Overview</SidebarLink>
-      <SidebarLink to="/ai-chat" icon={<Brain size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Get Your Ans</SidebarLink>
+      <button
+        onClick={() => {
+          openModal('aiChat');
+          handleNavigate(); // This closes the mobile sidebar
+        }}
+        className={`group flex items-center ${
+          isCollapsed ? 'justify-center' : 'space-x-3'
+        } px-3 py-3 rounded-xl transition-all duration-200 w-full ${
+          modalState.aiChat // Check if modal is active for styling
+            ? 'bg-gray-900 text-white shadow-sm'
+            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+        }`}
+      >
+        <div className={`${
+          modalState.aiChat ? 'text-white' : 'text-gray-400 group-hover:text-gray-600'
+        } flex-shrink-0`}>
+          <Brain size={isCollapsed ? 22 : 20} />
+        </div>
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.span
+              initial={{ opacity: 0, width: 0 }}
+              animate={{ opacity: 1, width: 'auto' }}
+              exit={{ opacity: 0, width: 0 }}
+              className="font-medium whitespace-nowrap overflow-hidden"
+            >
+              Get Your Ans
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </button>
+      <SidebarLink to="/ai-usage" icon={<BarChart3 size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>AI Usage</SidebarLink>
       <SidebarLink to="/notes" icon={<Notebook size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>My Notes</SidebarLink>
       <SidebarLink to="/teams" icon={<Users size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>My Teams</SidebarLink>
       <SidebarLink to="/members" icon={<UserCheck size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Members</SidebarLink>
@@ -332,6 +370,7 @@ const DashboardLayout = () => {
       {/* --- 6. ADD ALL GLOBAL MODALS HERE --- */}
       <CommandPalette />
       <ShortcutsModal />
+      <AiChatModal />
 
       <CreateTeamModal
         isOpen={modalState.createTeam}

@@ -5,6 +5,7 @@ import {
   Search,
   Shield,
   Info,
+  Brain // <-- 1. IMPORT THE BRAIN ICON
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -68,6 +69,20 @@ const Navbar = () => {
                       Ctrl + k
                     </kbd>
                   </button>
+
+                  {/* --- 2. NEW AI CHAT BUTTON (DESKTOP) --- */}
+                  <div className="h-6 w-px bg-gray-300"></div>
+                  <button
+                    onClick={() => openModal('aiChat')}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-white transition-all duration-200 border border-transparent hover:border-gray-200"
+                  >
+                    <Brain size={16} className="text-gray-400" />
+                    <span className="text-gray-500">AI Chat</span>
+                    <kbd className="px-1.5 py-0.5 text-xs font-medium text-gray-400 bg-white border border-gray-200 rounded-md shadow-sm">
+                      Ctrl + j
+                    </kbd>
+                  </button>
+                  {/* --- END NEW BUTTON --- */}
 
                   <div className="h-6 w-px bg-gray-300"></div>
 
@@ -179,7 +194,8 @@ const Navbar = () => {
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="px-3 py-2">
+                    {/* --- 3. UPDATED MOBILE ACTIONS --- */}
+                    <div className="px-3 py-2 space-y-2">
                       <button
                         onClick={() => {
                           openModal('commandPalette');
@@ -188,12 +204,28 @@ const Navbar = () => {
                         className="flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 w-full text-left border border-gray-200"
                       >
                         <Search size={18} />
-                        <div className="flex-1">
+                        <div>
                           <div className="font-medium">Search & Actions</div>
-                          <div className="text-xs text-gray-500 mt-0.5">Quick access to everything</div>
+                          <div className="text-xs text-gray-500 mt-0.5">Quick access (Ctrl+K)</div>
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          openModal('aiChat');
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 w-full text-left border border-gray-200"
+                      >
+                        <Brain size={18} />
+                        <div>
+                          <div className="font-medium">AI Chat</div>
+                          <div className="text-xs text-gray-500 mt-0.5">Ask questions (Ctrl+J)</div>
                         </div>
                       </button>
                     </div>
+                    {/* --- END UPDATED ACTIONS --- */}
+
 
                     {/* Navigation Links */}
                     <Link

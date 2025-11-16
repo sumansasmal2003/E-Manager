@@ -5,7 +5,7 @@ import {
   ClipboardList,
   Calendar,
   Users,
-  FilePieChart,
+  Brain, // Changed from FilePieChart to Brain for AI
   ArrowRight,
   CheckCircle,
   Star,
@@ -14,13 +14,14 @@ import {
   Shield,
   Zap,
   User,
-  User2Icon
+  User2Icon,
+  FilePieChart // We'll use this in the features list
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import image1 from '../assets/img1.png';
-import image2 from '../assets/img2.png';
+import image1 from '../assets/img1.png'; // This is the abstract flow chart
+import image2 from '../assets/img2.png'; // This is the futuristic meeting table
 
-// Professional Feature Card Component with original colors
+// Professional Feature Card Component (Style from your file)
 const FeatureCard = ({ icon, title, description, delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 30 }}
@@ -37,7 +38,7 @@ const FeatureCard = ({ icon, title, description, delay = 0 }) => (
   </motion.div>
 );
 
-// Professional Testimonial Card with original colors
+// Professional Testimonial Card (Style from your file)
 const TestimonialCard = ({ quote, name, title, delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -64,7 +65,7 @@ const TestimonialCard = ({ quote, name, title, delay = 0 }) => (
   </motion.div>
 );
 
-// Professional Image Component
+// Professional Image Component (Style from your file)
 const ProfessionalImage = ({ img, delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.95 }}
@@ -82,7 +83,7 @@ const ProfessionalImage = ({ img, delay = 0 }) => (
   </motion.div>
 );
 
-// FAQ Item Component
+// FAQ Item Component (Style from your file)
 const FAQItem = ({ question, answer, delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
@@ -122,7 +123,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-white text-gray-900 overflow-hidden">
 
-      {/* Hero Section */}
+      {/* Hero Section - UPDATED */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20 md:pt-36 md:pb-28 text-center relative">
@@ -136,22 +137,22 @@ const LandingPage = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm font-medium mb-8"
+              className="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm font-medium mb-8 border border-gray-200"
             >
-              <Zap size={16} className="mr-2" />
-              Trusted by 500+ team leaders worldwide
+              <Zap size={16} className="text-gray-900 mr-2" />
+              Introducing E-Manager AI: Your new co-pilot
             </motion.div>
 
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 leading-tight mb-6">
-              Manage Your Teams.
-              <span className="block text-gray-700">
-                Master Your Work.
+              The All-in-One Command Center,
+              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">
+                Now With a Brain.
               </span>
             </h1>
 
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-10">
-              E-Manager is the all-in-one platform for team leaders to track tasks,
-              schedule meetings, and monitor progress, all in one place.
+              E-Manager unifies your tasks, meetings, and member data,
+              now supercharged by an AI agent that understands (and acts on) your entire workflow.
             </p>
 
             <motion.div
@@ -167,11 +168,6 @@ const LandingPage = () => {
                 <span>Get Started for Free</span>
                 <ArrowRight size={20} />
               </Link>
-
-              <button className="inline-flex items-center justify-center space-x-3 bg-white text-gray-700 font-semibold py-4 px-10 rounded-xl border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-500/10 transition-all duration-200 text-lg shadow-sm hover:shadow-md">
-                <Play size={20} />
-                <span>Watch Demo</span>
-              </button>
             </motion.div>
 
             {/* Trust Badges */}
@@ -198,7 +194,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - UPDATED */}
       <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -209,10 +205,10 @@ const LandingPage = () => {
             className="text-center mb-20"
           >
             <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Everything you need, nothing you don't.
+              Your Complete Leadership Toolkit
             </motion.h2>
             <motion.p variants={itemVariants} className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Comprehensive tools for modern team leadership, designed for clarity and efficiency.
+              One platform to manage projects, people, and performance—all powered by AI.
             </motion.p>
           </motion.div>
 
@@ -220,32 +216,32 @@ const LandingPage = () => {
             <FeatureCard
               icon={<ClipboardList size={28} />}
               title="Smart Task Management"
-              description="Assign, track, and manage all your team's tasks in one central hub. Never miss a deadline."
+              description="Assign, track, and manage all your team's tasks. Use AI to break down complex goals into sub-tasks instantly."
               delay={0.1}
             />
             <FeatureCard
               icon={<Calendar size={28} />}
               title="Effortless Scheduling"
-              description="Schedule team meetings, generate Zoom links, and view your entire calendar at a glance."
+              description="Schedule team meetings, generate Zoom links instantly, and sync everything with your Google Calendar."
               delay={0.2}
             />
             <FeatureCard
               icon={<Users size={28} />}
-              title="Member Overview"
-              description="Keep detailed profiles, track 1-on-1s, and manage attendance with a powerful, simple interface."
+              title="Member & Team Hub"
+              description="Keep detailed profiles, track 1-on-1s, manage daily attendance, and get AI-generated talking points for meetings."
               delay={0.3}
             />
             <FeatureCard
-              icon={<FilePieChart size={28} />}
-              title="AI-Powered Reports"
-              description="Generate insightful, professional reports on team productivity and task completion with a single click."
+              icon={<Brain size={28} />}
+              title="Your Personal AI Agent"
+              description="Go beyond search. Tell your AI to create, update, delete, or find anything in your account using plain English."
               delay={0.4}
             />
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* How It Works Section - UPDATED */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -273,12 +269,17 @@ const LandingPage = () => {
                   {
                     step: "02",
                     title: "Assign Tasks & Schedule",
-                    description: "Use bulk-add to assign tasks quickly and schedule meetings with your team."
+                    description: "Use bulk-add to assign tasks quickly or let your AI create them for you."
                   },
                   {
                     step: "03",
                     title: "Manage & Report",
                     description: "Track daily progress on your 'Today' dashboard and generate AI-powered reports."
+                  },
+                  { // --- NEW STEP ---
+                    step: "04",
+                    title: "Delegate to Your AI",
+                    description: "Hit Ctrl+J and tell your AI what to do. 'Mark all 'Fixspire' tasks from last week as completed.' Done."
                   }
                 ].map((item, index) => (
                   <motion.div
@@ -305,7 +306,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Advanced Features Section */}
+      {/* Advanced Features Section - UPDATED */}
       <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -325,12 +326,12 @@ const LandingPage = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {[
-                  "Track 1-on-1s and private leader notes",
-                  "Manage daily attendance with ease",
-                  "Keep team notes and resource links centralized",
-                  "Export professional PDF reports for stakeholders",
-                  "Real-time progress tracking",
-                  "Customizable team dashboards"
+                  "Track 1-on-1s & private leader notes",
+                  "Manage daily attendance with a roll call",
+                  "Google Calendar two-way sync",
+                  "Generate professional PDF & CSV reports",
+                  "Centralized team notes & resources",
+                  "AI-Generated reports & talking points",
                 ].map((feature, index) => (
                   <motion.div
                     key={feature}
@@ -349,7 +350,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Testimonials Section - UPDATED */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -369,7 +370,7 @@ const LandingPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <TestimonialCard
-              quote="E-Manager replaced three of our tools. The 'Today' dashboard and AI reports are game-changers for my productivity."
+              quote="The new AI agent is a game-changer. I just *tell* it to create tasks and meetings. It replaced three of our tools."
               name="Sarah J."
               title="Project Manager, Tech Startup"
               delay={0.1}
@@ -381,7 +382,7 @@ const LandingPage = () => {
               delay={0.2}
             />
             <TestimonialCard
-              quote="I love how I can see everything from a 30,000-foot view on the dashboard or dive deep into a single member's activity."
+              quote="I love how I can ask the AI 'Am I missing anything for this week?' and it *knows*. It checks my tasks, my meetings, everything."
               name="Emily K."
               title="Engineering Lead, SaaS Co."
               delay={0.3}
@@ -390,7 +391,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* FAQ Section - UPDATED */}
       <section className="py-24 bg-gray-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -410,30 +411,30 @@ const LandingPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <FAQItem
-              question="Is this a collaborative tool?"
+              question="Is this a collaborative tool or just for me?"
               answer="Currently, E-Manager is designed as a 'command center' for a single leader to manage their teams. Members do not have their own logins. This simplifies setup and management."
               delay={0.1}
             />
             <FAQItem
               question="Is my data secure?"
-              answer="Yes. Your data is protected. All team information, tasks, and notes are tied directly to your account and are not accessible by anyone else."
+              answer="Yes. Your data is protected. All team information, tasks, and notes are tied directly to your account. We use industry-standard encryption and never sell your data."
               delay={0.2}
             />
             <FAQItem
-              question="What kind of reports can I generate?"
-              answer="You can generate AI-powered summaries of your team's activity over any date range, as well as professional PDF or CSV exports of your attendance data."
+              question="How does the AI work?"
+              answer="Our AI is a two-part system. It has a 'router' to understand if you want to read or write data, and a 'talker' to answer questions. All actions are based *only* on your account data, which is sent securely to the AI for processing."
               delay={0.3}
             />
             <FAQItem
-              question="How many teams or members can I add?"
-              answer="As many as you need. There are no limits on the number of teams, members, tasks, or notes you can create."
+              question="What can the AI do?"
+              answer="The AI can read all your data to answer questions (e.g., 'How many tasks are pending?'). It can also create, update, and delete tasks, meetings, and personal notes. Just ask it in plain English."
               delay={0.4}
             />
           </div>
         </div>
       </section>
 
-      {/* Final CTA Section */}
+      {/* Final CTA Section - UPDATED */}
       <section className="py-24 bg-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
@@ -443,29 +444,24 @@ const LandingPage = () => {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Take control of your team today.
+              Take control with your new AI assistant.
             </h2>
             <p className="text-xl text-gray-700 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Stop juggling spreadsheets and docs. Start managing with clarity.
+              Stop juggling spreadsheets and docs. Start managing with an AI co-pilot that does the work for you.
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center space-x-3 bg-white text-gray-900 font-semibold py-4 px-12 rounded-xl hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-200 text-lg shadow-lg hover:shadow-xl"
+                className="inline-flex items-center justify-center space-x-3 bg-gray-900 text-white font-semibold py-4 px-12 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-900/20 transition-all duration-200 text-lg shadow-lg hover:shadow-xl"
               >
                 <span>Sign Up Now</span>
                 <ArrowRight size={20} />
               </Link>
-
-              <button className="inline-flex items-center justify-center space-x-3 bg-transparent text-gray-800 font-semibold py-4 px-12 rounded-xl border-2 border-gray-600 hover:border-gray-400 focus:outline-none focus:ring-4 focus:ring-white/20 transition-all duration-200 text-lg">
-                <Play size={20} />
-                <span>Watch Demo</span>
-              </button>
             </div>
 
             <p className="text-gray-600 text-sm mt-6">
-              No credit card required • Setup in 5 minutes
+              No credit card required • Setup in 2 minutes
             </p>
           </motion.div>
         </div>
@@ -478,7 +474,7 @@ const LandingPage = () => {
             <div className="mb-6 md:mb-0">
               <p className="text-2xl font-bold text-gray-900">E-Manager</p>
               <p className="text-gray-600 text-sm mt-2">
-                Streamlining team leadership for the modern workplace.
+                The AI-Powered Team Command Center.
               </p>
             </div>
             <div className="text-gray-500 text-sm">
