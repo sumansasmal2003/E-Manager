@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'; // <-- 1. IMPORT useNavigate
-import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar, Menu, X, Sunrise, UserCheck, CheckSquare, Bell, User, Gamepad2, Brain, BarChart3 } from 'lucide-react';
+import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar, Menu, X, Sunrise, UserCheck, CheckSquare, Bell, User, Gamepad2, Brain, BarChart3, Server } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- 2. IMPORT MODALS AND HOOK ---
@@ -161,7 +161,7 @@ const DashboardLayout = () => {
           openModal('aiChat');
           handleNavigate(); // This closes the mobile sidebar
         }}
-        className={`group flex items-center ${
+        className={`group flex items-center cursor-pointer ${
           isCollapsed ? 'justify-center' : 'space-x-3'
         } px-3 py-3 rounded-xl transition-all duration-200 w-full ${
           modalState.aiChat // Check if modal is active for styling
@@ -182,7 +182,7 @@ const DashboardLayout = () => {
               exit={{ opacity: 0, width: 0 }}
               className="font-medium whitespace-nowrap overflow-hidden"
             >
-              AI Assistance
+              AI Assistant
             </motion.span>
           )}
         </AnimatePresence>
@@ -197,6 +197,7 @@ const DashboardLayout = () => {
       <SidebarLink to="/notifications" icon={<Bell size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Notifications</SidebarLink>
       <SidebarLink to="/profile" icon={<User size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>My Profile</SidebarLink>
       <SidebarLink to="/settings" icon={<Settings size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Settings</SidebarLink>
+      <SidebarLink to="/system-logs" icon={<Server size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>System Log</SidebarLink>
     </>
   );
 
@@ -345,14 +346,18 @@ const DashboardLayout = () => {
         </div>
       </div>
 
-      {/* ... (Footer logic remains the same) ... */}
-      <footer className="bg-white border-t border-gray-200 py-4 sticky bottom-0 z-30">
-        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+      <footer className="bg-gray-50 border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="text-sm text-gray-600 mb-2 md:mb-0">
-              © {new Date().getFullYear()} E Manager. All rights reserved.
+            <div className="mb-6 md:mb-0">
+              <p className="text-2xl font-bold text-gray-900">E-Manager</p>
+              <p className="text-gray-600 text-sm mt-2">
+                The AI-Powered Team Command Center.
+              </p>
             </div>
-            <div className="flex space-x-6">
+            <div className="flex flex-col justify-center gap-2 text-rose-600 text-sm">
+              <p>© {new Date().getFullYear()} E-Manager. All rights reserved.</p>
+              <div className="flex space-x-6">
               <Link to="/privacy" className="text-gray-600 hover:text-gray-800 transition-colors text-sm font-medium">
                 Privacy Policy
               </Link>
@@ -362,6 +367,7 @@ const DashboardLayout = () => {
               <Link to="/support" className="text-gray-600 hover:text-gray-800 transition-colors text-sm font-medium">
                 Support
               </Link>
+            </div>
             </div>
           </div>
         </div>

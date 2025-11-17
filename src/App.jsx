@@ -21,6 +21,7 @@ import AttendancePage from './pages/AttendancePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ProfilePage from './pages/ProfilePage';
 import GamePage from './pages/GamePage';
+import SystemLogPage from './pages/SystemLogPage';
 
 // --- IMPORT NAVBAR AND NEW COMPONENTS ---
 import Navbar from './components/Navbar';
@@ -67,6 +68,7 @@ function App() {
               <Route path="/notifications" element={<NotificationPage />} />
               <Route path="/games" element={<GamePage />} />
               <Route path="/ai-usage" element={<AiUsagePage />} />
+              <Route path="/system-logs" element={<SystemLogPage />} />
             </Route>
           </Route>
 

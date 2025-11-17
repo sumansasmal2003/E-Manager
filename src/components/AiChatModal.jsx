@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Brain, Send, User, Loader2, Zap, Mic,
   ClipboardList, Calendar, FileText, MessageSquare,
-  PlusCircle, Edit, Trash2, ArrowLeft
+  PlusCircle, Edit, Trash2, ArrowLeft,CheckSquare
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axiosConfig';
@@ -89,6 +89,15 @@ const categories = {
       { name: 'Schedule Meeting', icon: PlusCircle, template: "Schedule a meeting for the [TEAM NAME] team titled '[MEETING TITLE]' on [DATE] at [TIME]." },
       { name: 'Update Meeting', icon: Edit, template: "Reschedule the '[MEETING TITLE]' meeting to [NEW DATE] at [NEW TIME]." },
       { name: 'Cancel Meeting', icon: Trash2, template: "Cancel the meeting named '[MEETING TITLE]'." },
+    ]
+  },
+  attendance: {
+    name: 'Attendance',
+    icon: CheckSquare,
+    color: 'text-indigo-600 bg-indigo-50',
+    actions: [
+      { name: 'Set Today\'s Attendance', icon: PlusCircle, template: "Mark [MEMBER NAME / TEAM NAME] as [Present/Absent/Leave/Holiday] for today." },
+      { name: 'Find Attendance', icon: MessageSquare, template: "Show me all dates [MEMBER NAME] was [STATUS]." },
     ]
   },
   notes: {
@@ -337,7 +346,7 @@ const AiChatModal = () => {
                     exit={{ opacity: 0 }}
                   >
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">What would you like to do?</h3>
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       {Object.keys(categories).map(key => {
                         const category = categories[key];
                         const Icon = category.icon;
@@ -345,7 +354,7 @@ const AiChatModal = () => {
                           <button
                             key={category.name}
                             onClick={() => setSelectedCategory(key)}
-                            className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                           >
                             <Icon size={20} className="text-gray-700" />
                             <span className="font-medium text-gray-800">{category.name}</span>
@@ -354,7 +363,7 @@ const AiChatModal = () => {
                       })}
                       <button
                         onClick={handleSimpleChatClick}
-                        className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                       >
                         <MessageSquare size={20} className="text-gray-700" />
                         <span className="font-medium text-gray-800">Just Chat</span>
