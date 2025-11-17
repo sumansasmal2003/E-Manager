@@ -1,402 +1,441 @@
+// src/pages/NotificationPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axiosConfig';
 import {
-  Loader2,
-  Mail,
-  Send,
-  CheckCircle,
-  XCircle,
-  User,
-  Calendar,
-  Filter,
-  Search,
-  RefreshCw,
-  AlertTriangle,
-  Eye,
-  Clock,
-  ChevronRight,
-  ArrowLeft,
+  Loader2, Mail, Send, CheckCircle, XCircle, User, Calendar,
+  AlertTriangle, Eye, Clock, ChevronRight, ArrowLeft, Zap,
+  Inbox, FileText, Check, Users
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
-import CustomSelect from '../components/CustomSelect'; // <-- 1. IMPORT CUSTOM SELECT
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import CustomMultiSelect from '../components/CustomMultiSelect';
+import { Editor } from '@tinymce/tinymce-react';
+import AiDraftModal from '../components/AiDraftModal';
 
-// --- 2. DEFINE OPTIONS FOR CUSTOM SELECT ---
-const filterOptions = [
-  { value: 'all', label: 'All Status' },
-  { value: 'sent', label: 'Sent' },
-  { value: 'failed', label: 'Failed' },
-  { value: 'pending', label: 'Pending' },
-];
+// Enhanced Log Item Component
+const LogItem = ({ log, onClick, isSelected }) => (
+  <motion.button
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    onClick={onClick}
+    className={`w-full text-left p-4 rounded-lg border transition-all duration-200 ${
+      isSelected
+        ? 'bg-gray-900 text-white border-gray-900'
+        : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
+    }`}
+  >
+    <div className="flex items-start justify-between mb-2">
+      <span className={`text-sm font-medium line-clamp-2 ${
+        isSelected ? 'text-white' : 'text-gray-900'
+      }`}>
+        {log.subject || 'No Subject'}
+      </span>
+      {log.status?.toLowerCase() === 'sent' ? (
+        <CheckCircle size={16} className="text-green-500 flex-shrink-0 ml-2" />
+      ) : (
+        <XCircle size={16} className="text-red-500 flex-shrink-0 ml-2" />
+      )}
+    </div>
 
+    <div className={`text-xs mb-2 line-clamp-1 ${
+      isSelected ? 'text-gray-300' : 'text-gray-600'
+    }`}>
+      To: {log.toEmail}
+    </div>
+
+    <div className="flex items-center justify-between">
+      <span className={`text-xs ${
+        isSelected ? 'text-gray-400' : 'text-gray-500'
+      }`}>
+        {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}
+      </span>
+      {!isSelected && (
+        <ChevronRight size={14} className="text-gray-400" />
+      )}
+    </div>
+  </motion.button>
+);
+
+// Main Page Component
 const NotificationPage = () => {
-  // ... (all state and hooks remain the same) ...
+  const { user } = useAuth();
   const [logs, setLogs] = useState([]);
   const [selectedLog, setSelectedLog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchLogs = useCallback(async () => {
-    setRefreshing(true);
+  // State for Compose View
+  const [view, setView] = useState('compose');
+  const [members, setMembers] = useState([]);
+  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [subject, setSubject] = useState('');
+  const [body, setBody] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [isDrafting, setIsDrafting] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [sendSuccess, setSendSuccess] = useState(null);
+  const [sendError, setSendError] = useState(null);
+
+  // Mobile state
+  const [showMobilePreview, setShowMobilePreview] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
     setError(null);
     try {
-      const res = await api.get('/notifications');
-      setLogs(res.data);
-      if (!selectedLog && res.data.length > 0 && window.innerWidth >= 1024) {
-        setSelectedLog(res.data[0]);
-      }
+      const [logsRes, membersRes] = await Promise.all([
+        api.get('/notifications'),
+        api.get('/attendance/members')
+      ]);
+      setLogs(logsRes.data);
+      setMembers(membersRes.data.map(m => m.name));
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch notification logs');
-      console.error('Error fetching logs:', err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+      setError(err.response?.data?.message || 'Failed to fetch data');
     }
-  }, [selectedLog]);
-
-  useEffect(() => {
-    fetchLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setLoading(false);
   }, []);
 
-  // ... (filteredLogs, getStatusIcon, getStatusBadge, stats, loading, and error blocks remain the same) ...
-  const filteredLogs = logs.filter(log => {
-    const matchesSearch =
-      log.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.toEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.memberName?.toLowerCase().includes(searchTerm.toLowerCase());
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-    const matchesStatus =
-      statusFilter === 'all' ||
-      log.status?.toLowerCase() === statusFilter.toLowerCase();
-
-    return matchesSearch && matchesStatus;
-  });
-
-  const getStatusIcon = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'sent':
-        return <CheckCircle size={16} className="text-green-600" />;
-      case 'failed':
-        return <XCircle size={16} className="text-red-600" />;
-      case 'pending':
-        return <Clock size={16} className="text-yellow-600" />;
-      default:
-        return <AlertTriangle size={16} className="text-gray-400" />;
+  // Handle AI Draft Generation
+  const handleDraftWithAI = async (userPrompt) => {
+    setIsDrafting(true);
+    setSendError(null);
+    try {
+      const res = await api.post('/emails/draft', {
+        userPrompt,
+        memberNames: selectedMembers,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
+      setSubject(res.data.subject);
+      setBody(res.data.body);
+    } catch (err) {
+      setSendError(err.response?.data?.message || 'Failed to generate AI draft');
     }
+    setIsDrafting(false);
   };
 
-  const getStatusBadge = (status) => {
-    const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
-    switch (status?.toLowerCase()) {
-      case 'sent':
-        return `${baseClasses} bg-green-100 text-green-800`;
-      case 'failed':
-        return `${baseClasses} bg-red-100 text-red-800`;
-      case 'pending':
-        return `${baseClasses} bg-yellow-100 text-yellow-800`;
-      default:
-        return `${baseClasses} bg-gray-100 text-gray-800`;
+  // Handle Send Email
+  const handleSendEmail = async (e) => {
+    e.preventDefault();
+    setIsSending(true);
+    setSendError(null);
+    setSendSuccess(null);
+    try {
+      const res = await api.post('/emails/send', {
+        subject,
+        body,
+        memberNames: selectedMembers,
+      });
+      setSendSuccess(res.data.message);
+      // Clear form
+      setSubject('');
+      setBody('');
+      setSelectedMembers([]);
+      fetchData();
+    } catch (err) {
+      setSendError(err.response?.data?.message || 'Failed to send email');
     }
+    setIsSending(false);
   };
 
-  const stats = {
-    total: logs.length,
-    sent: logs.filter(log => log.status?.toLowerCase() === 'sent').length,
-    failed: logs.filter(log => log.status?.toLowerCase() === 'failed').length,
+  // Handle log selection (mobile)
+  const handleLogSelect = (log) => {
+    setSelectedLog(log);
+    setShowMobilePreview(true);
   };
-
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-96 space-y-4">
-        <Loader2 className="animate-spin text-gray-900" size={40} />
-        <p className="text-gray-600">Loading notification logs...</p>
-      </div>
-    );
-  }
-
-  if (error && logs.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-96 space-y-4 p-8">
-        <AlertTriangle size={48} className="text-red-500" />
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Unable to load notifications</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={fetchLogs}
-            className="bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="min-h-screen bg-gray-50">
+      <AiDraftModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        onDraft={handleDraftWithAI}
+      />
+
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        {/* ... (Header content remains the same) ... */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Email Notifications</h1>
-            <p className="text-gray-600">Monitor and review all sent email communications</p>
-          </div>
-          <button
-            onClick={fetchLogs}
-            disabled={refreshing}
-            className="mt-4 lg:mt-0 flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
-          >
-            <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
-            <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
-          </button>
-        </div>
-        {/* ... (Stats content remains the same) ... */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-            <div className="text-sm text-gray-600">Total Emails</div>
-          </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-900">{stats.sent}</div>
-            <div className="text-sm text-green-700">Successful</div>
-          </div>
-          <div className="text-center p-4 bg-red-50 rounded-lg">
-            <div className="text-2xl font-bold text-red-900">{stats.failed}</div>
-            <div className="text-sm text-red-700">Failed</div>
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+                <Mail className="text-white" size={20} />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">Email Notifications</h1>
+                <p className="text-gray-600 text-sm">Communicate with your team</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
-        {/* Email List Panel */}
-        <div className={`lg:col-span-1 bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col
-                         ${selectedLog ? 'hidden lg:flex' : 'flex'}`}
-        >
-          {/* Panel Header */}
-          <div className="p-4 border-b border-gray-200">
-            {/* ... (Panel Header title/count remains the same) ... */}
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Sent Emails</h2>
-              <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                {filteredLogs.length}
-              </span>
-            </div>
+      <div className="max-w-7xl mx-auto p-4 lg:p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
 
-            {/* Search and Filter */}
-            <div className="space-y-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                <input
-                  type="text"
-                  placeholder="Search emails..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                />
-              </div>
+          {/* Left Panel - Compose & Log */}
+          <div className={`lg:col-span-1 space-y-4 ${
+            showMobilePreview ? 'hidden lg:block' : 'block'
+          }`}>
 
-              {/* --- 3. REPLACE <select> WITH <CustomSelect> --- */}
-              <div className="flex space-x-2">
-                <CustomSelect
-                  icon={Filter}
-                  options={filterOptions}
-                  value={statusFilter}
-                  onChange={(value) => setStatusFilter(value)}
-                />
-              </div>
-              {/* --- END REPLACEMENT --- */}
-
-            </div>
-          </div>
-
-          {/* Email List */}
-          <div className="flex-1 overflow-y-auto">
-            {/* ... (Email list logic remains the same) ... */}
-            {filteredLogs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                <Mail size={40} className="text-gray-300 mb-3" />
-                <p className="text-gray-500 font-medium">No emails found</p>
-                <p className="text-gray-400 text-sm mt-1">
-                  {searchTerm || statusFilter !== 'all' ? 'Try adjusting your search or filters' : 'No emails have been sent yet'}
-                </p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-100">
-                {filteredLogs.map((log) => (
-                  <button
-                    key={log._id}
-                    onClick={() => setSelectedLog(log)}
-                    className={`w-full text-left p-4 transition-all duration-200 ${
-                      selectedLog?._id === log._id
-                        ? 'bg-gray-900 text-white'
-                        : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center space-x-2 flex-1 min-w-0">
-                        {getStatusIcon(log.status)}
-                        <span className={`text-sm font-medium truncate ${
-                          selectedLog?._id === log._id ? 'text-white' : 'text-gray-900'
-                        }`}>
-                          {log.subject || 'No Subject'}
-                        </span>
-                      </div>
-                      <ChevronRight
-                        size={16}
-                        className={`flex-shrink-0 ${
-                          selectedLog?._id === log._id ? 'text-white' : 'text-gray-400'
-                        }`}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <p className={`text-xs truncate ${
-                        selectedLog?._id === log._id ? 'text-gray-200' : 'text-gray-600'
-                      }`}>
-                        To: {log.toEmail}
-                      </p>
-                      {log.memberName && (
-                        <div className="flex items-center space-x-1">
-                          <User size={12} className={selectedLog?._id === log._id ? 'text-gray-300' : 'text-gray-400'} />
-                          <span className={`text-xs ${
-                            selectedLog?._id === log._id ? 'text-gray-300' : 'text-gray-500'
-                          }`}>
-                            {log.memberName}
-                          </span>
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between">
-                        <span className={getStatusBadge(log.status)}>
-                          {log.status || 'Unknown'}
-                        </span>
-                        <div className="flex items-center space-x-1">
-                          <Calendar size={12} className={selectedLog?._id === log._id ? 'text-gray-300' : 'text-gray-400'} />
-                          <span className={`text-xs ${
-                            selectedLog?._id === log._id ? 'text-gray-300' : 'text-gray-400'
-                          }`}>
-                            {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Email Preview Panel */}
-        <div className={`lg:col-span-2 bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col
-                         ${selectedLog ? 'flex' : 'hidden lg:flex'}`}
-        >
-          {/* ... (Email Preview Panel remains the same) ... */}
-          {selectedLog ? (
-            <>
-              {/* Preview Header */}
-              <div className="p-6 border-b border-gray-200 space-y-4">
+            {/* View Toggle */}
+            <div className="bg-white rounded-lg border border-gray-200 p-1">
+              <div className="flex">
                 <button
-                  onClick={() => setSelectedLog(null)}
-                  className="lg:hidden flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 font-medium mb-2"
+                  onClick={() => setView('compose')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    view === 'compose'
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
                 >
-                  <ArrowLeft size={16} />
-                  <span>Back to List</span>
+                  <FileText size={16} />
+                  Compose
                 </button>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2 truncate">
-                      {selectedLog.subject || 'No Subject'}
-                    </h3>
-                    <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                      <div>
-                        <span className="text-gray-600">To:</span>
-                        <span className="font-medium text-gray-900 ml-1">{selectedLog.toEmail}</span>
-                      </div>
-                      {selectedLog.memberName && (
-                        <div>
-                          <span className="text-gray-600">Member:</span>
-                          <span className="font-medium text-gray-900 ml-1">{selectedLog.memberName}</span>
-                        </div>
-                      )}
-                      <div>
-                        <span className="text-gray-600">Sent:</span>
-                        <span className="font-medium text-gray-900 ml-1">
-                          {format(new Date(selectedLog.createdAt), 'PPpp')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={getStatusBadge(selectedLog.status) + ' ml-4'}>
-                    {selectedLog.status}
-                  </div>
-                </div>
-
-                {selectedLog.status?.toLowerCase() === 'failed' && selectedLog.error && (
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <div className="flex items-center space-x-2 text-red-800 mb-1">
-                      <AlertTriangle size={16} />
-                      <span className="font-medium">Delivery Failed</span>
-                    </div>
-                    <p className="text-red-700 text-sm">{selectedLog.error}</p>
-                  </div>
-                )}
+                <button
+                  onClick={() => setView('log')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    view === 'log'
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <Inbox size={16} />
+                  Sent Log
+                </button>
               </div>
+            </div>
 
-              {/* Email Content */}
-              <div className="flex-1 flex flex-col min-h-0">
-                <div className="border-b border-gray-200 px-6 py-3 bg-gray-50">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Eye size={16} />
-                    <span>Email Preview</span>
+            {/* Content Area */}
+            <div className="bg-white rounded-lg border border-gray-200">
+              {view === 'compose' ? (
+                // COMPOSE VIEW
+                <form onSubmit={handleSendEmail} className="p-4 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Recipients
+                    </label>
+                    <CustomMultiSelect
+                      icon={Users}
+                      options={members}
+                      value={selectedMembers}
+                      onChange={setSelectedMembers}
+                      placeholder="Select team members..."
+                    />
                   </div>
-                </div>
 
-                {selectedLog.html ? (
-                  <iframe
-                    srcDoc={selectedLog.html}
-                    title="Email Preview"
-                    className="w-full flex-1 border-none"
-                    sandbox="allow-same-origin"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                    <Mail size={48} className="text-gray-300 mb-4" />
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">No Content Available</h4>
-                    <p className="text-gray-500">
-                      This email doesn't have any HTML content to display.
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Subject
+                    </label>
+                    <input
+                      type="text"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      placeholder="Email subject line"
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Message
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setIsAiModalOpen(true)}
+                        disabled={isDrafting}
+                        className="flex items-center gap-1.5 text-xs font-medium text-gray-50 hover:text-white disabled:opacity-50 bg-gray-900 px-2 py-1.5 rounded-full cursor-pointer"
+                      >
+                        {isDrafting ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : (
+                          <Zap size={12} />
+                        )}
+                        AI Draft
+                      </button>
+                    </div>
+                    <Editor
+                      apiKey='btbqthaaki8gu807fixqn8vbiv7peb7wcoml3q320qnkfedf'
+                      value={body}
+                      onEditorChange={(newValue) => setBody(newValue)}
+                      init={{
+                        height: 200,
+                        menubar: false,
+                        plugins: ['lists', 'link', 'autolink', 'wordcount'],
+                        toolbar: 'undo redo | bold italic | bullist numlist | link',
+                        content_style: 'body { font-family:Inter,sans-serif; font-size:14px; color:#374151; }',
+                        statusbar: false,
+                        branding: false
+                      }}
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Use <code className="bg-gray-100 px-1 rounded">{'{MEMBER_NAME}'}</code> to personalize emails
                     </p>
                   </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-              <Send size={64} className="text-gray-300 mb-4" />
-              <h3 className="text-xl font-medium text-gray-900 mb-2">
-                Select an Email
-              </h3>
-              <p className="text-gray-500 max-w-md">
-                Choose an email from the list to view its content, delivery status, and recipient information.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* Error Banner (if any error but data exists) */}
-      {error && logs.length > 0 && (
-        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-center space-x-2 text-yellow-800">
-            <AlertTriangle size={16} />
-            <span className="text-sm">Data may be outdated: {error}</span>
+                  <button
+                    type="submit"
+                    disabled={isSending || !subject || !body || selectedMembers.length === 0}
+                    className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                  >
+                    {isSending ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Send size={16} />
+                    )}
+                    <span>
+                      {isSending ? 'Sending...' : `Send to ${selectedMembers.length} recipient${selectedMembers.length !== 1 ? 's' : ''}`}
+                    </span>
+                  </button>
+
+                  <AnimatePresence>
+                    {sendSuccess && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm"
+                      >
+                        {sendSuccess}
+                      </motion.div>
+                    )}
+                    {sendError && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+                      >
+                        {sendError}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </form>
+              ) : (
+                // LOG VIEW
+                <div className="p-4">
+                  {loading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="animate-spin text-gray-400" size={24} />
+                    </div>
+                  ) : logs.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Inbox size={32} className="mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No emails sent yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {logs.map(log => (
+                        <LogItem
+                          key={log._id}
+                          log={log}
+                          onClick={() => handleLogSelect(log)}
+                          isSelected={selectedLog?._id === log._id}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Panel - Preview */}
+          <div className={`lg:col-span-2 ${
+            showMobilePreview ? 'block' : 'hidden lg:block'
+          }`}>
+            <div className="bg-white rounded-lg border border-gray-200 h-full flex flex-col">
+              {selectedLog ? (
+                <>
+                  {/* Preview Header */}
+                  <div className="p-4 border-b border-gray-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <button
+                        onClick={() => {
+                          setSelectedLog(null);
+                          setShowMobilePreview(false);
+                        }}
+                        className="lg:hidden flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 font-medium"
+                      >
+                        <ArrowLeft size={16} />
+                        <span>Back</span>
+                      </button>
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <Eye size={16} />
+                        <span>Email Preview</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <h2 className="text-lg font-semibold text-gray-900 mb-1">
+                          {selectedLog.subject}
+                        </h2>
+                        <div className="flex items-center space-x-4 text-sm text-gray-600">
+                          <span>To: {selectedLog.toEmail}</span>
+                          <span>•</span>
+                          <span>{format(new Date(selectedLog.createdAt), 'MMM dd, yyyy • h:mm a')}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-4">
+                        <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          selectedLog.status?.toLowerCase() === 'sent'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {selectedLog.status?.toLowerCase() === 'sent' ? (
+                            <CheckCircle size={12} className="mr-1" />
+                          ) : (
+                            <XCircle size={12} className="mr-1" />
+                          )}
+                          {selectedLog.status}
+                        </div>
+                      </div>
+
+                      {selectedLog.status?.toLowerCase() === 'failed' && selectedLog.error && (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                          <div className="flex items-start space-x-2">
+                            <AlertTriangle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
+                            <div className="text-sm text-red-700">
+                              <div className="font-medium">Delivery Failed</div>
+                              <div className="mt-1">{selectedLog.error}</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Email Content */}
+                  <div className="flex-1 min-h-0">
+                    <iframe
+                      srcDoc={selectedLog.html}
+                      title="Email Preview"
+                      className="w-full h-full border-none"
+                      sandbox="allow-same-origin"
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                  <Inbox size={48} className="text-gray-300 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    Select an Email
+                  </h3>
+                  <p className="text-gray-500 text-sm max-w-sm">
+                    Choose an email from the sent log to view its content and delivery status.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

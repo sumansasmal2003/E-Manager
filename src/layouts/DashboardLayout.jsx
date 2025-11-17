@@ -13,6 +13,8 @@ import CreateMeetingModal from '../components/CreateMeetingModal';
 import AddMemberModal from '../components/AddMemberModal';
 import ShortcutsModal from '../components/ShortcutsModal';
 import AiChatModal from '../components/AiChatModal';
+import { useAuth } from '../context/AuthContext';
+import OnboardingModal from '../components/OnboardingModal';
 
 // (SidebarLink component remains the same)
 const SidebarLink = ({ to, icon, children, isCollapsed, onNavigate }) => {
@@ -58,6 +60,8 @@ const DashboardLayout = () => {
   const [sidebarHeight, setSidebarHeight] = useState(0);
   const location = useLocation();
   const navigate = useNavigate(); // <-- 3. GET navigate
+  const { isFirstLogin } = useAuth();
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
 
   // --- 4. GET MODAL CONTROLS ---
   const { modalState, openModal, closeModal, modalContext } = useModal();
@@ -117,6 +121,17 @@ const DashboardLayout = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [openModal, modalState]);
+
+  useEffect(() => {
+    if (isFirstLogin) {
+      // Show the modal after a short delay so the UI can settle
+      const timer = setTimeout(() => {
+        setShowOnboardingModal(true);
+      }, 1500); // 1.5 second delay
+
+      return () => clearTimeout(timer);
+    }
+  }, [isFirstLogin]);
 
 
   // (getPageTitle, getPageDescription, handleNavigate, renderSidebarLinks remain the same)
@@ -377,6 +392,11 @@ const DashboardLayout = () => {
       <CommandPalette />
       <ShortcutsModal />
       <AiChatModal />
+
+      <OnboardingModal
+        isOpen={showOnboardingModal}
+        onClose={() => setShowOnboardingModal(false)}
+      />
 
       <CreateTeamModal
         isOpen={modalState.createTeam}

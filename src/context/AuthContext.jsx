@@ -9,6 +9,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isFirstLogin, setIsFirstLogin] = useState(false);
 
   useEffect(() => {
     // Check local storage for user data on initial app load
@@ -38,6 +39,11 @@ export const AuthProvider = ({ children }) => {
         // --- END DEFAULT ---
 
         setUser(parsedUser);
+        const hasBeenOnboarded = localStorage.getItem('eManagerOnboarded') === 'true';
+        if (!hasBeenOnboarded) {
+          setIsFirstLogin(true);
+          localStorage.setItem('eManagerOnboarded', 'true');
+        }
       }
     } catch (error) {
       console.error("Failed to parse user from localStorage", error);
@@ -47,6 +53,11 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
+    const hasBeenOnboarded = localStorage.getItem('eManagerOnboarded') === 'true';
+    if (!hasBeenOnboarded) {
+      setIsFirstLogin(true);
+      localStorage.setItem('eManagerOnboarded', 'true');
+    }
     // Store user data in state and local storage
     localStorage.setItem('eManagerUser', JSON.stringify(userData));
     setUser(userData);
@@ -66,6 +77,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout,
+    isFirstLogin,
     companyName: user?.companyName || '',
     companyAddress: user?.companyAddress || '',
     companyWebsite: user?.companyWebsite || '',
