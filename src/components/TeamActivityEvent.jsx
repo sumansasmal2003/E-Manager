@@ -61,7 +61,7 @@ const TeamActivityEvent = ({ activity }) => {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm text-gray-700 leading-snug">
-          <span className="font-medium text-gray-900">{activity.user?.username || 'User'}</span>
+          <span className="font-medium text-primary">{activity.user?.username || 'User'}</span>
           {' '}{activity.details}
         </p>
         <span

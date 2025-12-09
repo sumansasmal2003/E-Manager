@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FileText, Shield, ChevronRight, Mail, Clock, Database, Eye, Server, Users, Key } from 'lucide-react';
-import Navbar from '../components/Navbar';
 
 const PrivacyPolicyPage = () => {
   const lastUpdated = "November 13, 2025";
@@ -38,7 +37,7 @@ const PrivacyPolicyPage = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-6">
               <Shield className="text-white" size={32} />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
               Privacy Policy
             </h1>
             <div className="flex items-center justify-center space-x-4 text-lg text-gray-600">
@@ -67,7 +66,7 @@ const PrivacyPolicyPage = () => {
             className="lg:col-span-1"
           >
             <div className="sticky top-24 bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+              <h3 className="font-semibold text-primary mb-4 flex items-center">
                 <FileText size={18} className="mr-2" />
                 Contents
               </h3>
@@ -78,7 +77,7 @@ const PrivacyPolicyPage = () => {
                     onClick={() => scrollToSection(section.id)}
                     className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 group"
                   >
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                    <span className="text-sm font-medium text-gray-700 group-hover:text-primary">
                       {section.title}
                     </span>
                     <ChevronRight size={16} className="text-gray-400 group-hover:text-gray-600" />
@@ -103,7 +102,7 @@ const PrivacyPolicyPage = () => {
                     <Shield size={24} className="text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to E-Manager</h2>
+                    <h2 className="text-2xl font-bold text-primary mb-4">Welcome to E-Manager</h2>
                     <p className="text-gray-700 leading-relaxed">
                       This Privacy Policy explains how we collect, use, disclose, and safeguard your
                       information when you use our web application (the "Service"). We are committed
@@ -121,7 +120,7 @@ const PrivacyPolicyPage = () => {
                     <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                       <Database size={16} className="text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900">1. Information We Collect</h3>
+                    <h3 className="text-2xl font-bold text-primary">1. Information We Collect</h3>
                   </div>
 
                   <div className="space-y-6 text-gray-700">
@@ -155,7 +154,7 @@ const PrivacyPolicyPage = () => {
                     </div>
 
                     <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                      <h4 className="font-semibold text-primary mb-3 flex items-center">
                         <Eye size={18} className="mr-2" />
                         B. Information We Collect Automatically
                       </h4>
@@ -165,7 +164,7 @@ const PrivacyPolicyPage = () => {
                             <div className="w-1.5 h-1.5 bg-white rounded-full" />
                           </div>
                           <div>
-                            <strong className="text-gray-900">Cookies and Local Storage:</strong> We use local storage to keep you
+                            <strong className="text-primary">Cookies and Local Storage:</strong> We use local storage to keep you
                             logged in and to store your session information (like your authentication token).
                             We do not use tracking cookies for third-party advertising.
                           </div>
@@ -175,7 +174,7 @@ const PrivacyPolicyPage = () => {
                             <div className="w-1.5 h-1.5 bg-white rounded-full" />
                           </div>
                           <div>
-                            <strong className="text-gray-900">Usage Data:</strong> We may collect generic, non-personal information about
+                            <strong className="text-primary">Usage Data:</strong> We may collect generic, non-personal information about
                             how you interact with our Service (such as features used or buttons clicked) to
                             help us improve the application.
                           </div>
@@ -187,7 +186,7 @@ const PrivacyPolicyPage = () => {
 
                 {/* How We Use Your Information */}
                 <section id="how-we-use" className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">2. How We Use Your Information</h3>
+                  <h3 className="text-2xl font-bold text-primary mb-6">2. How We Use Your Information</h3>
                   <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                     <p className="text-gray-700 mb-4">We use the information we collect for the following purposes:</p>
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700">
@@ -216,7 +215,7 @@ const PrivacyPolicyPage = () => {
                     <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
                       <Server size={16} className="text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900">3. Data Sharing and Third-Party Services</h3>
+                    <h3 className="text-2xl font-bold text-primary">3. Data Sharing and Third-Party Services</h3>
                   </div>
 
                   <div className="space-y-6 text-gray-700">
@@ -259,7 +258,7 @@ const PrivacyPolicyPage = () => {
                     <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                       <Key size={16} className="text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900">4. Data Security</h3>
+                    <h3 className="text-2xl font-bold text-primary">4. Data Security</h3>
                   </div>
 
                   <div className="bg-green-50 rounded-xl p-6 border border-green-200">
@@ -282,13 +281,13 @@ const PrivacyPolicyPage = () => {
 
                 {/* Your Data Rights */}
                 <section id="your-rights" className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">5. Your Data Rights</h3>
+                  <h3 className="text-2xl font-bold text-primary mb-6">5. Your Data Rights</h3>
                   <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                     <p className="text-gray-700 mb-6">You have complete control over your personal information and User Content:</p>
 
                     <div className="space-y-4">
                       <div className="bg-white rounded-lg p-4 border border-gray-300">
-                        <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                        <h4 className="font-semibold text-primary mb-2 flex items-center">
                           <Eye size={16} className="mr-2 text-blue-600" />
                           Access and Update
                         </h4>
@@ -299,7 +298,7 @@ const PrivacyPolicyPage = () => {
                       </div>
 
                       <div className="bg-white rounded-lg p-4 border border-gray-300">
-                        <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                        <h4 className="font-semibold text-primary mb-2 flex items-center">
                           <Database size={16} className="mr-2 text-green-600" />
                           Data Deletion
                         </h4>
@@ -311,7 +310,7 @@ const PrivacyPolicyPage = () => {
                       </div>
 
                       <div className="bg-white rounded-lg p-4 border border-gray-300">
-                        <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                        <h4 className="font-semibold text-primary mb-2 flex items-center">
                           <Users size={16} className="mr-2 text-amber-600" />
                           Account Deletion
                         </h4>
@@ -326,7 +325,7 @@ const PrivacyPolicyPage = () => {
 
                 {/* Children's Privacy */}
                 <section id="children-privacy" className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">6. Children's Privacy</h3>
+                  <h3 className="text-2xl font-bold text-primary mb-6">6. Children's Privacy</h3>
                   <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                     <p className="text-gray-700">
                       The Service is not intended for or directed at children under the age of 13.
@@ -337,7 +336,7 @@ const PrivacyPolicyPage = () => {
 
                 {/* Policy Changes */}
                 <section id="policy-changes" className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">7. Changes to This Privacy Policy</h3>
+                  <h3 className="text-2xl font-bold text-primary mb-6">7. Changes to This Privacy Policy</h3>
                   <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                     <p className="text-gray-700">
                       We may update this Privacy Policy from time to time. We will notify you of
@@ -350,7 +349,7 @@ const PrivacyPolicyPage = () => {
 
                 {/* Contact Us */}
                 <section id="contact" className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">8. Contact Us</h3>
+                  <h3 className="text-2xl font-bold text-primary mb-6">8. Contact Us</h3>
                   <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">

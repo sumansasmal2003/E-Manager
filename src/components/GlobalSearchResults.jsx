@@ -22,7 +22,7 @@ const ResultItem = ({ icon, title, subtitle, link, onResultClick }) => (
       {icon}
     </div>
     <div className="min-w-0 flex-1">
-      <p className="text-sm font-medium text-gray-900 truncate">{title}</p>
+      <p className="text-sm font-medium text-primary truncate">{title}</p>
       <p className="text-xs text-gray-500 truncate">{subtitle}</p>
     </div>
   </button>

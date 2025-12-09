@@ -14,34 +14,40 @@ export const ModalProvider = ({ children }) => {
     addMember: false,
     shortcuts: false,
     aiChat: false,
+    upgradeModal: false,
+    // Add other modals here if needed
   });
 
-  // This state is fine
-  const [modalContext, setModalContext] = useState({});
+  // This holds data passed to the modal (e.g., onTeamCreated function)
+  const [modalContext, setModalContextState] = useState({});
 
-  // --- THIS IS THE FIX ---
-  // We remove the 'context' argument. openModal should *only* open.
-  // The context is set *independently* by the page (e.g., TeamDetailPage).
-  const openModal = useCallback((modalName) => {
+  // --- FIX: Accept contextData ---
+  const openModal = useCallback((modalName, contextData = {}) => {
     setModalState(prev => ({ ...prev, [modalName]: true }));
-    // We NO LONGER set or clear context here
+
+    // If context data is provided (e.g., { onTeamCreated: ... }), save it
+    if (Object.keys(contextData).length > 0) {
+      setModalContextState(prev => ({ ...prev, ...contextData }));
+    }
   }, []);
 
-  // --- THIS IS THE SECOND FIX ---
-  // closeModal should *only* close the modal.
-  // The context will be cleared by the page's cleanup effect.
   const closeModal = useCallback((modalName) => {
     setModalState(prev => ({ ...prev, [modalName]: false }));
-    // We NO LONGER clear the context here
+    // We don't clear context immediately to avoid UI flickering during close animation
+    // The next openModal call will merge/overwrite needed context
   }, []);
-  // --- END OF FIX ---
+
+  // Helper to manually set context if needed (used in TeamDetailPage)
+  const setModalContext = useCallback((newContext) => {
+    setModalContextState(prev => ({ ...prev, ...newContext }));
+  }, []);
 
   const value = {
     modalState,
     modalContext,
     openModal,
     closeModal,
-    setModalContext, // This is what pages use to set context
+    setModalContext,
   };
 
   return (

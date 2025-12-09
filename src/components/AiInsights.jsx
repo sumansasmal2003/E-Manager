@@ -123,7 +123,7 @@ const AiInsights = () => {
     <div className="space-y-3">
       <div className="flex items-center space-x-2">
         <Zap size={18} className="text-gray-600" />
-        <h3 className="text-base font-semibold text-gray-900">AI Insights</h3>
+        <h3 className="text-base font-semibold text-primary">AI Insights</h3>
       </div>
       <AnimatePresence mode="popLayout">
         {insights.map(insight => (

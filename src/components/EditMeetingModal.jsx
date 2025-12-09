@@ -185,7 +185,7 @@ const EditMeetingModal = ({ isOpen, onClose, meetingToEdit, teamMembers, onMeeti
                 type="button"
                 onClick={handleGenerateZoom}
                 disabled={isZoomDisabled}
-                className="px-4 py-3 bg-gray-900 text-white rounded-lg flex items-center space-x-2"
+                className="px-4 py-3 bg-primary text-white rounded-lg flex items-center space-x-2"
               >
                 {zoomLoading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Zap size={16} />}
               </motion.button>
@@ -197,7 +197,7 @@ const EditMeetingModal = ({ isOpen, onClose, meetingToEdit, teamMembers, onMeeti
           <button type="button" onClick={onClose} className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg">
             Cancel
           </button>
-          <motion.button type="submit" disabled={loading} className="flex-1 bg-gray-900 text-white font-medium py-3 px-4 rounded-lg">
+          <motion.button type="submit" disabled={loading} className="flex-1 bg-primary text-white font-medium py-3 px-4 rounded-lg">
             {loading ? 'Saving...' : 'Save Changes'}
           </motion.button>
         </div>

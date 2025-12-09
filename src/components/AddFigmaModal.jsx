@@ -72,7 +72,7 @@ const AddFigmaModal = ({ isOpen, onClose, teamId, onFigmaLinkAdded }) => {
           <button
             type="button"
             onClick={handleClose}
-            className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+            className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
           >
             Cancel
           </button>
@@ -81,7 +81,7 @@ const AddFigmaModal = ({ isOpen, onClose, teamId, onFigmaLinkAdded }) => {
             whileTap={{ scale: 0.99 }}
             type="submit"
             disabled={loading}
-            className="flex-1 bg-gray-900 text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-primary text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <div className="flex items-center justify-center space-x-2">

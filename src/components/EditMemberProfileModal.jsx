@@ -105,7 +105,7 @@ const EditMemberProfileModal = ({ isOpen, onClose, profile, onProfileUpdated }) 
           <motion.button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-gray-900 text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+            className="flex-1 bg-primary text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 disabled:opacity-50"
           >
             {loading ? <Loader2 className="animate-spin mx-auto" /> : 'Save Changes'}
           </motion.button>

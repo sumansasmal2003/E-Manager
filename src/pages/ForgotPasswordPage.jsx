@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Key, CheckCircle, ArrowLeft, Shield, Users, Clock, Zap } from 'lucide-react';
 import Input from '../components/Input';
 import api from '../api/axiosConfig';
-import Navbar from '../components/Navbar';
 
 const ForgotPasswordPage = () => {
   const [step, setStep] = useState('email'); // 'email', 'otp', 'success'
@@ -128,7 +127,6 @@ const ForgotPasswordPage = () => {
 
   return (
     <>
-      <Navbar />
       <div className="min-h-screen flex">
         {/* Left Section - Brand & Features */}
         <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-between lg:p-12 xl:p-16 bg-gradient-to-br from-gray-50 to-gray-100">
@@ -139,10 +137,10 @@ const ForgotPasswordPage = () => {
             className="max-w-lg"
           >
             <Link to="/" className="inline-flex items-center space-x-3 mb-16">
-              <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
                 <Shield className="text-white" size={20} />
               </div>
-              <span className="text-2xl font-bold text-gray-900">E-Manager</span>
+              <span className="text-2xl font-bold text-primary">E-Manager</span>
             </Link>
 
             <div className="space-y-8">
@@ -151,7 +149,7 @@ const ForgotPasswordPage = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-4xl xl:text-5xl font-bold text-gray-900 leading-tight mb-4"
+                  className="text-4xl xl:text-5xl font-bold text-primary leading-tight mb-4"
                 >
                   Secure Account
                   <span className="block text-gray-700">Recovery</span>
@@ -174,15 +172,15 @@ const ForgotPasswordPage = () => {
               >
                 {[
                   {
-                    icon: <Mail className="text-gray-900" size={20} />,
+                    icon: <Mail className="text-primary" size={20} />,
                     text: "Enter your email address to receive a secure code"
                   },
                   {
-                    icon: <Key className="text-gray-900" size={20} />,
+                    icon: <Key className="text-primary" size={20} />,
                     text: "Check your email and enter the 6-digit verification code"
                   },
                   {
-                    icon: <Lock className="text-gray-900" size={20} />,
+                    icon: <Lock className="text-primary" size={20} />,
                     text: "Create a new strong password for your account"
                   }
                 ].map((feature, index) => (
@@ -220,10 +218,10 @@ const ForgotPasswordPage = () => {
               className="lg:hidden flex justify-center mb-8"
             >
               <Link to="/" className="inline-flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
                   <Shield className="text-white" size={20} />
                 </div>
-                <span className="text-2xl font-bold text-gray-900">E-Manager</span>
+                <span className="text-2xl font-bold text-primary">E-Manager</span>
               </Link>
             </motion.div>
 
@@ -249,11 +247,11 @@ const ForgotPasswordPage = () => {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                        className="mx-auto w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center"
+                        className="mx-auto w-12 h-12 bg-primary rounded-xl flex items-center justify-center"
                       >
                         <Key className="text-white" size={20} />
                       </motion.div>
-                      <h2 className="text-3xl font-bold text-gray-900">Forgot Password?</h2>
+                      <h2 className="text-3xl font-bold text-primary">Forgot Password?</h2>
                       <p className="text-gray-600 text-base">
                         No problem! Enter your email and we'll send you a secure reset code.
                       </p>
@@ -285,7 +283,7 @@ const ForgotPasswordPage = () => {
                         whileTap={{ scale: 0.99 }}
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-gray-900 text-white font-medium py-3.5 px-4 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                        className="w-full bg-primary text-white font-medium py-3.5 px-4 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-primary focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                       >
                         {loading ? (
                           <div className="flex items-center justify-center space-x-2">
@@ -315,11 +313,11 @@ const ForgotPasswordPage = () => {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                        className="mx-auto w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center"
+                        className="mx-auto w-12 h-12 bg-primary rounded-xl flex items-center justify-center"
                       >
                         <Lock className="text-white" size={20} />
                       </motion.div>
-                      <h2 className="text-3xl font-bold text-gray-900">Check Your Email</h2>
+                      <h2 className="text-3xl font-bold text-primary">Check Your Email</h2>
                       <p className="text-gray-600 text-base">
                         {message || "We've sent a 6-digit verification code to your email address."}
                       </p>
@@ -354,7 +352,7 @@ const ForgotPasswordPage = () => {
                               onChange={(e) => handleOtpChange(index, e.target.value)}
                               onKeyDown={(e) => handleOtpKeyDown(index, e)}
                               onPaste={handleOtpPaste}
-                              className="w-12 h-12 text-center text-lg font-semibold bg-white border-2 border-gray-300 rounded-xl focus:border-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 outline-none"
+                              className="w-12 h-12 text-center text-lg font-semibold bg-white border-2 border-gray-300 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 outline-none"
                               autoFocus={index === 0}
                             />
                           ))}
@@ -375,7 +373,7 @@ const ForgotPasswordPage = () => {
                             type="button"
                             onClick={handleResendOtp}
                             disabled={loading}
-                            className="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors disabled:opacity-50"
+                            className="text-sm text-gray-600 hover:text-primary font-medium transition-colors disabled:opacity-50"
                           >
                             Didn't receive code? Resend
                           </button>
@@ -398,7 +396,7 @@ const ForgotPasswordPage = () => {
                         whileTap={{ scale: 0.99 }}
                         type="submit"
                         disabled={loading || otp.join('').length !== 6}
-                        className="w-full bg-gray-900 text-white font-medium py-3.5 px-4 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                        className="w-full bg-primary text-white font-medium py-3.5 px-4 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-primary focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                       >
                         {loading ? (
                           <div className="flex items-center justify-center space-x-2">
@@ -432,14 +430,14 @@ const ForgotPasswordPage = () => {
                       <CheckCircle className="text-green-600" size={32} />
                     </motion.div>
                     <div>
-                      <h2 className="text-3xl font-bold text-gray-900">Password Reset Successfully!</h2>
+                      <h2 className="text-3xl font-bold text-primary">Password Reset Successfully!</h2>
                       <p className="text-gray-600 text-base mt-3">
                         {message || "Your password has been reset successfully. You can now log in with your new password."}
                       </p>
                     </div>
                     <Link
                       to="/login"
-                      className="inline-flex items-center justify-center space-x-3 bg-gray-900 text-white font-medium py-3.5 px-8 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="inline-flex items-center justify-center space-x-3 bg-primary text-white font-medium py-3.5 px-8 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-primary focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
                       <ArrowLeft size={18} />
                       <span>Back to Login</span>
@@ -453,7 +451,7 @@ const ForgotPasswordPage = () => {
                 <div className="text-center border-t border-gray-200 pt-6">
                   <Link
                     to="/login"
-                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium flex items-center justify-center"
+                    className="text-sm text-gray-600 hover:text-primary transition-colors font-medium flex items-center justify-center"
                   >
                     <ArrowLeft size={16} className="mr-2" />
                     Back to Login

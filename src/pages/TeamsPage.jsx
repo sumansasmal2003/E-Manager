@@ -6,8 +6,10 @@ import TeamCard from '../components/TeamCard';
 import { Plus, Users, AlertCircle, Grid, Table, Trash2, Calendar, User, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useModal } from '../context/ModalContext'; // 2. IMPORT useModal
+import { useAuth } from '../context/AuthContext';
 
 const TeamsPage = () => {
+  const { user } = useAuth();
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -90,7 +92,7 @@ const TeamsPage = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg">
                   <Users className="text-white" size={24} />
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
@@ -98,10 +100,10 @@ const TeamsPage = () => {
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">My Teams</h1>
+                <h1 className="text-3xl font-bold text-primary">My Teams</h1>
                 <p className="text-gray-600 mt-1">
                   {teams.length} team{teams.length !== 1 ? 's' : ''} •
-                  <span className="text-gray-900 font-medium ml-1">Collaborate & manage</span>
+                  <span className="text-primary font-medium ml-1">Collaborate & manage</span>
                 </p>
               </div>
             </div>
@@ -112,8 +114,8 @@ const TeamsPage = () => {
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-md transition-all ${
                     viewMode === 'grid'
-                      ? 'bg-white shadow-sm text-gray-900'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-white shadow-sm text-primary'
+                      : 'text-gray-600 hover:text-primary'
                   }`}
                 >
                   <Grid size={18} />
@@ -122,8 +124,8 @@ const TeamsPage = () => {
                   onClick={() => setViewMode('table')}
                   className={`p-2 rounded-md transition-all ${
                     viewMode === 'table'
-                      ? 'bg-white shadow-sm text-gray-900'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-white shadow-sm text-primary'
+                      : 'text-gray-600 hover:text-primary'
                   }`}
                 >
                   <Table size={18} />
@@ -131,13 +133,15 @@ const TeamsPage = () => {
               </div>
 
               {/* 7. UPDATE onClick to use global modal */}
-              <button
-                onClick={() => openModal('createTeam', { onTeamCreated: handleTeamCreated })}
-                className="flex-1 lg:flex-none bg-gray-900 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                <Plus size={20} />
-                <span className="font-semibold">Create Team</span>
-              </button>
+              {user?.role === 'owner' && (
+                <button
+                  onClick={() => openModal('createTeam', { onTeamCreated: handleTeamCreated })}
+                  className="bg-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gray-800 transition-colors"
+                >
+                  <Plus size={20} />
+                  <span>Create Team</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -146,7 +150,7 @@ const TeamsPage = () => {
         {loading && (
           <div className="flex justify-center items-center py-20">
             <div className="flex flex-col items-center space-y-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
               <p className="text-gray-600">Loading your teams...</p>
             </div>
           </div>
@@ -162,7 +166,7 @@ const TeamsPage = () => {
             <p className="text-red-600 mb-4">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+              className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
             >
               Try Again
             </button>
@@ -191,11 +195,11 @@ const TeamsPage = () => {
                     {/* ... (table head) ... */}
                     <thead>
                       <tr className="border-b border-gray-200">
-                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">Team</th>
-                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">Members</th>
-                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">Created</th>
-                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">Status</th>
-                        <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">Actions</th>
+                        <th className="text-left py-4 px-6 text-sm font-semibold text-primary">Team</th>
+                        <th className="text-left py-4 px-6 text-sm font-semibold text-primary">Members</th>
+                        <th className="text-left py-4 px-6 text-sm font-semibold text-primary">Created</th>
+                        <th className="text-left py-4 px-6 text-sm font-semibold text-primary">Status</th>
+                        <th className="text-left py-4 px-6 text-sm font-semibold text-primary">Actions</th>
                       </tr>
                     </thead>
                     {/* ... (table body) ... */}
@@ -207,11 +211,11 @@ const TeamsPage = () => {
                         >
                           <td className="py-4 px-6">
                             <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
                                 <Users className="text-white" size={18} />
                               </div>
                               <div>
-                                <p className="font-medium text-gray-900 group-hover:text-gray-700">
+                                <p className="font-medium text-primary group-hover:text-gray-700">
                                   {team.teamName}
                                 </p>
                                 <p className="text-sm text-gray-500 truncate max-w-xs">
@@ -270,13 +274,13 @@ const TeamsPage = () => {
               <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Users className="text-gray-400" size={32} />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No teams yet</h3>
+              <h3 className="text-xl font-semibold text-primary mb-2">No teams yet</h3>
               <p className="text-gray-600 max-w-md mx-auto mb-6">
                 Create your first team to start collaborating with others on projects and tasks.
               </p>
               <button
                 onClick={() => openModal('createTeam', { onTeamCreated: handleTeamCreated })}
-                className="bg-gray-900 text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors font-semibold inline-flex items-center space-x-2"
+                className="bg-primary text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors font-semibold inline-flex items-center space-x-2"
               >
                 <Plus size={20} />
                 <span>Create Your First Team</span>

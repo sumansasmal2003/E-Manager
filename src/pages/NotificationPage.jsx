@@ -21,13 +21,13 @@ const LogItem = ({ log, onClick, isSelected }) => (
     onClick={onClick}
     className={`w-full text-left p-4 rounded-lg border transition-all duration-200 ${
       isSelected
-        ? 'bg-gray-900 text-white border-gray-900'
+        ? 'bg-primary text-white border-primary'
         : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
     }`}
   >
     <div className="flex items-start justify-between mb-2">
       <span className={`text-sm font-medium line-clamp-2 ${
-        isSelected ? 'text-white' : 'text-gray-900'
+        isSelected ? 'text-white' : 'text-primary'
       }`}>
         {log.subject || 'No Subject'}
       </span>
@@ -161,11 +161,11 @@ const NotificationPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                 <Mail className="text-white" size={20} />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">Email Notifications</h1>
+                <h1 className="text-xl font-semibold text-primary">Email Notifications</h1>
                 <p className="text-gray-600 text-sm">Communicate with your team</p>
               </div>
             </div>
@@ -189,8 +189,8 @@ const NotificationPage = () => {
                   onClick={() => setView('compose')}
                   className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     view === 'compose'
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-primary text-white'
+                      : 'text-gray-600 hover:text-primary'
                   }`}
                 >
                   <FileText size={16} />
@@ -200,8 +200,8 @@ const NotificationPage = () => {
                   onClick={() => setView('log')}
                   className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     view === 'log'
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-primary text-white'
+                      : 'text-gray-600 hover:text-primary'
                   }`}
                 >
                   <Inbox size={16} />
@@ -237,7 +237,7 @@ const NotificationPage = () => {
                       value={subject}
                       onChange={(e) => setSubject(e.target.value)}
                       placeholder="Email subject line"
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                     />
                   </div>
 
@@ -250,7 +250,7 @@ const NotificationPage = () => {
                         type="button"
                         onClick={() => setIsAiModalOpen(true)}
                         disabled={isDrafting}
-                        className="flex items-center gap-1.5 text-xs font-medium text-gray-50 hover:text-white disabled:opacity-50 bg-gray-900 px-2 py-1.5 rounded-full cursor-pointer"
+                        className="flex items-center gap-1.5 text-xs font-medium text-gray-50 hover:text-white disabled:opacity-50 bg-primary px-2 py-1.5 rounded-full cursor-pointer"
                       >
                         {isDrafting ? (
                           <Loader2 size={12} className="animate-spin" />
@@ -282,7 +282,7 @@ const NotificationPage = () => {
                   <button
                     type="submit"
                     disabled={isSending || !subject || !body || selectedMembers.length === 0}
-                    className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 bg-primary text-white font-medium py-2.5 px-4 rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
                   >
                     {isSending ? (
                       <Loader2 size={16} className="animate-spin" />
@@ -359,7 +359,7 @@ const NotificationPage = () => {
                           setSelectedLog(null);
                           setShowMobilePreview(false);
                         }}
-                        className="lg:hidden flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 font-medium"
+                        className="lg:hidden flex items-center space-x-2 text-sm text-gray-600 hover:text-primary font-medium"
                       >
                         <ArrowLeft size={16} />
                         <span>Back</span>
@@ -372,7 +372,7 @@ const NotificationPage = () => {
 
                     <div className="space-y-3">
                       <div>
-                        <h2 className="text-lg font-semibold text-gray-900 mb-1">
+                        <h2 className="text-lg font-semibold text-primary mb-1">
                           {selectedLog.subject}
                         </h2>
                         <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -424,7 +424,7 @@ const NotificationPage = () => {
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                   <Inbox size={48} className="text-gray-300 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <h3 className="text-lg font-medium text-primary mb-2">
                     Select an Email
                   </h3>
                   <p className="text-gray-500 text-sm max-w-sm">

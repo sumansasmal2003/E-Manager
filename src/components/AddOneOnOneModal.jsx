@@ -77,7 +77,7 @@ const AddOneOnOneModal = ({ isOpen, onClose, memberName, onOneOnOneCreated, init
             value={discussionPoints}
             onChange={(e) => setDiscussionPoints(e.target.value)}
             rows={5}
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 resize-none"
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
           />
         </div>
 
@@ -92,7 +92,7 @@ const AddOneOnOneModal = ({ isOpen, onClose, memberName, onOneOnOneCreated, init
           <motion.button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-gray-900 text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+            className="flex-1 bg-primary text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 disabled:opacity-50"
           >
             {loading ? 'Scheduling...' : 'Schedule 1-on-1'}
           </motion.button>

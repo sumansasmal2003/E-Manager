@@ -31,13 +31,13 @@ const CustomSelect = ({ options, value, onChange, placeholder = 'Select an optio
       <button
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
-        className="relative w-full pl-10 pr-10 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 text-left focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 flex items-center justify-between hover:border-gray-400"
+        className="relative w-full pl-10 pr-10 py-3 bg-white border border-gray-300 rounded-lg text-primary placeholder-gray-500 text-left focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 flex items-center justify-between hover:border-gray-400"
       >
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           {Icon ? <Icon size={18} className="text-gray-400" /> : <Filter size={18} className="text-gray-400" />}
         </div>
 
-        <span className={`font-medium ${selectedOption ? 'text-gray-900' : 'text-gray-500'}`}>
+        <span className={`font-medium ${selectedOption ? 'text-primary' : 'text-gray-500'}`}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
 
@@ -70,12 +70,12 @@ const CustomSelect = ({ options, value, onChange, placeholder = 'Select an optio
                     onClick={() => handleOptionClick(option.value)}
                     className={`w-full text-left flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-200 ${
                       isSelected
-                        ? 'bg-gray-900 text-white'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-primary text-white'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-primary'
                     }`}
                   >
                     <span className="font-medium">{option.label}</span>
-                    {isSelected && <Check size={16} className={isSelected ? 'text-white' : 'text-gray-900'} />}
+                    {isSelected && <Check size={16} className={isSelected ? 'text-white' : 'text-primary'} />}
                   </button>
                 );
               })}

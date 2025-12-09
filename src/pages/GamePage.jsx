@@ -257,7 +257,7 @@ const WordPuzzleGame = () => {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-16 h-16 border-4 border-gray-900 border-t-transparent rounded-full mb-4"
+          className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full mb-4"
         />
         <p className="text-gray-600 text-lg font-medium">Generating your word puzzle...</p>
       </div>
@@ -268,26 +268,26 @@ const WordPuzzleGame = () => {
     <div className="flex flex-col items-center max-w-md mx-auto">
       {/* Enhanced Header */}
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Word Puzzle</h2>
+        <h2 className="text-2xl font-bold text-primary mb-2">Word Puzzle</h2>
         <p className="text-gray-600">Guess the 5-letter word in 6 tries</p>
       </div>
 
       {/* Enhanced Stats Display */}
       <div className="grid grid-cols-4 gap-3 mb-6 w-full">
         <div className="bg-gray-50 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-gray-900">{stats.played}</p>
+          <p className="text-2xl font-bold text-primary">{stats.played}</p>
           <p className="text-xs text-gray-500 font-medium">Played</p>
         </div>
         <div className="bg-gray-50 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-gray-900">{winPercentage}%</p>
+          <p className="text-2xl font-bold text-primary">{winPercentage}%</p>
           <p className="text-xs text-gray-500 font-medium">Win Rate</p>
         </div>
         <div className="bg-gray-50 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-gray-900">{stats.streak}</p>
+          <p className="text-2xl font-bold text-primary">{stats.streak}</p>
           <p className="text-xs text-gray-500 font-medium">Streak</p>
         </div>
         <div className="bg-gray-50 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-gray-900">{stats.maxStreak}</p>
+          <p className="text-2xl font-bold text-primary">{stats.maxStreak}</p>
           <p className="text-xs text-gray-500 font-medium">Max</p>
         </div>
       </div>
@@ -357,7 +357,7 @@ const WordPuzzleGame = () => {
               <button
                 onClick={startNewGame}
                 disabled={isGenerating}
-                className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors disabled:opacity-50"
               >
                 {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
                 {isGenerating ? 'Generating...' : 'New Game'}
@@ -380,7 +380,7 @@ const WordPuzzleGame = () => {
             <button
               onClick={startNewGame}
               disabled={isGenerating}
-              className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors disabled:opacity-50 mx-auto"
+              className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition-colors disabled:opacity-50 mx-auto"
             >
               {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <RotateCcw size={16} />}
               {isGenerating ? 'Generating...' : 'Try Again'}
@@ -455,7 +455,7 @@ const WordPuzzleGame = () => {
               className="bg-white rounded-2xl p-6 max-w-sm w-full"
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Statistics</h3>
+                <h3 className="text-xl font-bold text-primary">Statistics</h3>
                 <button onClick={() => setShowStats(false)} className="text-gray-400 hover:text-gray-600">
                   <X size={20} />
                 </button>
@@ -463,25 +463,25 @@ const WordPuzzleGame = () => {
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="text-center p-3 bg-gray-50 rounded-xl">
-                  <p className="text-2xl font-bold text-gray-900">{stats.played}</p>
+                  <p className="text-2xl font-bold text-primary">{stats.played}</p>
                   <p className="text-sm text-gray-500">Played</p>
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded-xl">
-                  <p className="text-2xl font-bold text-gray-900">{winPercentage}%</p>
+                  <p className="text-2xl font-bold text-primary">{winPercentage}%</p>
                   <p className="text-sm text-gray-500">Win %</p>
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded-xl">
-                  <p className="text-2xl font-bold text-gray-900">{stats.streak}</p>
+                  <p className="text-2xl font-bold text-primary">{stats.streak}</p>
                   <p className="text-sm text-gray-500">Current Streak</p>
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded-xl">
-                  <p className="text-2xl font-bold text-gray-900">{stats.maxStreak}</p>
+                  <p className="text-2xl font-bold text-primary">{stats.maxStreak}</p>
                   <p className="text-sm text-gray-500">Max Streak</p>
                 </div>
               </div>
 
               <div className="mb-4">
-                <h4 className="font-semibold text-gray-900 mb-3">Guess Distribution</h4>
+                <h4 className="font-semibold text-primary mb-3">Guess Distribution</h4>
                 <div className="space-y-2">
                   {stats.distribution.map((count, index) => {
                     const percentage = stats.wins > 0 ? Math.round((count / stats.wins) * 100) : 0;
@@ -632,7 +632,7 @@ const SudokuGame = () => {
     <div className="flex flex-col items-center">
       {/* Enhanced Header */}
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Sudoku Challenge</h2>
+        <h2 className="text-2xl font-bold text-primary mb-2">Sudoku Challenge</h2>
         <p className="text-gray-600">Fill the grid so every row, column, and 3x3 box contains 1-9</p>
       </div>
 
@@ -643,7 +643,7 @@ const SudokuGame = () => {
             <Clock size={16} className="text-gray-500" />
             <span className="text-sm font-medium text-gray-500">Time</span>
           </div>
-          <p className="text-xl font-bold text-gray-900">{formatTime(timer)}</p>
+          <p className="text-xl font-bold text-primary">{formatTime(timer)}</p>
         </div>
       </div>
 
@@ -718,7 +718,7 @@ const SudokuGame = () => {
           onClick={handleCheck}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-700 transition-colors shadow-sm"
+          className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-700 transition-colors shadow-sm"
         >
           <Check size={18} />
           Check Solution
@@ -841,7 +841,7 @@ const MemoryMatchGame = () => {
     <div className="flex flex-col items-center">
       {/* Enhanced Header */}
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Memory Match</h2>
+        <h2 className="text-2xl font-bold text-primary mb-2">Memory Match</h2>
         <p className="text-gray-600">Find all matching pairs of cards</p>
       </div>
 
@@ -852,15 +852,15 @@ const MemoryMatchGame = () => {
             <Clock size={14} className="text-gray-500" />
             <span className="text-sm font-medium text-gray-500">Time</span>
           </div>
-          <p className="text-xl font-bold text-gray-900">{formatTime(timer)}</p>
+          <p className="text-xl font-bold text-primary">{formatTime(timer)}</p>
         </div>
         <div className="bg-gray-50 rounded-xl p-3 text-center">
           <span className="text-sm font-medium text-gray-500">Moves</span>
-          <p className="text-xl font-bold text-gray-900">{moves}</p>
+          <p className="text-xl font-bold text-primary">{moves}</p>
         </div>
         <div className="bg-gray-50 rounded-xl p-3 text-center">
           <span className="text-sm font-medium text-gray-500">Best</span>
-          <p className="text-xl font-bold text-gray-900">{bestScore || '-'}</p>
+          <p className="text-xl font-bold text-primary">{bestScore || '-'}</p>
         </div>
       </div>
 
@@ -905,7 +905,7 @@ const MemoryMatchGame = () => {
               transformStyle: 'preserve-3d',
             }}
           >
-            <div className="absolute inset-0 backface-hidden flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200">
+            <div className="absolute inset-0 backface-hidden flex items-center justify-center bg-gradient-to-br from-gray-800 to-primary rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200">
               <Star className="text-yellow-400 opacity-60" size={20} />
             </div>
             <div className="absolute inset-0 backface-hidden flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 rounded-xl" style={{ transform: 'rotateY(180deg)' }}>
@@ -919,7 +919,7 @@ const MemoryMatchGame = () => {
         onClick={createBoard}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-700 transition-colors shadow-sm"
+        className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-700 transition-colors shadow-sm"
       >
         <RotateCcw size={18} />
         New Game
@@ -988,11 +988,11 @@ const GamePage = () => {
           <motion.div
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
-            className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-lg mb-6"
+            className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-gray-800 rounded-2xl shadow-lg mb-6"
           >
             <Gamepad2 className="text-white" size={32} />
           </motion.div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Brain Games Arena</h1>
+          <h1 className="text-4xl font-bold text-primary mb-4">Brain Games Arena</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Challenge your mind with our collection of engaging puzzles and games.
             All progress is saved automatically.
@@ -1030,7 +1030,7 @@ const GamePage = () => {
                   {isActive && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl -z-10"
+                      className="absolute inset-0 bg-gradient-to-br from-primary to-gray-800 rounded-xl -z-10"
                       initial={false}
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />

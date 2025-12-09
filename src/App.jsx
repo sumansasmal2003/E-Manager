@@ -7,6 +7,7 @@ import TeamsPage from './pages/TeamsPage';
 import DashboardLayout from './layouts/DashboardLayout';
 
 // Pages
+import SetupOrganizationPage from './pages/SetupOrganizationPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import NotesPage from './pages/NotesPage';
@@ -22,10 +23,18 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ProfilePage from './pages/ProfilePage';
 import GamePage from './pages/GamePage';
 import SystemLogPage from './pages/SystemLogPage';
+import ManagersPage from './pages/ManagersPage'; // <-- Import
+import PricingPage from './pages/PricingPage';
+import FeaturesPage from './pages/FeaturesPage';
+import Pricing from './pages/Pricing';
+import SecurityPage from './pages/SecurityPage';
+import AboutPage from './pages/AboutPage';
+import CareersPage from './pages/CareersPage';
+import ContactPage from './pages/ContactPage';
+import CookiePolicyPage from './pages/CookiePolicyPage';
 
-// --- IMPORT NAVBAR AND NEW COMPONENTS ---
 import Navbar from './components/Navbar';
-import Home from './components/Home'; // <-- IMPORT HOME
+import Home from './components/Home';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import SupportPage from './pages/SupportPage';
@@ -42,19 +51,27 @@ function App() {
       <main>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Home />} /> {/* <-- THIS IS THE NEW / ROUTE */}
+          <Route path="/" element={<Home />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/terms" element={<TermsOfServicePage />} />
+          <Route path="/cookies" element={<CookiePolicyPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/features" element={<FeaturesPage />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/security" element={<SecurityPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/careers" element={<CareersPage />} />
+          <Route path="/contact" element={<ContactPage />} />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
+            <Route path="/setup-organization" element={<SetupOrganizationPage />} />
             <Route element={<DashboardLayout />}>
-              {/* The old '/' route is now '/today' */}
               <Route path="/today" element={<TodayPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/managers" element={<ManagersPage />} /> {/* <-- Add Route */}
               <Route path="/notes" element={<NotesPage />} />
               <Route path="/teams" element={<TeamsPage />} />
               <Route path="/team/:teamId" element={<TeamDetailPage />} />
@@ -69,6 +86,7 @@ function App() {
               <Route path="/games" element={<GamePage />} />
               <Route path="/ai-usage" element={<AiUsagePage />} />
               <Route path="/system-logs" element={<SystemLogPage />} />
+              <Route path="/billing" element={<PricingPage />} />
             </Route>
           </Route>
 

@@ -124,7 +124,7 @@ const CopyTasksModal = ({ isOpen, onClose, tasks, teamName }) => {
           className={`w-full flex items-center justify-center space-x-2 font-medium py-3 px-4 rounded-lg transition-all duration-200 ${
             copied
               ? 'bg-green-600 text-white'
-              : 'bg-gray-900 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2'
+              : 'bg-primary text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
           }`}
           whileHover={{ scale: copied ? 1 : 1.02 }}
           whileTap={{ scale: copied ? 1 : 0.98 }}

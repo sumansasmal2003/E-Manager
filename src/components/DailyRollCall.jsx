@@ -140,7 +140,7 @@ const ErrorState = ({ error, onRetry }) => (
 const EmptyState = () => (
   <div className="text-center py-12 px-6">
     <Users className="mx-auto text-gray-300 mb-4" size={48} />
-    <h3 className="text-lg font-medium text-gray-900 mb-2">No Team Members</h3>
+    <h3 className="text-lg font-medium text-primary mb-2">No Team Members</h3>
     <p className="text-gray-500 text-sm max-w-sm mx-auto">
       Get started by adding team members to track their daily attendance and manage schedules.
     </p>
@@ -164,7 +164,7 @@ const MemberRow = React.memo(({ member, status, isSaving, onStatusChange }) => {
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-gray-900 truncate">
+          <p className="text-sm font-semibold text-primary truncate">
             {member.name}
           </p>
           <p className="text-xs text-gray-500 truncate">
@@ -232,7 +232,7 @@ const DailyRollCall = () => {
               <UserCheck className="text-white" size={24} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Daily Roll Call</h1>
+              <h1 className="text-xl font-bold text-primary">Daily Roll Call</h1>
               <p className="text-sm text-gray-600 flex items-center gap-1.5 mt-0.5">
                 <Calendar size={14} />
                 {format(new Date(), 'EEEE, MMMM d, yyyy')}
@@ -243,12 +243,12 @@ const DailyRollCall = () => {
           {/* Stats */}
           <div className="flex items-center gap-4 text-sm">
             <div className="text-right">
-              <div className="font-semibold text-gray-900">{stats.present} / {stats.total}</div>
+              <div className="font-semibold text-primary">{stats.present} / {stats.total}</div>
               <div className="text-gray-500">Present</div>
             </div>
             <div className="w-px h-8 bg-gray-200"></div>
             <div className="text-right">
-              <div className="font-semibold text-gray-900">{stats.marked} / {stats.total}</div>
+              <div className="font-semibold text-primary">{stats.marked} / {stats.total}</div>
               <div className="text-gray-500">Marked</div>
             </div>
           </div>

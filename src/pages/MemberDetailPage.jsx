@@ -192,7 +192,7 @@ const MemberDetailPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <Loader2 className="animate-spin text-gray-900 mb-4 mx-auto" size={32} />
+          <Loader2 className="animate-spin text-primary mb-4 mx-auto" size={32} />
           <p className="text-gray-600">Loading member details...</p>
         </motion.div>
       </div>
@@ -212,11 +212,11 @@ const MemberDetailPage = () => {
               <AlertCircle size={24} className="text-red-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">Unable to load member</h3>
+              <h3 className="text-lg font-semibold text-primary mb-1">Unable to load member</h3>
               <p className="text-gray-600 text-sm mb-3">{error}</p>
               <Link
                 to="/members"
-                className="inline-flex items-center text-gray-700 hover:text-gray-900 font-medium text-sm"
+                className="inline-flex items-center text-gray-700 hover:text-primary font-medium text-sm"
               >
                 <ArrowLeft size={16} className="mr-2" />
                 Back to all members
@@ -251,7 +251,7 @@ const MemberDetailPage = () => {
         >
           <Link
             to="/members"
-            className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium text-sm bg-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl border border-gray-200 shadow-sm hover:shadow-md w-fit"
+            className="inline-flex items-center text-gray-600 hover:text-primary transition-colors duration-200 font-medium text-sm bg-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl border border-gray-200 shadow-sm hover:shadow-md w-fit"
           >
             <ArrowLeft size={16} className="mr-2" />
             <span className="hidden sm:inline">Back to all members</span>
@@ -265,14 +265,14 @@ const MemberDetailPage = () => {
                 <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6 w-full lg:flex-1">
                   <div className="flex justify-center sm:justify-start">
                     <div className="relative">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary to-gray-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
                         <span className="text-white text-xl sm:text-2xl font-bold">
                           {memberName.charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <button
                         onClick={() => setIsProfileModalOpen(true)}
-                        className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-gray-900 text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors duration-200 shadow-lg"
+                        className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-primary text-white rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors duration-200 shadow-lg"
                         title="Edit profile"
                       >
                         <Edit size={12} className="sm:w-3 sm:h-3" />
@@ -282,7 +282,7 @@ const MemberDetailPage = () => {
 
                   <div className="flex-1 min-w-0 text-center sm:text-left">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 break-words">
+                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary break-words">
                         {memberName}
                       </h1>
                     </div>
@@ -303,7 +303,7 @@ const MemberDetailPage = () => {
                           <Mail size={14} className="flex-shrink-0" />
                           <a
                             href={`mailto:${profile.email}`}
-                            className="text-gray-900 hover:text-gray-700 font-medium text-xs sm:text-sm break-all"
+                            className="text-primary hover:text-gray-700 font-medium text-xs sm:text-sm break-all"
                           >
                             {profile.email}
                           </a>
@@ -325,7 +325,7 @@ const MemberDetailPage = () => {
                       <button
                         onClick={handleSendMemberReport}
                         disabled={isSendingReport || !profile?.email}
-                        className="bg-gray-900 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl flex items-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl w-full sm:w-auto justify-center"
+                        className="bg-primary text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl flex items-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-primary focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl w-full sm:w-auto justify-center"
                       >
                         {isSendingReport ? (
                           <Loader2 size={16} className="animate-spin sm:w-4 sm:h-4" />
@@ -378,7 +378,7 @@ const MemberDetailPage = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center space-x-1 sm:space-x-2 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
                     activeTab === tab.id
-                      ? 'border-gray-900 text-gray-900'
+                      ? 'border-primary text-primary'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
@@ -387,7 +387,7 @@ const MemberDetailPage = () => {
                   {tab.count > 0 && (
                     <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium min-w-[20px] sm:min-w-[24px] ${
                       activeTab === tab.id
-                        ? 'bg-gray-900 text-white'
+                        ? 'bg-primary text-white'
                         : 'bg-gray-100 text-gray-700'
                     }`}>
                       {tab.count}
@@ -420,9 +420,9 @@ const MemberDetailPage = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   {/* Completion Rate Card */}
                   <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Task Completion</h3>
+                    <h3 className="text-lg font-semibold text-primary mb-3 sm:mb-4">Task Completion</h3>
                     <div className="flex items-center justify-between mb-3 sm:mb-4">
-                      <div className="text-2xl sm:text-3xl font-bold text-gray-900">
+                      <div className="text-2xl sm:text-3xl font-bold text-primary">
                         {stats.completionRate}%
                       </div>
                       <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center ${
@@ -453,7 +453,7 @@ const MemberDetailPage = () => {
 
                   {/* Recent Activity Summary */}
                   <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Recent Activity</h3>
+                    <h3 className="text-lg font-semibold text-primary mb-3 sm:mb-4">Recent Activity</h3>
                     <div className="space-y-2 sm:space-y-3">
                       {activities.slice(0, 3).map((activity) => (
                         <div key={activity._id} className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
@@ -481,17 +481,17 @@ const MemberDetailPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                   <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6 text-center">
                     <Calendar className="mx-auto text-blue-600 mb-2 sm:mb-3 w-5 h-5 sm:w-6 sm:h-6" />
-                    <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{meetings.length}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-primary mb-1">{meetings.length}</div>
                     <div className="text-xs sm:text-sm text-gray-600">Meetings</div>
                   </div>
                   <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6 text-center">
                     <Users className="mx-auto text-green-600 mb-2 sm:mb-3 w-5 h-5 sm:w-6 sm:h-6" />
-                    <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{oneOnOnes.length}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-primary mb-1">{oneOnOnes.length}</div>
                     <div className="text-xs sm:text-sm text-gray-600">1-on-1s</div>
                   </div>
                   <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6 text-center">
                     <Clock className="mx-auto text-purple-600 mb-2 sm:mb-3 w-5 h-5 sm:w-6 sm:h-6" />
-                    <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{activities.length}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-primary mb-1">{activities.length}</div>
                     <div className="text-xs sm:text-sm text-gray-600">Activities</div>
                   </div>
                 </div>
@@ -507,7 +507,7 @@ const MemberDetailPage = () => {
                 className="space-y-4 sm:space-y-6"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
-                  <h2 className="text-xl font-semibold text-gray-900">Assigned Tasks</h2>
+                  <h2 className="text-xl font-semibold text-primary">Assigned Tasks</h2>
                   <span className="text-sm text-gray-600">
                     {tasks.length} task{tasks.length !== 1 ? 's' : ''}
                   </span>
@@ -518,7 +518,7 @@ const MemberDetailPage = () => {
                     tasks.map(task => (
                       <div key={task._id} className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
                         <p className="text-sm font-medium text-gray-500 mb-3">
-                          From Team: <Link to={`/team/${task.team._id}`} className="text-gray-900 hover:text-gray-700 font-semibold">{task.team.teamName}</Link>
+                          From Team: <Link to={`/team/${task.team._id}`} className="text-primary hover:text-gray-700 font-semibold">{task.team.teamName}</Link>
                         </p>
                         <TaskItem
                           task={task}
@@ -530,7 +530,7 @@ const MemberDetailPage = () => {
                   ) : (
                     <div className="text-center py-8 sm:py-12 bg-white border border-gray-200 rounded-2xl">
                       <ClipboardList size={40} className="mx-auto text-gray-300 mb-3 sm:mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No tasks assigned</h3>
+                      <h3 className="text-lg font-semibold text-primary mb-2">No tasks assigned</h3>
                       <p className="text-gray-600 text-sm sm:text-base">This member doesn't have any assigned tasks yet.</p>
                     </div>
                   )}
@@ -547,7 +547,7 @@ const MemberDetailPage = () => {
                 className="space-y-4 sm:space-y-6"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
-                  <h2 className="text-xl font-semibold text-gray-900">Scheduled Meetings</h2>
+                  <h2 className="text-xl font-semibold text-primary">Scheduled Meetings</h2>
                   <span className="text-sm text-gray-600">
                     {meetings.length} meeting{meetings.length !== 1 ? 's' : ''}
                   </span>
@@ -563,7 +563,7 @@ const MemberDetailPage = () => {
                   ) : (
                     <div className="text-center py-8 sm:py-12 bg-white border border-gray-200 rounded-2xl">
                       <Calendar size={40} className="mx-auto text-gray-300 mb-3 sm:mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No meetings scheduled</h3>
+                      <h3 className="text-lg font-semibold text-primary mb-2">No meetings scheduled</h3>
                       <p className="text-gray-600 text-sm sm:text-base">This member doesn't have any scheduled meetings.</p>
                     </div>
                   )}
@@ -580,7 +580,7 @@ const MemberDetailPage = () => {
                 className="space-y-4 sm:space-y-6"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
-                  <h2 className="text-xl font-semibold text-gray-900">1-on-1 Records</h2>
+                  <h2 className="text-xl font-semibold text-primary">1-on-1 Records</h2>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       onClick={handleGenerateTalkingPoints}
@@ -600,7 +600,7 @@ const MemberDetailPage = () => {
                         setAiTalkingPoints(''); // Ensure points are empty
                         setIsOneOnOneModalOpen(true);
                       }}
-                      className="bg-gray-900 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="bg-primary text-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
                       <Plus size={16} />
                       <span>Schedule 1-on-1</span>
@@ -621,7 +621,7 @@ const MemberDetailPage = () => {
                   ) : (
                     <div className="text-center py-8 sm:py-12 bg-white border border-gray-200 rounded-2xl">
                       <Users size={40} className="mx-auto text-gray-300 mb-3 sm:mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No 1-on-1s scheduled</h3>
+                      <h3 className="text-lg font-semibold text-primary mb-2">No 1-on-1s scheduled</h3>
                       <p className="text-gray-600 text-sm sm:text-base">Schedule your first 1-on-1 to keep track of notes and action items.</p>
                     </div>
                   )}
@@ -638,7 +638,7 @@ const MemberDetailPage = () => {
                 className="space-y-4 sm:space-y-6"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
-                  <h2 className="text-xl font-semibold text-gray-900">Recent Activity</h2>
+                  <h2 className="text-xl font-semibold text-primary">Recent Activity</h2>
                   <span className="text-sm text-gray-600">
                     {activities.length} activit{activities.length !== 1 ? 'ies' : 'y'}
                   </span>
@@ -655,7 +655,7 @@ const MemberDetailPage = () => {
                     ) : (
                       <div className="text-center py-8 sm:py-12">
                         <Activity size={40} className="mx-auto text-gray-300 mb-3 sm:mb-4" />
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No recent activity</h3>
+                        <h3 className="text-lg font-semibold text-primary mb-2">No recent activity</h3>
                         <p className="text-gray-600 text-sm sm:text-base">This member hasn't been mentioned in any activity logs.</p>
                       </div>
                     )}

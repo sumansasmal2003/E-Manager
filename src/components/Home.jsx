@@ -11,7 +11,7 @@ const Home = () => {
     // Show a full-page loader while checking auth status
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="animate-spin text-gray-900" size={48} />
+        <Loader2 className="animate-spin text-primary" size={48} />
       </div>
     );
   }

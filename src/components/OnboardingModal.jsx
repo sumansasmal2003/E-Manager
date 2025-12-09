@@ -12,12 +12,12 @@ const OnboardingModal = ({ isOpen, onClose }) => {
           initial={{ scale: 0 }}
           animate={{ scale: 1, rotate: 360 }}
           transition={{ type: 'spring', stiffness: 200, damping: 10, delay: 0.2 }}
-          className="w-20 h-20 bg-gray-900 rounded-2xl flex items-center justify-center mb-6 shadow-xl"
+          className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mb-6 shadow-xl"
         >
           <Zap size={32} className="text-white" />
         </motion.div>
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">
+        <h2 className="text-2xl font-bold text-primary mb-3">
           Welcome to E-Manager!
         </h2>
         <p className="text-gray-600 mb-8 max-w-sm">
@@ -66,7 +66,7 @@ const OnboardingModal = ({ isOpen, onClose }) => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onClose}
-          className="w-full mt-10 bg-gray-900 text-white font-medium py-3 px-6 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+          className="w-full mt-10 bg-primary text-white font-medium py-3 px-6 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
         >
           Got It, Let's Go!
         </motion.button>

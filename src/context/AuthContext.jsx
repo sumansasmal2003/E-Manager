@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext();
 
@@ -18,27 +18,20 @@ export const AuthProvider = ({ children }) => {
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
 
-        // ... (existing backwards compatibility checks)
-        if (parsedUser.connecteamAccounts === undefined) {
-          parsedUser.connecteamAccounts = [];
-        }
-        if (parsedUser.googleCalendarConnected === undefined) {
-          parsedUser.googleCalendarConnected = false;
-        }
+        // Backwards compatibility: Ensure specific fields exist
+        if (parsedUser.connecteamAccounts === undefined) parsedUser.connecteamAccounts = [];
+        if (parsedUser.googleCalendarConnected === undefined) parsedUser.googleCalendarConnected = false;
         if (parsedUser.companyName === undefined) parsedUser.companyName = '';
-        if (parsedUser.companyAddress === undefined) parsedUser.companyAddress = '';
-        if (parsedUser.companyWebsite === undefined) parsedUser.companyWebsite = '';
-        if (parsedUser.ceoName === undefined) parsedUser.ceoName = '';
-        if (parsedUser.hrName === undefined) parsedUser.hrName = '';
-        if (parsedUser.hrEmail === undefined) parsedUser.hrEmail = '';
+        if (parsedUser.createdAt === undefined) parsedUser.createdAt = null;
+        if (parsedUser.isTwoFactorEnabled === undefined) parsedUser.isTwoFactorEnabled = false;
 
-        // --- ADD DEFAULT FOR createdAt ---
-        if (parsedUser.createdAt === undefined) {
-          parsedUser.createdAt = null; // Use null as a fallback
+        // Branding fallback
+        if (!parsedUser.branding) {
+           parsedUser.branding = { logoUrl: '', primaryColor: '#111827' };
         }
-        // --- END DEFAULT ---
 
         setUser(parsedUser);
+
         const hasBeenOnboarded = localStorage.getItem('eManagerOnboarded') === 'true';
         if (!hasBeenOnboarded) {
           setIsFirstLogin(true);
@@ -52,39 +45,48 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (userData) => {
+  // --- LOGIN (Wrapped in useCallback to prevent infinite loops) ---
+  const login = useCallback((userData) => {
+    // Check onboarding status
     const hasBeenOnboarded = localStorage.getItem('eManagerOnboarded') === 'true';
     if (!hasBeenOnboarded) {
       setIsFirstLogin(true);
       localStorage.setItem('eManagerOnboarded', 'true');
     }
-    // Store user data in state and local storage
+
+    // Ensure critical objects exist
+    if (!userData.branding) {
+      userData.branding = { logoUrl: '', primaryColor: '#111827' };
+    }
+
+    // Save to Storage & State
     localStorage.setItem('eManagerUser', JSON.stringify(userData));
     setUser(userData);
-  };
+  }, []);
 
-  const logout = () => {
-    // Remove user data
+  // --- LOGOUT (Wrapped in useCallback) ---
+  const logout = useCallback(() => {
     localStorage.removeItem('eManagerUser');
     setUser(null);
-  };
+    // Note: ThemeContext listens to 'user' changing to null and will reset branding automatically
+  }, []);
 
   const value = {
     user,
     token: user?.token,
-    connecteamAccounts: user?.connecteamAccounts || [],
     isLoggedIn: !!user,
     loading,
     login,
     logout,
     isFirstLogin,
+
+    // Quick accessors (Optional, but helpful)
     companyName: user?.companyName || '',
-    companyAddress: user?.companyAddress || '',
-    companyWebsite: user?.companyWebsite || '',
-    ceoName: user?.ceoName || '',
-    hrName: user?.hrName || '',
-    hrEmail: user?.hrEmail || '',
-    // No need to expose createdAt here, components can get it from the 'user' object
+    isTwoFactorEnabled: user?.isTwoFactorEnabled || false,
+    branding: user?.branding || { logoUrl: '', primaryColor: '#111827' },
+    role: user?.role || 'owner',
+    permissions: user?.permissions || {},
+    connecteamAccounts: user?.connecteamAccounts || [],
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

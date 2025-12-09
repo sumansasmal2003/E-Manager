@@ -249,18 +249,18 @@ const AttendancePage = () => {
       {/* Enhanced Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
             <Calendar className="text-white" size={24} />
           </div>
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Attendance Management</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-primary mb-2">Attendance Management</h1>
             <p className="text-gray-600">Track and manage team attendance with comprehensive analytics</p>
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
           <button
             onClick={() => setIsExportModalOpen(true)}
-            className="flex items-center justify-center space-x-3 bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-all duration-200 font-medium shadow-sm"
+            className="flex items-center justify-center space-x-3 bg-primary text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-all duration-200 font-medium shadow-sm"
           >
             <Download size={18} />
             <span>Export Report</span>
@@ -270,7 +270,7 @@ const AttendancePage = () => {
           <div className="flex items-center bg-white border border-gray-300 rounded-lg p-2 shadow-sm">
             <button
               onClick={() => setCurrentMonth(new Date())}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-primary hover:bg-gray-100 rounded-md transition-colors"
               title="Go to Today"
             >
               Today
@@ -278,16 +278,16 @@ const AttendancePage = () => {
             <div className="flex items-center border-l border-gray-300 pl-2 ml-2">
               <button
                 onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-md transition-colors"
               >
                 <ChevronLeft size={20} />
               </button>
-              <span className="font-semibold text-gray-900 text-center w-32 px-4">
+              <span className="font-semibold text-primary text-center w-32 px-4">
                 {formattedMonth}
               </span>
               <button
                 onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-md transition-colors"
               >
                 <ChevronRight size={20} />
               </button>
@@ -319,7 +319,7 @@ const AttendancePage = () => {
           <div className="flex items-center space-x-3 mb-6">
             <Calendar className="text-gray-600" size={20} />
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Today's Overview</h2>
+              <h2 className="text-lg font-semibold text-primary">Today's Overview</h2>
               <p className="text-sm text-gray-600">{format(new Date(), 'EEEE, MMMM dd, yyyy')}</p>
             </div>
           </div>
@@ -328,7 +328,7 @@ const AttendancePage = () => {
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{todayStats.Present}</p>
+                  <p className="text-2xl font-bold text-primary">{todayStats.Present}</p>
                   <p className="text-sm text-gray-600">Present</p>
                 </div>
                 <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -339,7 +339,7 @@ const AttendancePage = () => {
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{todayStats.Absent}</p>
+                  <p className="text-2xl font-bold text-primary">{todayStats.Absent}</p>
                   <p className="text-sm text-gray-600">Absent</p>
                 </div>
                 <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
@@ -350,7 +350,7 @@ const AttendancePage = () => {
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{todayStats.Leave}</p>
+                  <p className="text-2xl font-bold text-primary">{todayStats.Leave}</p>
                   <p className="text-sm text-gray-600">On Leave</p>
                 </div>
                 <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -366,7 +366,7 @@ const AttendancePage = () => {
           <div className="flex items-center space-x-3 mb-6">
             <BarChart3 className="text-gray-600" size={20} />
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Monthly Overview</h2>
+              <h2 className="text-lg font-semibold text-primary">Monthly Overview</h2>
               <p className="text-sm text-gray-600">{formattedMonth} Performance</p>
             </div>
           </div>
@@ -375,7 +375,7 @@ const AttendancePage = () => {
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{monthlyStats.Present}</p>
+                  <p className="text-2xl font-bold text-primary">{monthlyStats.Present}</p>
                   <p className="text-sm text-gray-600">Present Days</p>
                 </div>
                 <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -386,7 +386,7 @@ const AttendancePage = () => {
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{monthlyStats.totalDays}</p>
+                  <p className="text-2xl font-bold text-primary">{monthlyStats.totalDays}</p>
                   <p className="text-sm text-gray-600">Total Days</p>
                 </div>
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -397,7 +397,7 @@ const AttendancePage = () => {
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{monthlyStats.attendanceRate.toFixed(1)}%</p>
+                  <p className="text-2xl font-bold text-primary">{monthlyStats.attendanceRate.toFixed(1)}%</p>
                   <p className="text-sm text-gray-600">Attendance Rate</p>
                 </div>
                 <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -416,9 +416,9 @@ const AttendancePage = () => {
             <div className="flex items-center space-x-3">
               <Users className="text-gray-600" size={20} />
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Monthly Attendance Grid</h2>
+                <h2 className="text-xl font-semibold text-primary">Monthly Attendance Grid</h2>
                 <p className="text-gray-600 mt-1">
-                  Filter grid rows based on <span className="font-bold text-gray-900">today's</span> status
+                  Filter grid rows based on <span className="font-bold text-primary">today's</span> status
                 </p>
               </div>
             </div>
@@ -436,12 +436,12 @@ const AttendancePage = () => {
         {/* Member Grid */}
         {loadingMembers ? (
           <div className="flex flex-col items-center justify-center h-64 space-y-4">
-            <Loader2 className="animate-spin text-gray-900" size={32} />
+            <Loader2 className="animate-spin text-primary" size={32} />
             <p className="text-gray-600">Loading team members...</p>
           </div>
         ) : loadingRecords ? (
            <div className="flex flex-col items-center justify-center h-64 space-y-4">
-            <Loader2 className="animate-spin text-gray-900" size={32} />
+            <Loader2 className="animate-spin text-primary" size={32} />
             <p className="text-gray-600">Loading attendance records...</p>
           </div>
         ) : (
@@ -458,7 +458,7 @@ const AttendancePage = () => {
             ) : (
               <div className="text-center py-16">
                 <Users size={48} className="mx-auto text-gray-300 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-primary mb-2">
                   {statusFilter === 'all' ? 'No team members' : 'No members found'}
                 </h3>
                 <p className="text-gray-600 max-w-sm mx-auto">

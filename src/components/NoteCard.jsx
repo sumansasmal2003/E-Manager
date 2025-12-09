@@ -46,7 +46,7 @@ const NoteCard = ({ note, onDelete, onEdit }) => {
       {/* Header */}
       <div className="flex justify-between items-start space-x-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">{note.title}</h3>
+          <h3 className="text-lg font-semibold text-primary truncate">{note.title}</h3>
           <div className="flex items-center space-x-2 mt-1">
             <Calendar size={12} className="text-gray-400" />
             <span className="text-xs text-gray-500">{formattedDate}</span>

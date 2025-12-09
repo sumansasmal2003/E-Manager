@@ -22,7 +22,7 @@ const TeamCard = ({ team, onDelete }) => {
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">{team.teamName}</h3>
+          <h3 className="text-lg font-semibold text-primary truncate">{team.teamName}</h3>
           <div className="flex items-center space-x-2 mt-1">
             <Users size={14} className="text-gray-400" />
             <span className="text-sm text-gray-500">
@@ -51,14 +51,14 @@ const TeamCard = ({ team, onDelete }) => {
       {/* Owner Info */}
       <div className="mb-4">
         <p className="text-sm text-gray-600">
-          Owned by: <span className="font-medium text-gray-900">{team.owner.username}</span>
+          Owned by: <span className="font-medium text-primary">{team.owner.username}</span>
         </p>
       </div>
 
       {/* Action Link */}
       <Link
         to={`/team/${team._id}`}
-        className="inline-flex items-center text-gray-700 font-medium hover:text-gray-900 transition-colors group/link"
+        className="inline-flex items-center text-gray-700 font-medium hover:text-primary transition-colors group/link"
       >
         <span>View Team</span>
         <ArrowRight size={16} className="ml-2 group-hover/link:translate-x-1 transition-transform duration-200" />

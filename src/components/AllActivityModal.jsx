@@ -32,7 +32,7 @@ const AllActivityModal = ({ isOpen, onClose, teamId, teamName }) => {
       <div className="max-h-[70vh] overflow-y-auto pr-2">
         {loading && (
           <div className="flex justify-center items-center h-48">
-            <Loader2 className="animate-spin text-gray-900" size={32} />
+            <Loader2 className="animate-spin text-primary" size={32} />
           </div>
         )}
 

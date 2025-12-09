@@ -94,11 +94,11 @@ const AttendanceModal = ({ isOpen, onClose, selectedDate, members }) => {
               key={member}
               className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg"
             >
-              <span className="font-medium text-gray-900">{member}</span>
+              <span className="font-medium text-primary">{member}</span>
               <select
                 value={records[member] || 'Present'}
                 onChange={(e) => handleStatusChange(member, e.target.value)}
-                className={`text-sm font-medium border rounded-md focus:ring-2 focus:ring-gray-900 transition-colors ${getStatusColor(
+                className={`text-sm font-medium border rounded-md focus:ring-2 focus:ring-primary transition-colors ${getStatusColor(
                   records[member] || 'Present'
                 )}`}
               >

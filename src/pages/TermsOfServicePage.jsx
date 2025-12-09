@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FileText, Shield, ChevronRight, Mail, Clock, UserCheck, AlertTriangle, Scale } from 'lucide-react';
-import Navbar from '../components/Navbar';
 
 const TermsOfServicePage = () => {
   const lastUpdated = "November 13, 2025";
@@ -35,10 +34,10 @@ const TermsOfServicePage = () => {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-900 rounded-2xl mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-6">
               <Shield className="text-white" size={32} />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
               Terms of Service
             </h1>
             <div className="flex items-center justify-center space-x-4 text-lg text-gray-600">
@@ -59,7 +58,7 @@ const TermsOfServicePage = () => {
             className="lg:col-span-1"
           >
             <div className="sticky top-24 bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+              <h3 className="font-semibold text-primary mb-4 flex items-center">
                 <FileText size={18} className="mr-2" />
                 Contents
               </h3>
@@ -70,7 +69,7 @@ const TermsOfServicePage = () => {
                     onClick={() => scrollToSection(section.id)}
                     className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 group"
                   >
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                    <span className="text-sm font-medium text-gray-700 group-hover:text-primary">
                       {section.title}
                     </span>
                     <ChevronRight size={16} className="text-gray-400 group-hover:text-gray-600" />
@@ -95,7 +94,7 @@ const TermsOfServicePage = () => {
                     <Scale size={24} className="text-blue-600" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to E-Manager</h2>
+                    <h2 className="text-2xl font-bold text-primary mb-4">Welcome to E-Manager</h2>
                     <p className="text-gray-700 leading-relaxed mb-4">
                       These Terms of Service ("Terms") govern your access to and use of our web application
                       (the "Service"). Please read these Terms carefully before using the Service.
@@ -115,21 +114,21 @@ const TermsOfServicePage = () => {
                 {/* Accounts Section */}
                 <section id="accounts" className="p-8">
                   <div className="flex items-center space-x-3 mb-6">
-                    <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                       <UserCheck size={16} className="text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900">1. Accounts</h3>
+                    <h3 className="text-2xl font-bold text-primary">1. Accounts</h3>
                   </div>
                   <div className="space-y-4 text-gray-700">
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">1.1. Account Creation</h4>
+                      <h4 className="font-semibold text-primary mb-2">1.1. Account Creation</h4>
                       <p>
                         To use the Service, you must register for an account. You agree to provide
                         accurate, current, and complete information during the registration process.
                       </p>
                     </div>
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">1.2. Account Responsibility</h4>
+                      <h4 className="font-semibold text-primary mb-2">1.2. Account Responsibility</h4>
                       <p>
                         You are responsible for safeguarding your password and for all activities that
                         occur under your account. You must notify us immediately of any unauthorized use of your account.
@@ -140,10 +139,10 @@ const TermsOfServicePage = () => {
 
                 {/* The Service Section */}
                 <section id="service" className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">2. The Service</h3>
+                  <h3 className="text-2xl font-bold text-primary mb-6">2. The Service</h3>
                   <div className="space-y-4 text-gray-700">
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">2.1. Description</h4>
+                      <h4 className="font-semibold text-primary mb-2">2.1. Description</h4>
                       <p>
                         The Service is a personal and team management tool designed for leaders. It allows
                         you to create teams, manage members (as text entries), assign tasks, schedule meetings,
@@ -151,7 +150,7 @@ const TermsOfServicePage = () => {
                       </p>
                     </div>
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">2.2. User Content</h4>
+                      <h4 className="font-semibold text-primary mb-2">2.2. User Content</h4>
                       <p>
                         You own all data, information, and content you submit to the Service ("User Content").
                         This includes, but is not limited to, team names, member names, task details, note
@@ -159,7 +158,7 @@ const TermsOfServicePage = () => {
                       </p>
                     </div>
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">2.3. Responsibility for Content</h4>
+                      <h4 className="font-semibold text-primary mb-2">2.3. Responsibility for Content</h4>
                       <p>
                         You are solely responsible for the accuracy, legality, and appropriateness of all
                         User Content you create or store using the Service. E-Manager is a tool for your use,
@@ -175,7 +174,7 @@ const TermsOfServicePage = () => {
                     <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
                       <AlertTriangle size={16} className="text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900">3. Third-Party Integrations</h3>
+                    <h3 className="text-2xl font-bold text-primary">3. Third-Party Integrations</h3>
                   </div>
                   <div className="space-y-6 text-gray-700">
                     <p>
@@ -215,7 +214,7 @@ const TermsOfServicePage = () => {
 
                 {/* Acceptable Use */}
                 <section id="acceptable-use" className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">4. Acceptable Use</h3>
+                  <h3 className="text-2xl font-bold text-primary mb-6">4. Acceptable Use</h3>
                   <p className="text-gray-700 mb-4">You agree not to use the Service to:</p>
                   <ul className="space-y-3 text-gray-700">
                     {[
@@ -226,7 +225,7 @@ const TermsOfServicePage = () => {
                       "Use the Service for any purpose other than its intended use as a management tool"
                     ].map((item, index) => (
                       <li key={index} className="flex items-start space-x-3">
-                        <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <div className="w-1.5 h-1.5 bg-white rounded-full" />
                         </div>
                         <span>{item}</span>
@@ -237,16 +236,16 @@ const TermsOfServicePage = () => {
 
                 {/* Termination */}
                 <section id="termination" className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">5. Termination</h3>
+                  <h3 className="text-2xl font-bold text-primary mb-6">5. Termination</h3>
                   <div className="space-y-4 text-gray-700">
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">5.1. By You</h4>
+                      <h4 className="font-semibold text-primary mb-2">5.1. By You</h4>
                       <p>
                         You can stop using the Service and request account deletion at any time by contacting us.
                       </p>
                     </div>
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">5.2. By Us</h4>
+                      <h4 className="font-semibold text-primary mb-2">5.2. By Us</h4>
                       <p>
                         We reserve the right to suspend or terminate your account and access to the Service
                         at our sole discretion, without notice, if you breach these Terms.
@@ -257,17 +256,17 @@ const TermsOfServicePage = () => {
 
                 {/* Liability */}
                 <section id="liability" className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">6. Disclaimers and Limitation of Liability</h3>
+                  <h3 className="text-2xl font-bold text-primary mb-6">6. Disclaimers and Limitation of Liability</h3>
                   <div className="space-y-4 text-gray-700">
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">6.1. "AS IS" Service</h4>
+                      <h4 className="font-semibold text-primary mb-2">6.1. "AS IS" Service</h4>
                       <p>
                         The Service is provided "AS IS" and "AS AVAILABLE" without any warranties of any kind,
                         express or implied. We do not warrant that the Service will be uninterrupted, error-free, or secure.
                       </p>
                     </div>
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">6.2. Limitation of Liability</h4>
+                      <h4 className="font-semibold text-primary mb-2">6.2. Limitation of Liability</h4>
                       <p>
                         To the fullest extent permitted by law, E-Manager shall not be liable for any indirect,
                         incidental, special, consequential, or punitive damages, or any loss of profits or
@@ -280,7 +279,7 @@ const TermsOfServicePage = () => {
 
                 {/* Changes to Terms */}
                 <section id="changes" className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">7. Changes to Terms</h3>
+                  <h3 className="text-2xl font-bold text-primary mb-6">7. Changes to Terms</h3>
                   <p className="text-gray-700">
                     We reserve the right to modify these Terms at any time. If we make changes, we will
                     provide notice by updating the "Last Updated" date at the top of these Terms. Your
@@ -290,7 +289,7 @@ const TermsOfServicePage = () => {
 
                 {/* Contact Information */}
                 <section id="contact" className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">8. Contact Information</h3>
+                  <h3 className="text-2xl font-bold text-primary mb-6">8. Contact Information</h3>
                   <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                     <div className="flex items-center space-x-3 mb-3">
                       <Mail size={20} className="text-gray-600" />
@@ -298,7 +297,7 @@ const TermsOfServicePage = () => {
                         If you have any questions about these Terms, please contact us at{' '}
                         <a
                           href="mailto:support@e-manager.com"
-                          className="font-semibold text-gray-900 hover:text-gray-700 transition-colors"
+                          className="font-semibold text-primary hover:text-gray-700 transition-colors"
                         >
                           support@e-manager.com
                         </a>

@@ -8,7 +8,7 @@ import Input from './Input';
 import { useConfirm } from '../context/ConfirmContext';
 
 const IntegrationSettings = () => {
-  const { user, login, connecteamAccounts } = useAuth();
+  const { user, login, connecteamAccounts = [] } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const { confirm } = useConfirm();
 
@@ -89,7 +89,7 @@ const IntegrationSettings = () => {
     setGoogleLoading(true);
     setGoogleError(false);
     try {
-      const res = await api.get('/auth/google');
+      const res = await api.get('/auth/google/connect');
       if (res.data.authUrl) {
         window.location.href = res.data.authUrl;
       } else {
@@ -136,7 +136,7 @@ const IntegrationSettings = () => {
           <div className="flex items-center space-x-3">
             <Calendar className="text-gray-600" size={20} />
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Google Calendar</h2>
+              <h2 className="text-lg font-semibold text-primary">Google Calendar</h2>
               <p className="text-sm text-gray-600 mt-0.5">Sync your meetings and tasks with Google Calendar</p>
             </div>
           </div>
@@ -199,7 +199,7 @@ const IntegrationSettings = () => {
           ) : (
             <div className="text-center p-6 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
               <Calendar className="mx-auto text-gray-400 mb-3" size={32} />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Connect Google Calendar</h3>
+              <h3 className="text-lg font-medium text-primary mb-2">Connect Google Calendar</h3>
               <p className="text-gray-600 mb-4 max-w-md mx-auto">
                 Sync your meetings and tasks with Google Calendar for better schedule management
               </p>
@@ -208,7 +208,7 @@ const IntegrationSettings = () => {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleGoogleConnect}
                 disabled={googleLoading}
-                className="inline-flex items-center justify-center space-x-2 bg-gray-900 text-white font-medium py-3 px-6 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                className="inline-flex items-center justify-center space-x-2 bg-primary text-white font-medium py-3 px-6 rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 {googleLoading ? (
                   <Loader2 size={18} className="animate-spin" />
@@ -235,7 +235,7 @@ const IntegrationSettings = () => {
           <div className="flex items-center space-x-3">
             <Shield className="text-gray-600" size={20} />
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">ConnecTeam Accounts</h2>
+              <h2 className="text-lg font-semibold text-primary">ConnecTeam Accounts</h2>
               <p className="text-sm text-gray-600 mt-0.5">Manage your ConnecTeam admin account links</p>
             </div>
           </div>
@@ -243,7 +243,7 @@ const IntegrationSettings = () => {
 
         {/* Current Accounts List */}
         <div className="p-6 border-b border-gray-200">
-          <h3 className="text-md font-semibold text-gray-900 mb-4">Connected Accounts</h3>
+          <h3 className="text-md font-semibold text-primary mb-4">Connected Accounts</h3>
           {connecteamAccounts.length > 0 ? (
             <div className="space-y-3">
               {connecteamAccounts.map(account => (
@@ -263,7 +263,7 @@ const IntegrationSettings = () => {
                       <Shield size={18} className="text-gray-600" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-gray-900 truncate">{account.name}</p>
+                      <p className="font-medium text-primary truncate">{account.name}</p>
                       <p className="text-sm text-gray-500 truncate">{account.link}</p>
                     </div>
                     <ExternalLink size={16} className="text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" />
@@ -290,7 +290,7 @@ const IntegrationSettings = () => {
 
         {/* Add New Account Form */}
         <div className="p-6">
-          <h3 className="text-md font-semibold text-gray-900 mb-4">Add New Account</h3>
+          <h3 className="text-md font-semibold text-primary mb-4">Add New Account</h3>
           <form onSubmit={handleSubmit} className="space-y-6">
             <AnimatePresence>
               {error && (
@@ -347,7 +347,7 @@ const IntegrationSettings = () => {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="inline-flex items-center justify-center space-x-3 bg-gray-900 text-white font-medium py-3 px-6 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="inline-flex items-center justify-center space-x-3 bg-primary text-white font-medium py-3 px-6 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               {loading ? (
                 <>

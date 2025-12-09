@@ -1,16 +1,41 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Eye, EyeOff, Shield, CheckCircle, Users, Calendar, FilePieChart, Zap } from 'lucide-react';
+import {
+  User, Mail, Lock, Eye, EyeOff, Shield, Building, ArrowRight, CheckCircle2
+} from 'lucide-react';
 import Input from '../components/Input';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../api/axiosConfig';
+
+// --- Google Icon Component ---
+const GoogleIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24">
+    <path
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      fill="#4285F4"
+    />
+    <path
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      fill="#34A853"
+    />
+    <path
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      fill="#FBBC05"
+    />
+    <path
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      fill="#EA4335"
+    />
+  </svg>
+);
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
+    companyName: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
@@ -19,7 +44,7 @@ const RegisterPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const { username, email, password } = formData;
+  const { username, email, password, companyName } = formData;
 
   const onChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,104 +55,110 @@ const RegisterPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.post(
-        'https://e-manager-backend-6vwv.onrender.com/api/auth/register',
-        formData
-      );
-
+      const res = await api.post('/auth/register', formData);
       login(res.data);
       setLoading(false);
       navigate('/dashboard');
-
     } catch (err) {
+      console.error(err);
       setError(err.response?.data?.message || 'Registration failed');
       setLoading(false);
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  // Password strength indicators
-  const passwordStrength = {
-    length: password.length >= 6,
-    hasUppercase: /[A-Z]/.test(password),
-    hasLowercase: /[a-z]/.test(password),
-    hasNumber: /[0-9]/.test(password),
+  // Google OAuth Redirect
+  const handleGoogleLogin = () => {
+    // This URL must match your backend route
+    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/google/google`;
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Section - Registration Form */}
-      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 xl:px-12">
+    <div className="min-h-screen flex bg-white font-sans selection:bg-blue-100 selection:text-blue-900">
+
+      {/* --- LEFT COLUMN: FORM --- */}
+      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 xl:px-12 bg-white z-10">
         <div className="mx-auto w-full max-w-md lg:max-w-lg">
-          {/* Mobile Logo */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="lg:hidden flex justify-center mb-8"
-          >
-            <Link to="/" className="inline-flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
-                <Shield className="text-white" size={20} />
+
+          {/* Logo (Mobile) */}
+          <div className="lg:hidden flex justify-center mb-8">
+            <Link to="/" className="inline-flex items-center space-x-2">
+              <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
+                <Shield className="text-white" size={16} />
               </div>
-              <span className="text-2xl font-bold text-gray-900">E-Manager</span>
+              <span className="text-xl font-bold text-zinc-900">E-Manager</span>
             </Link>
-          </motion.div>
+          </div>
 
           <motion.div
-            className="w-full bg-white lg:bg-transparent lg:border-0 lg:shadow-none border border-gray-200 rounded-2xl shadow-sm p-8 space-y-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.5 }}
           >
             {/* Header */}
-            <div className="text-center space-y-3">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                className="mx-auto w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center"
-              >
-                <User className="text-white" size={20} />
-              </motion.div>
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
-                Create Account
-              </h2>
-              <p className="text-gray-600 text-base">
-                Join E-Manager and take control of your work
-              </p>
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-black text-zinc-900 mb-2">Create Organization</h2>
+              <p className="text-slate-600">Start your 30-day free trial. No credit card required.</p>
             </div>
 
-            {/* Error Message */}
+            {/* Error Banner */}
             {error && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm text-center"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm text-center font-medium"
               >
                 {error}
               </motion.div>
             )}
 
-            {/* Registration Form */}
-            <form className="space-y-6" onSubmit={onSubmit}>
+            {/* Google Button */}
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 text-slate-700 font-medium py-3.5 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 shadow-sm cursor-pointer"
+            >
+              <GoogleIcon />
+              <span>Sign up with Google</span>
+            </button>
+
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase tracking-wider font-semibold">
+                <span className="px-4 bg-white text-slate-400">Or register with email</span>
+              </div>
+            </div>
+
+            {/* Form */}
+            <form className="space-y-5" onSubmit={onSubmit}>
               <Input
-                icon={<User size={18} className="text-gray-400" />}
+                icon={<Building size={18} className="text-slate-400" />}
                 type="text"
-                placeholder="Enter your username"
+                placeholder="Organization Name"
+                name="companyName"
+                value={companyName}
+                onChange={onChange}
+                required
+                autoComplete="organization"
+                autoFocus
+              />
+
+              <Input
+                icon={<User size={18} className="text-slate-400" />}
+                type="text"
+                placeholder="Full Name"
                 name="username"
                 value={username}
                 onChange={onChange}
                 required
-                autoComplete="username"
+                autoComplete="name"
               />
 
               <Input
-                icon={<Mail size={18} className="text-gray-400" />}
+                icon={<Mail size={18} className="text-slate-400" />}
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Work Email"
                 name="email"
                 value={email}
                 onChange={onChange}
@@ -137,9 +168,9 @@ const RegisterPage = () => {
 
               <div className="relative">
                 <Input
-                  icon={<Lock size={18} className="text-gray-400" />}
+                  icon={<Lock size={18} className="text-slate-400" />}
                   type={showPassword ? "text" : "password"}
-                  placeholder="Create a password"
+                  placeholder="Create Password"
                   name="password"
                   value={password}
                   onChange={onChange}
@@ -149,203 +180,86 @@ const RegisterPage = () => {
                 />
                 <button
                   type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-zinc-900 transition-colors p-1"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-
-              {/* Enhanced Password Requirements */}
-              {password && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="bg-gray-50 p-4 rounded-lg border border-gray-200"
-                >
-                  <p className="text-sm font-medium text-gray-900 mb-3">Password requirements:</p>
-                  <ul className="text-xs text-gray-600 space-y-2">
-                    <li className="flex items-center">
-                      <CheckCircle
-                        size={14}
-                        className={`mr-2 ${passwordStrength.length ? 'text-green-500' : 'text-gray-300'}`}
-                      />
-                      At least 6 characters
-                    </li>
-                    <li className="flex items-center">
-                      <CheckCircle
-                        size={14}
-                        className={`mr-2 ${passwordStrength.hasUppercase ? 'text-green-500' : 'text-gray-300'}`}
-                      />
-                      One uppercase letter
-                    </li>
-                    <li className="flex items-center">
-                      <CheckCircle
-                        size={14}
-                        className={`mr-2 ${passwordStrength.hasLowercase ? 'text-green-500' : 'text-gray-300'}`}
-                      />
-                      One lowercase letter
-                    </li>
-                    <li className="flex items-center">
-                      <CheckCircle
-                        size={14}
-                        className={`mr-2 ${passwordStrength.hasNumber ? 'text-green-500' : 'text-gray-300'}`}
-                      />
-                      One number
-                    </li>
-                  </ul>
-                </motion.div>
-              )}
 
               <motion.button
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gray-900 text-white font-medium py-3.5 px-4 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                className="w-full bg-zinc-900 text-white font-bold py-4 px-4 rounded-xl hover:bg-black focus:outline-none focus:ring-4 focus:ring-zinc-200 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
               >
                 {loading ? (
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Creating account...</span>
-                  </div>
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Creating Account...</span>
+                  </>
                 ) : (
-                  'Create Account'
+                  <>
+                    <span>Get Started</span>
+                    <ArrowRight size={18} />
+                  </>
                 )}
               </motion.button>
             </form>
 
-            {/* Terms and Login Link */}
-            <div className="text-center space-y-4">
-              <p className="text-xs text-gray-500">
-                By creating an account, you agree to our{' '}
-                <Link to="/terms" className="text-gray-700 hover:text-gray-900 underline underline-offset-2">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link to="/privacy" className="text-gray-700 hover:text-gray-900 underline underline-offset-2">
-                  Privacy Policy
-                </Link>
-              </p>
-
-              <div className="border-t border-gray-200 pt-4">
-                <p className="text-sm text-gray-600">
-                  Already have an account?{' '}
-                  <Link
-                    to="/login"
-                    className="font-semibold text-gray-900 hover:text-gray-700 transition-colors underline underline-offset-2"
-                  >
-                    Sign in
-                  </Link>
-                </p>
-              </div>
-            </div>
+            <p className="mt-8 text-center text-sm text-slate-500">
+              Already have an account?{' '}
+              <Link to="/login" className="font-bold text-zinc-900 hover:underline">
+                Log in
+              </Link>
+            </p>
           </motion.div>
         </div>
       </div>
 
-      {/* Right Section - Brand & Benefits */}
-      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-between lg:p-12 xl:p-16 bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* --- RIGHT COLUMN: BRANDING --- */}
+      <div className="hidden lg:flex lg:flex-1 relative bg-slate-50 overflow-hidden items-center justify-center p-12">
+        {/* Background Patterns */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-100 rounded-full blur-[100px] opacity-50 mix-blend-multiply"></div>
+
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-lg"
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="relative z-10 max-w-lg"
         >
-          <Link to="/" className="inline-flex items-center space-x-3 mb-16">
-            <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
-              <Shield className="text-white" size={20} />
+          <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wide mb-6">
+              <Shield size={12} />
+              Enterprise Ready
             </div>
-            <span className="text-2xl font-bold text-gray-900">E-Manager</span>
-          </Link>
+            <h2 className="text-3xl font-black text-zinc-900 mb-4 leading-tight">
+              Scale your team with confidence.
+            </h2>
+            <p className="text-slate-600 mb-8 leading-relaxed">
+              Join 500+ organizations that use E-Manager to streamline operations, automate reporting, and secure their data.
+            </p>
 
-          <div className="space-y-8">
-            <div>
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-4xl xl:text-5xl font-bold text-gray-900 leading-tight mb-4"
-              >
-                Start your journey to
-                <span className="block text-gray-700">better team leadership</span>
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-lg text-gray-600 leading-relaxed"
-              >
-                Join thousands of team leaders who have transformed their workflow with our all-in-one management platform.
-              </motion.p>
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="space-y-6"
-            >
+            <div className="space-y-4">
               {[
-                {
-                  icon: <Users className="text-gray-900" size={20} />,
-                  title: "Smart Team Management",
-                  description: "Organize unlimited teams and members with intuitive controls"
-                },
-                {
-                  icon: <Calendar className="text-gray-900" size={20} />,
-                  title: "Effortless Scheduling",
-                  description: "Schedule meetings and track attendance in one place"
-                },
-                {
-                  icon: <FilePieChart className="text-gray-900" size={20} />,
-                  title: "AI-Powered Insights",
-                  description: "Generate professional reports with intelligent analytics"
-                },
-                {
-                  icon: <Zap className="text-gray-900" size={20} />,
-                  title: "Instant Setup",
-                  description: "Get started in minutes with no complex configuration"
-                }
-              ].map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + (index * 0.1) }}
-                  className="flex items-start space-x-4 p-4 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200"
-                >
-                  <div className="w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-                    {feature.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{feature.title}</h3>
-                    <p className="text-gray-600 text-sm mt-1">{feature.description}</p>
-                  </div>
-                </motion.div>
+                "AI-Powered Productivity Insights",
+                "Automated Daily Briefings",
+                "Bank-Grade Security (SOC2)"
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3 text-sm font-medium text-zinc-700">
+                  <CheckCircle2 size={18} className="text-green-500" />
+                  {item}
+                </div>
               ))}
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
 
-        {/* Bottom Stats */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="grid grid-cols-3 gap-8 text-center"
-        >
-          <div>
-            <div className="text-2xl font-bold text-gray-900">500+</div>
-            <div className="text-xs text-gray-500">Team Leaders</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900">10K+</div>
-            <div className="text-xs text-gray-500">Teams Managed</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900">99%</div>
-            <div className="text-xs text-gray-500">Satisfaction</div>
+          <div className="mt-8 flex items-center justify-center gap-2 text-slate-400 text-sm font-medium">
+            <Shield size={14} />
+            <span>Secure 256-bit Encryption</span>
           </div>
         </motion.div>
       </div>

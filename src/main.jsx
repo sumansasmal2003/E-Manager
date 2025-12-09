@@ -1,21 +1,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.jsx';
-import './index.css';
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext.jsx';
-import { ConfirmProvider } from './context/ConfirmContext.jsx';
-import { ModalProvider } from './context/ModalContext.jsx'; // <-- 1. IMPORT
+import App from './App';
+import './index.css';
+
+// Context Providers
+import { AuthProvider } from './context/AuthContext';
+import { ModalProvider } from './context/ModalContext';
+import { ConfirmProvider } from './context/ConfirmContext';
+import { ThemeProvider } from './context/ThemeContext'; // <-- Import ThemeProvider
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <ConfirmProvider>
-          <ModalProvider> {/* <-- 2. WRAP APP */}
-            <App />
+        <ThemeProvider> {/* <-- Wrap AuthProvider inside ThemeProvider (or vice versa, order matters less here but keep logical) */}
+          <ModalProvider>
+            <ConfirmProvider>
+              <App />
+            </ConfirmProvider>
           </ModalProvider>
-        </ConfirmProvider>
+        </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>

@@ -151,7 +151,7 @@ const GenerateReportModal = ({ isOpen, onClose, teamId, teamName }) => {
           <motion.button
             type="submit"
             disabled={loading}
-            className="w-full bg-gray-900 text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             whileHover={{ scale: loading ? 1 : 1.02 }}
             whileTap={{ scale: loading ? 1 : 0.98 }}
           >
@@ -170,14 +170,14 @@ const GenerateReportModal = ({ isOpen, onClose, teamId, teamName }) => {
       {report && !loading && (
         <div className="space-y-6">
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">Report Generated Successfully</h3>
+            <h3 className="text-lg font-semibold text-primary mb-1">Report Generated Successfully</h3>
             <p className="text-sm text-gray-600">Review your team report below</p>
           </div>
 
           <div className="border border-gray-200 rounded-lg bg-gray-50">
             <div className="p-4 border-b border-gray-200 bg-white rounded-t-lg">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-900">Report Preview</span>
+                <span className="text-sm font-medium text-primary">Report Preview</span>
                 <span className="text-xs text-gray-500">
                   {new Date().toLocaleDateString()}
                 </span>
@@ -197,7 +197,7 @@ const GenerateReportModal = ({ isOpen, onClose, teamId, teamName }) => {
           <div className="flex flex-col sm:flex-row gap-3">
             <motion.button
               onClick={handleCopy}
-              className="flex-1 bg-white border border-gray-300 text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2"
+              className="flex-1 bg-white border border-gray-300 text-primary font-medium py-3 px-4 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -211,7 +211,7 @@ const GenerateReportModal = ({ isOpen, onClose, teamId, teamName }) => {
 
             <motion.button
               onClick={handleDownloadPDF}
-              className="flex-1 bg-gray-900 text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 transition-all duration-200 flex items-center justify-center space-x-2"
+              className="flex-1 bg-primary text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 transition-all duration-200 flex items-center justify-center space-x-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -223,7 +223,7 @@ const GenerateReportModal = ({ isOpen, onClose, teamId, teamName }) => {
           <div className="text-center">
             <button
               onClick={handleClose}
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
+              className="text-sm text-gray-600 hover:text-primary transition-colors duration-200"
             >
               Close
             </button>

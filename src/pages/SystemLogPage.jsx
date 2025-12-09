@@ -58,7 +58,7 @@ const LogItem = ({ log }) => {
         <div className="flex items-center space-x-4 flex-1 min-w-0">
           <div className="flex-shrink-0">{config.icon}</div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-gray-900 truncate" title={log.message}>
+            <p className="font-semibold text-primary truncate" title={log.message}>
               {log.message}
             </p>
             <div className="flex items-center space-x-3 text-sm text-gray-600 mt-1">
@@ -90,7 +90,7 @@ const LogItem = ({ log }) => {
             className="overflow-hidden"
           >
             <div className="p-4 border-t border-gray-200 bg-white">
-              <h4 className="text-sm font-semibold text-gray-900 mb-2">Error Stack Trace:</h4>
+              <h4 className="text-sm font-semibold text-primary mb-2">Error Stack Trace:</h4>
               <pre className="text-xs text-gray-700 bg-gray-100 p-3 rounded-md overflow-x-auto">
                 {log.stack || 'No stack trace available.'}
               </pre>
@@ -154,11 +154,11 @@ const SystemLogPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
             <Server className="text-white" size={24} />
           </div>
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">System Logs</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-primary mb-2">System Logs</h1>
             <p className="text-gray-600">Review recent application errors and warnings</p>
           </div>
         </div>
@@ -187,7 +187,7 @@ const SystemLogPage = () => {
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 min-h-[400px]">
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <Loader2 className="animate-spin text-gray-900" size={32} />
+            <Loader2 className="animate-spin text-primary" size={32} />
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -198,7 +198,7 @@ const SystemLogPage = () => {
         ) : logs.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-center">
             <Server className="text-gray-300 mb-4" size={40} />
-            <h3 className="text-lg font-semibold text-gray-900">All Systems Clear</h3>
+            <h3 className="text-lg font-semibold text-primary">All Systems Clear</h3>
             <p className="text-gray-500 mt-2">No system errors have been logged. Great job!</p>
           </div>
         ) : (

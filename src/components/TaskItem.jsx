@@ -93,7 +93,7 @@ const TaskItem = ({ task, onEdit, onDelete }) => {
           {/* Header with Title and Actions */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-gray-900 leading-tight break-words pr-2">
+              <h3 className="text-sm font-semibold text-primary leading-tight break-words pr-2">
                 {task.title}
               </h3>
             </div>

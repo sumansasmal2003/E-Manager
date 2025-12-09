@@ -40,13 +40,13 @@ const CustomMultiSelect = ({ options, value, onChange, placeholder = 'Select opt
       <button
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
-        className="relative w-full pl-10 pr-10 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 text-left focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 flex items-center justify-between"
+        className="relative w-full pl-10 pr-10 py-3 bg-white border border-gray-300 rounded-lg text-primary placeholder-gray-500 text-left focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 flex items-center justify-between"
       >
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           {Icon && <Icon size={18} className="text-gray-400" />}
         </div>
 
-        <span className={value.length === 0 ? 'text-gray-500' : 'text-gray-900'}>
+        <span className={value.length === 0 ? 'text-gray-500' : 'text-primary'}>
           {getSelectedLabels()}
         </span>
 
@@ -79,7 +79,7 @@ const CustomMultiSelect = ({ options, value, onChange, placeholder = 'Select opt
                     className="w-full text-left flex items-center space-x-3 px-3 py-2 rounded-md text-gray-800 hover:bg-gray-100"
                   >
                     <div className={`w-5 h-5 border-2 rounded-md flex items-center justify-center ${
-                      isSelected ? 'bg-gray-900 border-gray-900' : 'border-gray-300'
+                      isSelected ? 'bg-primary border-primary' : 'border-gray-300'
                     }`}>
                       {isSelected && <Check size={14} className="text-white" />}
                     </div>

@@ -2,17 +2,16 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   LogIn, UserPlus, LogOut, LayoutDashboard, Menu, X, User,
-  Search,
-  Shield,
-  Info,
-  Brain // <-- 1. IMPORT THE BRAIN ICON
+  Search, Shield, Info, Brain
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useModal } from '../context/ModalContext';
+import { useTheme } from '../context/ThemeContext'; // Ensure this is imported
 
 const Navbar = () => {
   const { isLoggedIn, user, logout } = useAuth();
+  const { branding } = useTheme(); // Get custom logo/colors
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -32,21 +31,41 @@ const Navbar = () => {
     return current === path;
   };
 
+  // Helper to determine what text to show
+  const getBrandName = () => {
+    if (isLoggedIn && user?.companyName) {
+      return user.companyName;
+    }
+    return "E-Manager";
+  };
+
   return (
     <nav className="w-full bg-white border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+
+          {/* --- LOGO & BRAND NAME --- */}
           <div className="flex-shrink-0 flex items-center">
             <Link
               to={isLoggedIn ? "/" : "/"}
               className="flex items-center space-x-3 group"
             >
-              <div className="w-9 h-9 bg-gray-900 rounded-xl flex items-center justify-center group-hover:bg-gray-800 transition-colors duration-200">
-                <Shield className="text-white" size={18} />
-              </div>
+              {/* Dynamic Logo (from Branding Settings) or Default */}
+              {branding?.logoUrl ? (
+                <img
+                  src={branding.logoUrl}
+                  alt="Company Logo"
+                  className="h-9 w-auto object-contain rounded-md"
+                />
+              ) : (
+                <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center group-hover:opacity-90 transition-opacity">
+                  <Shield className="text-white" size={18} />
+                </div>
+              )}
+
+              {/* Dynamic Company Name */}
               <span className="text-xl font-bold text-gray-900 hidden sm:block tracking-tight">
-                E Manager
+                {getBrandName()}
               </span>
             </Link>
           </div>
@@ -70,8 +89,8 @@ const Navbar = () => {
                     </kbd>
                   </button>
 
-                  {/* --- 2. NEW AI CHAT BUTTON (DESKTOP) --- */}
                   <div className="h-6 w-px bg-gray-300"></div>
+
                   <button
                     onClick={() => openModal('aiChat')}
                     className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-white transition-all duration-200 border border-transparent hover:border-gray-200"
@@ -82,7 +101,6 @@ const Navbar = () => {
                       Ctrl + j
                     </kbd>
                   </button>
-                  {/* --- END NEW BUTTON --- */}
 
                   <div className="h-6 w-px bg-gray-300"></div>
 
@@ -182,105 +200,60 @@ const Navbar = () => {
               <div className="py-3 space-y-1">
                 {isLoggedIn ? (
                   <>
-                    {/* User Info */}
                     <div className="flex items-center space-x-3 px-4 py-3 bg-gray-50 mx-3 rounded-lg mb-2">
                       <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                         <User size={14} className="text-gray-600" />
                       </div>
                       <div>
                         <div className="text-sm font-medium text-gray-900">{user?.username}</div>
-                        <div className="text-xs text-gray-500">Active</div>
+                        {/* Also show company name in mobile menu for context */}
+                        <div className="text-xs text-gray-500">{user?.companyName}</div>
                       </div>
                     </div>
 
-                    {/* Quick Actions */}
-                    {/* --- 3. UPDATED MOBILE ACTIONS --- */}
+                    {/* ... (Rest of mobile menu items: Search, AI Chat, Links) ... */}
+                    {/* (This part remains the same as your provided code) */}
                     <div className="px-3 py-2 space-y-2">
-                      <button
-                        onClick={() => {
-                          openModal('commandPalette');
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className="flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 w-full text-left border border-gray-200"
-                      >
-                        <Search size={18} />
-                        <div>
-                          <div className="font-medium">Search & Actions</div>
-                          <div className="text-xs text-gray-500 mt-0.5">Quick access (Ctrl+K)</div>
-                        </div>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          openModal('aiChat');
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className="flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 w-full text-left border border-gray-200"
-                      >
-                        <Brain size={18} />
-                        <div>
-                          <div className="font-medium">AI Chat</div>
-                          <div className="text-xs text-gray-500 mt-0.5">Ask questions (Ctrl+J)</div>
-                        </div>
-                      </button>
+                         <button onClick={() => { openModal('commandPalette'); setIsMobileMenuOpen(false); }} className="flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 w-full text-left border border-gray-200">
+                            <Search size={18} />
+                            <div>
+                               <div className="font-medium">Search & Actions</div>
+                               <div className="text-xs text-gray-500 mt-0.5">Quick access (Ctrl+K)</div>
+                            </div>
+                         </button>
+                         <button onClick={() => { openModal('aiChat'); setIsMobileMenuOpen(false); }} className="flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 w-full text-left border border-gray-200">
+                            <Brain size={18} />
+                            <div>
+                               <div className="font-medium">AI Chat</div>
+                               <div className="text-xs text-gray-500 mt-0.5">Ask questions (Ctrl+J)</div>
+                            </div>
+                         </button>
                     </div>
-                    {/* --- END UPDATED ACTIONS --- */}
 
-
-                    {/* Navigation Links */}
-                    <Link
-                      to="/"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center space-x-3 px-4 py-3 mx-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        isActiveRoute('/')
-                          ? 'bg-gray-900 text-white'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                      }`}
-                    >
+                    <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center space-x-3 px-4 py-3 mx-3 rounded-lg text-sm font-medium transition-all duration-200 ${isActiveRoute('/') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}>
                       <LayoutDashboard size={18} />
                       <span>Dashboard</span>
                     </Link>
 
-                    <button
-                      onClick={() => {
-                        openModal('shortcuts');
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="flex items-center space-x-3 px-4 py-3 mx-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 w-full text-left"
-                    >
+                    <button onClick={() => { openModal('shortcuts'); setIsMobileMenuOpen(false); }} className="flex items-center space-x-3 px-4 py-3 mx-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 w-full text-left">
                       <Info size={18} />
                       <span>Keyboard Shortcuts</span>
                     </button>
 
                     <div className="border-t border-gray-200 my-2"></div>
 
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center space-x-3 px-4 py-3 mx-3 rounded-lg text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200 w-full text-left"
-                    >
+                    <button onClick={handleLogout} className="flex items-center space-x-3 px-4 py-3 mx-3 rounded-lg text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200 w-full text-left">
                       <LogOut size={18} />
                       <span>Log out</span>
                     </button>
                   </>
                 ) : (
                   <>
-                    <Link
-                      to="/login"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center space-x-3 px-4 py-3 mx-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                        isActiveRoute('/login')
-                          ? 'bg-gray-900 text-white'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                      }`}
-                    >
+                    <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center space-x-3 px-4 py-3 mx-3 rounded-lg text-sm font-medium transition-all duration-200 ${isActiveRoute('/login') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}>
                       <LogIn size={18} />
                       <span>Sign in</span>
                     </Link>
-                    <Link
-                      to="/register"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center space-x-3 px-4 py-3 mx-3 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-all duration-200"
-                    >
+                    <Link to="/register" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center space-x-3 px-4 py-3 mx-3 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-all duration-200">
                       <UserPlus size={18} />
                       <span>Create account</span>
                     </Link>

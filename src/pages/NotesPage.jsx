@@ -146,7 +146,7 @@ const NotesPage = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg">
                   <FileText className="text-white" size={24} />
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gray-700 rounded-full border-2 border-white flex items-center justify-center">
@@ -154,10 +154,10 @@ const NotesPage = () => {
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">My Notes</h1>
+                <h1 className="text-3xl font-bold text-primary">My Notes</h1>
                 <p className="text-gray-600 mt-1">
                   {filteredAndSortedNotes.length} note{filteredAndSortedNotes.length !== 1 ? 's' : ''} •
-                  <span className="text-gray-900 font-medium ml-1">
+                  <span className="text-primary font-medium ml-1">
                     {activeCategory === 'All' ? 'All categories' : activeCategory}
                   </span>
                 </p>
@@ -167,7 +167,7 @@ const NotesPage = () => {
             {/* --- 6. UPDATE onClick HANDLER --- */}
             <button
               onClick={() => openModal('addNote', { onNoteAdded: handleNoteAdded })}
-              className="group bg-gray-900 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="group bg-primary text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               <Plus size={20} className="transition-transform group-hover:rotate-90" />
               <span className="font-semibold">New Note</span>
@@ -198,8 +198,8 @@ const NotesPage = () => {
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-md transition-all ${
                     viewMode === 'grid'
-                      ? 'bg-white shadow-sm text-gray-900'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-white shadow-sm text-primary'
+                      : 'text-gray-600 hover:text-primary'
                   }`}
                 >
                   <Grid size={18} />
@@ -208,8 +208,8 @@ const NotesPage = () => {
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-md transition-all ${
                     viewMode === 'list'
-                      ? 'bg-white shadow-sm text-gray-900'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-white shadow-sm text-primary'
+                      : 'text-gray-600 hover:text-primary'
                   }`}
                 >
                   <List size={18} />
@@ -237,7 +237,7 @@ const NotesPage = () => {
                   onClick={() => setActiveCategory(category)}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                     activeCategory === category
-                      ? 'bg-gray-900 text-white shadow-lg'
+                      ? 'bg-primary text-white shadow-lg'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
                   }`}
                 >
@@ -253,7 +253,7 @@ const NotesPage = () => {
         {loading && (
           <div className="flex justify-center items-center py-20">
             <div className="flex flex-col items-center space-y-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
               <p className="text-gray-600">Loading your notes...</p>
             </div>
           </div>
@@ -269,7 +269,7 @@ const NotesPage = () => {
             <p className="text-red-600">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="mt-4 bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+              className="mt-4 bg-primary text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
             >
               Try Again
             </button>
@@ -299,7 +299,7 @@ const NotesPage = () => {
               <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <FileText className="text-gray-400" size={32} />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No notes found</h3>
+              <h3 className="text-xl font-semibold text-primary mb-2">No notes found</h3>
               <p className="text-gray-600 max-w-md mx-auto mb-6">
                 {searchTerm
                   ? "No notes match your search criteria. Try adjusting your search terms or filters."
@@ -310,7 +310,7 @@ const NotesPage = () => {
               {!searchTerm && activeCategory === 'All' && (
                 <button
                   onClick={() => openModal('addNote', { onNoteAdded: handleNoteAdded })}
-                  className="bg-gray-900 text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors font-semibold"
+                  className="bg-primary text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors font-semibold"
                 >
                   Create Your First Note
                 </button>

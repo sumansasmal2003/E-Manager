@@ -40,7 +40,7 @@ const ChatMessage = ({ message, isTyping }) => {
     >
       <div className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-          isUser ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700'
+          isUser ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'
         }`}>
           {isUser ? (
             <span className="text-sm font-medium">{user?.username?.charAt(0).toUpperCase() || 'U'}</span>
@@ -49,7 +49,7 @@ const ChatMessage = ({ message, isTyping }) => {
           )}
         </div>
         <div className={`px-4 py-3 rounded-lg max-w-lg ${
-          isUser ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'
+          isUser ? 'bg-primary text-white' : 'bg-gray-50 text-gray-800'
         }`}>
           <div className="text-sm leading-relaxed">
             <ReactMarkdown
@@ -313,12 +313,12 @@ const AiChatModal = () => {
                   >
                     <button
                       onClick={() => setSelectedCategory(null)}
-                      className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 font-medium mb-4"
+                      className="flex items-center space-x-2 text-sm text-gray-600 hover:text-primary font-medium mb-4"
                     >
                       <ArrowLeft size={16} />
                       <span>Back to categories</span>
                     </button>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h3 className="text-lg font-semibold text-primary mb-4">
                       {categories[selectedCategory].name} Actions
                     </h3>
                     <div className="space-y-2">
@@ -345,7 +345,7 @@ const AiChatModal = () => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                   >
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">What would you like to do?</h3>
+                    <h3 className="text-lg font-semibold text-primary mb-4">What would you like to do?</h3>
                     <div className="grid grid-cols-2 gap-3">
                       {Object.keys(categories).map(key => {
                         const category = categories[key];
@@ -420,7 +420,7 @@ const AiChatModal = () => {
                     setChatMode('selection');
                     setSelectedCategory(null);
                   }}
-                  className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 font-medium mb-3"
+                  className="flex items-center space-x-2 text-sm text-gray-600 hover:text-primary font-medium mb-3"
                 >
                   <ArrowLeft size={16} />
                   <span>Back to actions</span>
@@ -432,7 +432,7 @@ const AiChatModal = () => {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder={isListening ? "Listening..." : "Ask about your tasks, teams, or notes..."}
-                    className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-sm"
+                    className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg text-primary focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm"
                     disabled={isLoading || isTyping || isListening}
                   />
                   {isSpeechSupported && (
@@ -452,7 +452,7 @@ const AiChatModal = () => {
                   <button
                     type="submit"
                     disabled={isLoading || isTyping || !input.trim()}
-                    className="bg-gray-900 text-white p-2 rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                    className="bg-primary text-white p-2 rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
                   >
                     {(isLoading || isTyping) ? (
                       <Loader2 size={18} className="animate-spin" />

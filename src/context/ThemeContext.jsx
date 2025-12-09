@@ -1,42 +1,102 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 
-// 1. Create the context
 const ThemeContext = createContext();
 
-// 2. Create the provider component
+// --- COLOR UTILITIES ---
+
+// Convert Hex to RGB Array
+const hexToRgb = (hex) => {
+  const bigint = parseInt(hex.replace('#', ''), 16);
+  return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+};
+
+// Convert RGB Array to Hex String
+const rgbToHex = (r, g, b) => {
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+};
+
+// Mix two colors (Standard weighted mix)
+const mix = (color1, color2, weight) => {
+  const w = weight;
+  const w1 = 1 - w;
+  const r = Math.round(color1[0] * w1 + color2[0] * w);
+  const g = Math.round(color1[1] * w1 + color2[1] * w);
+  const b = Math.round(color1[2] * w1 + color2[2] * w);
+  return [r, g, b];
+};
+
 export const ThemeProvider = ({ children }) => {
-  // Get theme from localStorage or default to 'light'
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem('theme') || 'light'
-  );
+  const { user } = useAuth();
 
+  const [branding, setBranding] = useState({
+    logoUrl: '',
+    primaryColor: '#111827' // Default: Zinc-900
+  });
+
+  // 1. SYNC WITH USER STATE
   useEffect(() => {
-    const root = window.document.documentElement; // <html> tag
+    if (user?.branding) {
+      // Apply User Branding
+      setBranding({
+        logoUrl: user.branding.logoUrl || '',
+        primaryColor: user.branding.primaryColor || '#111827'
+      });
+    } else {
+      // Reset to Defaults (Logout)
+      setBranding({
+        logoUrl: '',
+        primaryColor: '#111827'
+      });
+    }
+  }, [user]);
 
-    // 1. Remove the old theme class
-    const oldTheme = theme === 'dark' ? 'light' : 'dark';
-    root.classList.remove(oldTheme);
+  // 2. GENERATE & INJECT CSS VARIABLES
+  useEffect(() => {
+    const root = document.documentElement;
+    const base = hexToRgb(branding.primaryColor);
+    const white = [255, 255, 255];
+    const black = [0, 0, 0];
 
-    // 2. Add the new theme class
-    root.classList.add(theme);
+    // Set the main primary variable (used by text-primary, bg-primary)
+    root.style.setProperty('--brand-primary', branding.primaryColor);
 
-    // 3. Save the new theme to localStorage
-    localStorage.setItem('theme', theme);
-  }, [theme]); // Run this effect whenever 'theme' changes
+    // Generate gradients based on the primary color (treated as the '900' shade)
+    const shades = {
+      50:  mix(base, white, 0.98), // 98% White
+      100: mix(base, white, 0.96), // 96% White
+      200: mix(base, white, 0.90), // 90% White
+      300: mix(base, white, 0.80),
+      400: mix(base, white, 0.60),
+      500: mix(base, white, 0.40),
+      600: mix(base, white, 0.25),
+      700: mix(base, white, 0.15),
+      800: mix(base, white, 0.05), // 5% White (Dark)
+      900: base,                   // The selected color
+      950: mix(base, black, 0.20)  // 20% Black (Darker)
+    };
 
-  // Function to toggle the theme
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
-  };
+    // Inject all shades as CSS variables
+    Object.entries(shades).forEach(([key, rgb]) => {
+      root.style.setProperty(`--brand-${key}`, rgbToHex(...rgb));
+    });
+
+  }, [branding.primaryColor]);
+
+  // Provide setter so Settings Page can update it immediately
+  const value = { branding, setBranding };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
 };
 
-// 3. Create a custom hook to use the context
 export const useTheme = () => {
-  return useContext(ThemeContext);
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
 };

@@ -72,7 +72,7 @@ See you there! 👋`;
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between mb-2">
-              <h4 className="text-lg font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
+              <h4 className="text-lg font-semibold text-primary group-hover:text-gray-700 transition-colors">
                 {meeting.title}
               </h4>
               <div className="flex items-center space-x-1 ml-2">
@@ -129,7 +129,7 @@ See you there! 👋`;
                 href={meeting.meetingLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+                className="inline-flex items-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
               >
                 <Video size={16} className="mr-2" />
                 Join Meeting
@@ -165,7 +165,7 @@ See you there! 👋`;
               {/* Modal Header */}
               <div className="flex justify-between items-center p-6 border-b border-gray-200">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-primary">
                     Share Meeting Details
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
@@ -189,14 +189,14 @@ See you there! 👋`;
                     <div className="flex items-start space-x-2">
                       <Calendar size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
                       <div>
-                        <strong className="text-gray-900">{meeting.title}</strong>
+                        <strong className="text-primary">{meeting.title}</strong>
                       </div>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <Clock size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
                       <div>
-                        <span className="font-medium text-gray-900">Date & Time:</span><br />
+                        <span className="font-medium text-primary">Date & Time:</span><br />
                         {formattedDate} at {formattedTime}
                       </div>
                     </div>
@@ -206,7 +206,7 @@ See you there! 👋`;
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       <div>
-                        <span className="font-medium text-gray-900">Agenda:</span><br />
+                        <span className="font-medium text-primary">Agenda:</span><br />
                         {meeting.agenda}
                       </div>
                     </div>
@@ -214,7 +214,7 @@ See you there! 👋`;
                     <div className="flex items-start space-x-2">
                       <Users size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
                       <div>
-                        <span className="font-medium text-gray-900">Participants:</span><br />
+                        <span className="font-medium text-primary">Participants:</span><br />
                         {meeting.participants.join(', ')}
                       </div>
                     </div>
@@ -223,7 +223,7 @@ See you there! 👋`;
                       <div className="flex items-start space-x-2">
                         <Video size={16} className="text-gray-500 mt-0.5 flex-shrink-0" />
                         <div>
-                          <span className="font-medium text-gray-900">Meeting Link:</span><br />
+                          <span className="font-medium text-primary">Meeting Link:</span><br />
                           <a
                             href={meeting.meetingLink}
                             target="_blank"
@@ -244,7 +244,7 @@ See you there! 👋`;
                   className={`w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
                     copied
                       ? 'bg-green-600 text-white'
-                      : 'bg-gray-900 text-white hover:bg-gray-800'
+                      : 'bg-primary text-white hover:bg-gray-800'
                   }`}
                 >
                   {copied ? (

@@ -1,3 +1,4 @@
+// src/components/ExportAttendanceModal.jsx
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import Input from './Input';
@@ -8,7 +9,7 @@ import { motion } from 'framer-motion';
 // Import PDF libraries
 import jsPDF from 'jspdf';
 
-// Helper to build the CSV content
+// Helper to build the CSV content (Unchanged)
 const buildCSV = (records) => {
   const headers = ['Date', 'Member', 'Status'];
   const csvData = records.map(record => [
@@ -61,314 +62,169 @@ const generateMockData = (startDate, endDate, selectedMembers) => {
   return records;
 };
 
-// Modern and professional PDF generation
+// --- UPDATED: Member-wise PDF generation ---
 const buildPDF = (records, startDate, endDate, selectedMembers) => {
   const pdf = new jsPDF('p', 'mm', 'a4');
-
   const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
   const margin = 20;
-  let yPosition = margin;
 
-  // Colors - Professional color scheme
+  // Colors
   const colors = {
-    primary: [31, 41, 55],
-    secondary: [107, 114, 128],
-    accent: [59, 130, 246],
-    success: [16, 185, 129],
-    warning: [245, 158, 11],
-    danger: [239, 68, 68],
-    info: [59, 130, 246],
-    lightBg: [249, 250, 251],
+    primary: [31, 41, 55],    // Gray 800
+    secondary: [107, 114, 128], // Gray 500
+    success: [16, 185, 129],  // Green 500
+    warning: [245, 158, 11],  // Amber 500
+    danger: [239, 68, 68],    // Red 500
+    info: [59, 130, 246],     // Blue 500
+    lightBg: [249, 250, 251], // Gray 50
     white: [255, 255, 255]
   };
 
-  // Helper function to draw rounded rectangle
+  // Helper: Draw rounded rectangle
   const drawRoundedRect = (x, y, width, height, radius, color) => {
     pdf.setFillColor(...color);
     pdf.roundedRect(x, y, width, height, radius, radius, 'F');
   };
 
-  // Header
-  drawRoundedRect(0, 0, pageWidth, 60, 0, colors.primary);
+  // 1. Group records by member
+  const recordsByMember = {};
+  records.forEach(r => {
+    if (!recordsByMember[r.member]) recordsByMember[r.member] = [];
+    recordsByMember[r.member].push(r);
+  });
 
-  // Title
-  pdf.setFontSize(24);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(255, 255, 255);
-  pdf.text('ATTENDANCE REPORT', pageWidth / 2, 25, { align: 'center' });
+  // Sort members alphabetically
+  const sortedMembers = Object.keys(recordsByMember).sort();
 
-  // Subtitle
-  pdf.setFontSize(11);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(200, 200, 200);
-  pdf.text('Professional Team Attendance Summary', pageWidth / 2, 35, { align: 'center' });
+  // Iterate through each member
+  sortedMembers.forEach((member, mIndex) => {
+    // Add new page for subsequent members
+    if (mIndex > 0) pdf.addPage();
 
-  yPosition = 75;
+    let yPosition = margin;
 
-  // Report Details Card
-  drawRoundedRect(margin, yPosition, pageWidth - 2 * margin, 35, 8, colors.lightBg);
-  pdf.setFontSize(10);
-  pdf.setTextColor(...colors.secondary);
-  pdf.text('REPORT DETAILS', margin + 15, yPosition + 12);
+    // --- Header for this Member ---
+    drawRoundedRect(0, 0, pageWidth, 50, 0, colors.primary);
 
-  pdf.setFontSize(9);
-  pdf.setTextColor(...colors.primary);
-  pdf.text(`Period: ${formatDateForDisplay(startDate)} to ${formatDateForDisplay(endDate)}`, margin + 15, yPosition + 20);
-  pdf.text(`Team Members: ${selectedMembers.size}`, margin + 15, yPosition + 26);
-  pdf.text(`Total Records: ${records.length}`, margin + 15, yPosition + 32);
-
-  const summaryX = pageWidth / 2 + 10;
-  pdf.text('Generated: ' + new Date().toLocaleDateString(), summaryX, yPosition + 20);
-  pdf.text('Format: Professional PDF', summaryX, yPosition + 26);
-  pdf.text('Confidential', summaryX, yPosition + 32);
-
-  yPosition += 50;
-
-  // Quick Statistics - Centered layout
-  const stats = calculateStatistics(records);
-  const statWidth = (pageWidth - 2 * margin - 15) / 4;
-
-  // Statistics Cards
-  const statConfigs = [
-    { label: 'Present', value: stats.Present, color: colors.success, icon: '✓' },
-    { label: 'Absent', value: stats.Absent, color: colors.danger, icon: '✗' },
-    { label: 'Leave', value: stats.Leave, color: colors.warning, icon: 'L' },
-    { label: 'Holiday', value: stats.Holiday, color: colors.info, icon: 'H' }
-  ];
-
-  statConfigs.forEach((stat, index) => {
-    const x = margin + index * (statWidth + 5);
-
-    // Card background
-    drawRoundedRect(x, yPosition, statWidth, 25, 6, colors.lightBg);
-
-    // Icon
-    pdf.setFontSize(10);
-    pdf.setTextColor(...stat.color);
-    pdf.text(stat.icon, x + 8, yPosition + 8);
-
-    // Value
-    pdf.setFontSize(12);
-    pdf.setTextColor(...colors.primary);
+    pdf.setFontSize(22);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(stat.value.toString(), x + 15, yPosition + 8);
+    pdf.setTextColor(...colors.white);
+    pdf.text(member.toUpperCase(), pageWidth / 2, 20, { align: 'center' });
 
-    // Label
-    pdf.setFontSize(7);
-    pdf.setTextColor(...colors.secondary);
-    pdf.text(stat.label.toUpperCase(), x + 8, yPosition + 15);
-  });
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(200, 200, 200);
+    pdf.text(`Attendance Report: ${formatDateForDisplay(startDate)} - ${formatDateForDisplay(endDate)}`, pageWidth / 2, 30, { align: 'center' });
 
-  yPosition += 35;
+    yPosition = 60;
 
-  // Centered Table Header
-  const tableWidth = pageWidth - 2 * margin;
-  const col1Width = tableWidth * 0.3; // Date
-  const col2Width = tableWidth * 0.4; // Member
-  const col3Width = tableWidth * 0.3; // Status
+    // --- Member Stats ---
+    const memberRecords = recordsByMember[member];
+    // Sort by date
+    memberRecords.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  drawRoundedRect(margin, yPosition, tableWidth, 8, 4, colors.primary);
-  pdf.setFontSize(9);
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFont('helvetica', 'bold');
+    const stats = calculateStatistics(memberRecords);
+    const totalDays = memberRecords.length;
+    const attendanceRate = totalDays > 0 ? ((stats.Present / totalDays) * 100).toFixed(1) : 0;
 
-  // Center text in each column
-  pdf.text('DATE', margin + col1Width / 2, yPosition + 5.5, { align: 'center' });
-  pdf.text('TEAM MEMBER', margin + col1Width + col2Width / 2, yPosition + 5.5, { align: 'center' });
-  pdf.text('STATUS', margin + col1Width + col2Width + col3Width / 2, yPosition + 5.5, { align: 'center' });
+    // Draw Stats Row
+    const statBoxWidth = (pageWidth - (2 * margin) - 15) / 4;
 
-  yPosition += 12;
+    const statConfigs = [
+      { label: 'Present', value: stats.Present, color: colors.success },
+      { label: 'Absent', value: stats.Absent, color: colors.danger },
+      { label: 'Leave', value: stats.Leave, color: colors.warning },
+      { label: 'Rate', value: `${attendanceRate}%`, color: colors.primary }
+    ];
 
-  // Table Rows
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
+    statConfigs.forEach((stat, idx) => {
+      const x = margin + idx * (statBoxWidth + 5);
 
-  records.forEach((record, index) => {
-    // Check if we need a new page
-    if (yPosition > 250) {
-      pdf.addPage();
-      yPosition = margin;
+      // Box
+      drawRoundedRect(x, yPosition, statBoxWidth, 20, 4, colors.lightBg);
 
-      // Redraw table header on new page
-      drawRoundedRect(margin, yPosition, tableWidth, 8, 4, colors.primary);
-      pdf.setFontSize(9);
-      pdf.setTextColor(255, 255, 255);
+      // Label
+      pdf.setFontSize(8);
+      pdf.setTextColor(...colors.secondary);
+      pdf.text(stat.label.toUpperCase(), x + 5, yPosition + 8);
+
+      // Value
+      pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('DATE', margin + col1Width / 2, yPosition + 5.5, { align: 'center' });
-      pdf.text('TEAM MEMBER', margin + col1Width + col2Width / 2, yPosition + 5.5, { align: 'center' });
-      pdf.text('STATUS', margin + col1Width + col2Width + col3Width / 2, yPosition + 5.5, { align: 'center' });
-      yPosition += 12;
-    }
+      pdf.setTextColor(...stat.color);
+      pdf.text(stat.value.toString(), x + 5, yPosition + 16);
+    });
 
-    // Alternate row background
-    if (index % 2 === 0) {
-      drawRoundedRect(margin, yPosition, tableWidth, 7, 2, [249, 250, 251]);
-    }
+    yPosition += 30;
 
-    const date = formatForReport(record.date);
-    const member = record.member;
-    const status = record.status;
+    // --- Table Header ---
+    const tableWidth = pageWidth - 2 * margin;
+    const colDateWidth = tableWidth * 0.4;
+    const colStatusWidth = tableWidth * 0.6;
 
-    // Set color based on status
-    let statusColor = colors.success;
-    if (status === 'Absent') {
-      statusColor = colors.danger;
-    } else if (status === 'Leave') {
-      statusColor = colors.warning;
-    } else if (status === 'Holiday') {
-      statusColor = colors.info;
-    }
+    drawRoundedRect(margin, yPosition, tableWidth, 8, 2, colors.primary);
+    pdf.setFontSize(9);
+    pdf.setTextColor(...colors.white);
+    pdf.setFont('helvetica', 'bold');
 
-    // Center text in each column
-    pdf.setTextColor(...colors.primary);
-    pdf.text(date, margin + col1Width / 2, yPosition + 5, { align: 'center' });
-    pdf.text(member, margin + col1Width + col2Width / 2, yPosition + 5, { align: 'center' });
+    pdf.text('DATE', margin + 10, yPosition + 5.5);
+    pdf.text('STATUS', margin + colDateWidth + 10, yPosition + 5.5);
 
-    pdf.setTextColor(...statusColor);
-    pdf.text(status, margin + col1Width + col2Width + col3Width / 2, yPosition + 5, { align: 'center' });
+    yPosition += 10;
 
-    yPosition += 7;
-  });
+    // --- Table Rows ---
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
 
-  yPosition += 15;
+    memberRecords.forEach((record, index) => {
+      // Check for page break
+      if (yPosition > pageHeight - margin) {
+        pdf.addPage();
+        yPosition = margin;
 
-  // ATTENDANCE SUMMARY Section - Properly displayed
-  // Always check if we need a new page for the summary
-  if (yPosition > 180) {
-    pdf.addPage();
-    yPosition = margin;
-  }
+        // Re-draw header on new page
+        drawRoundedRect(margin, yPosition, tableWidth, 8, 2, colors.primary);
+        pdf.setTextColor(...colors.white);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('DATE', margin + 10, yPosition + 5.5);
+        pdf.text('STATUS', margin + colDateWidth + 10, yPosition + 5.5);
+        yPosition += 10;
+        pdf.setFont('helvetica', 'normal');
+      }
 
-  // Summary header
-  drawRoundedRect(margin, yPosition, pageWidth - 2 * margin, 10, 4, colors.primary);
-  pdf.setFontSize(11);
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('ATTENDANCE SUMMARY', margin + 10, yPosition + 6.5);
+      // Zebra striping
+      if (index % 2 === 0) {
+        drawRoundedRect(margin, yPosition - 2, tableWidth, 6, 1, colors.lightBg);
+      }
 
-  yPosition += 15;
+      const dateStr = formatForReport(record.date);
+      const status = record.status;
 
-  // Summary content with proper height
-  const summaryHeight = 70;
-  drawRoundedRect(margin, yPosition, pageWidth - 2 * margin, summaryHeight, 6, colors.white);
+      // Status Color
+      let statusColor = colors.primary;
+      if (status === 'Present') statusColor = colors.success;
+      if (status === 'Absent') statusColor = colors.danger;
+      if (status === 'Leave') statusColor = colors.warning;
+      if (status === 'Holiday') statusColor = colors.info;
 
-  // Add subtle border
-  pdf.setDrawColor(...colors.lightBg);
-  pdf.setLineWidth(0.5);
-  pdf.roundedRect(margin, yPosition, pageWidth - 2 * margin, summaryHeight, 6, 6, 'S');
+      pdf.setTextColor(...colors.primary);
+      pdf.text(dateStr, margin + 10, yPosition + 2);
 
-  const summaryStartY = yPosition + 12;
-  const summaryCol1 = margin + 15;
-  const summaryCol2 = pageWidth / 2;
-  const summaryCol3 = pageWidth - margin - 60;
+      pdf.setTextColor(...statusColor);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(status, margin + colDateWidth + 10, yPosition + 2);
+      pdf.setFont('helvetica', 'normal');
 
-  // Calculate attendance statistics
-  const totalDays = records.length;
-  const presentDays = stats.Present;
-  const attendanceRate = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(1) : 0;
+      yPosition += 7;
+    });
 
-  // Main metrics - Top row
-  pdf.setFontSize(9);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(...colors.primary);
-  pdf.text('Overall Performance', summaryCol1, summaryStartY);
-
-  pdf.setFontSize(16);
-  pdf.setTextColor(...colors.success);
-  pdf.text(`${attendanceRate}%`, summaryCol1, summaryStartY + 8);
-
-  pdf.setFontSize(7);
-  pdf.setTextColor(...colors.secondary);
-  pdf.text('Attendance Rate', summaryCol1, summaryStartY + 12);
-
-  // Total records
-  pdf.setFontSize(9);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(...colors.primary);
-  pdf.text('Total Records', summaryCol2, summaryStartY);
-
-  pdf.setFontSize(16);
-  pdf.setTextColor(...colors.accent);
-  pdf.text(totalDays.toString(), summaryCol2, summaryStartY + 8);
-
-  pdf.setFontSize(7);
-  pdf.setTextColor(...colors.secondary);
-  pdf.text('Working Days', summaryCol2, summaryStartY + 12);
-
-  // Team size
-  pdf.setFontSize(9);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(...colors.primary);
-  pdf.text('Team Size', summaryCol3, summaryStartY);
-
-  pdf.setFontSize(16);
-  pdf.setTextColor(...colors.info);
-  pdf.text(selectedMembers.size.toString(), summaryCol3, summaryStartY + 8);
-
-  pdf.setFontSize(7);
-  pdf.setTextColor(...colors.secondary);
-  pdf.text('Members', summaryCol3, summaryStartY + 12);
-
-  // Detailed breakdown section - Bottom section
-  const breakdownY = summaryStartY + 20;
-  pdf.setFontSize(8);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(...colors.primary);
-  pdf.text('Detailed Breakdown', summaryCol1, breakdownY);
-
-  let currentY = breakdownY + 8;
-  const breakdownConfigs = [
-    { status: 'Present', color: colors.success, count: stats.Present },
-    { status: 'Absent', color: colors.danger, count: stats.Absent },
-    { status: 'Leave', color: colors.warning, count: stats.Leave },
-    { status: 'Holiday', color: colors.info, count: stats.Holiday }
-  ];
-
-  breakdownConfigs.forEach(config => {
-    const percentage = totalDays > 0 ? ((config.count / totalDays) * 100).toFixed(1) : 0;
-
-    // Status label
+    // Footer for Member
+    const footerY = pageHeight - 10;
     pdf.setFontSize(7);
-    pdf.setTextColor(...colors.primary);
-    pdf.text(config.status, summaryCol1, currentY);
-
-    // Bar background
-    pdf.setFillColor(...colors.lightBg);
-    pdf.roundedRect(summaryCol1 + 25, currentY - 2, 40, 3, 1.5, 1.5, 'F');
-
-    // Bar fill
-    if (config.count > 0) {
-      const barWidth = (40 * config.count) / Math.max(totalDays, 1);
-      pdf.setFillColor(...config.color);
-      pdf.roundedRect(summaryCol1 + 25, currentY - 2, barWidth, 3, 1.5, 1.5, 'F');
-    }
-
-    // Percentage and count
-    pdf.setTextColor(...config.color);
-    pdf.text(`${percentage}%`, summaryCol1 + 70, currentY);
-
     pdf.setTextColor(...colors.secondary);
-    pdf.text(`(${config.count})`, summaryCol1 + 85, currentY);
-
-    currentY += 6;
+    pdf.text(`Page ${pdf.internal.getNumberOfPages()} • E-Manager Report`, pageWidth / 2, footerY, { align: 'center' });
   });
-
-  // Performance note - positioned at bottom of summary box
-  const noteY = yPosition + summaryHeight;
-  pdf.setFontSize(6);
-  pdf.setTextColor(...colors.secondary);
-  pdf.setFont('helvetica', 'italic');
-  pdf.text('Note: Based on recorded attendance data for the specified period.', margin + 10, noteY);
-
-  // Footer
-  const footerY = pdf.internal.pageSize.getHeight() - 15;
-  pdf.setDrawColor(...colors.lightBg);
-  pdf.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
-
-  pdf.setFontSize(7);
-  pdf.setTextColor(...colors.secondary);
-  pdf.text('Generated by E-Manager Professional Suite • Confidential', margin, footerY);
-  pdf.text(`Page ${pdf.internal.getNumberOfPages()}`, pageWidth - margin, footerY, { align: 'right' });
 
   return pdf.output('blob');
 };
@@ -629,7 +485,7 @@ const ExportAttendanceModal = ({ isOpen, onClose, members }) => {
 
         {/* Member Selection */}
         <div className="bg-gray-50 rounded-xl p-4">
-          <label className="block text-sm font-semibold text-gray-900 mb-3">
+          <label className="block text-sm font-semibold text-primary mb-3">
             Team Members Selection
           </label>
 
@@ -672,14 +528,14 @@ const ExportAttendanceModal = ({ isOpen, onClose, members }) => {
                       onChange={() => handleMemberToggle(member.name)}
                     />
                     {selectedMembers.has(member.name) && (
-                      <Check size={12} className="text-gray-900" />
+                      <Check size={12} className="text-primary" />
                     )}
                   </div>
                   <User size={18} className="text-gray-400 group-hover:text-gray-600" />
-                  <span className="text-sm font-medium text-gray-900 flex-1">{member.name}</span>
+                  <span className="text-sm font-medium text-primary flex-1">{member.name}</span>
                   <span className={`text-xs px-2 py-1 rounded-full font-medium transition-colors ${
                     selectedMembers.has(member.name)
-                      ? 'bg-gray-900 text-white'
+                      ? 'bg-primary text-white'
                       : 'bg-gray-100 text-gray-600'
                   }`}>
                     {selectedMembers.has(member.name) ? 'Selected' : 'Click to select'}
@@ -692,22 +548,22 @@ const ExportAttendanceModal = ({ isOpen, onClose, members }) => {
 
         {/* Format Selection */}
         <div className="bg-gray-50 rounded-xl p-4">
-          <label className="block text-sm font-semibold text-gray-900 mb-3">
+          <label className="block text-sm font-semibold text-primary mb-3">
             Export Format
           </label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <label className={`flex items-center space-x-4 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
               exportFormat === 'PDF'
-                ? 'border-gray-900 bg-white shadow-sm'
+                ? 'border-primary bg-white shadow-sm'
                 : 'border-gray-200 bg-white hover:border-gray-300'
             }`}>
               <div className={`p-3 rounded-lg ${
-                exportFormat === 'PDF' ? 'bg-gray-900' : 'bg-gray-100'
+                exportFormat === 'PDF' ? 'bg-primary' : 'bg-gray-100'
               }`}>
                 <FileText size={20} className={exportFormat === 'PDF' ? 'text-white' : 'text-gray-600'} />
               </div>
               <div className="flex-1">
-                <div className="font-semibold text-gray-900">PDF</div>
+                <div className="font-semibold text-primary">PDF</div>
               </div>
               <input
                 type="radio"
@@ -715,22 +571,22 @@ const ExportAttendanceModal = ({ isOpen, onClose, members }) => {
                 value="PDF"
                 checked={exportFormat === 'PDF'}
                 onChange={() => setExportFormat('PDF')}
-                className="text-gray-900 focus:ring-gray-900"
+                className="text-primary focus:ring-primary"
               />
             </label>
 
             <label className={`flex items-center space-x-4 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
               exportFormat === 'CSV'
-                ? 'border-gray-900 bg-white shadow-sm'
+                ? 'border-primary bg-white shadow-sm'
                 : 'border-gray-200 bg-white hover:border-gray-300'
             }`}>
               <div className={`p-3 rounded-lg ${
-                exportFormat === 'CSV' ? 'bg-gray-900' : 'bg-gray-100'
+                exportFormat === 'CSV' ? 'bg-primary' : 'bg-gray-100'
               }`}>
                 <Table size={20} className={exportFormat === 'CSV' ? 'text-white' : 'text-gray-600'} />
               </div>
               <div className="flex-1">
-                <div className="font-semibold text-gray-900">CSV</div>
+                <div className="font-semibold text-primary">CSV</div>
               </div>
               <input
                 type="radio"
@@ -738,7 +594,7 @@ const ExportAttendanceModal = ({ isOpen, onClose, members }) => {
                 value="CSV"
                 checked={exportFormat === 'CSV'}
                 onChange={() => setExportFormat('CSV')}
-                className="text-gray-900 focus:ring-gray-900"
+                className="text-primary focus:ring-primary"
               />
             </label>
           </div>
@@ -757,7 +613,7 @@ const ExportAttendanceModal = ({ isOpen, onClose, members }) => {
           <motion.button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-gray-900 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center space-x-2 transition-all duration-200"
+            className="flex-1 bg-primary text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center space-x-2 transition-all duration-200"
             whileHover={{ scale: loading ? 1 : 1.02 }}
             whileTap={{ scale: loading ? 1 : 0.98 }}
           >

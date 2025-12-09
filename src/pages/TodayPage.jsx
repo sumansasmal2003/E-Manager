@@ -129,7 +129,7 @@ const QuickAddNote = ({ onNoteAdded }) => {
       {!isExpanded ? (
         <button
           onClick={toggle}
-          className="w-full p-4 flex items-center justify-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group"
+          className="w-full p-4 flex items-center justify-center gap-2 text-gray-600 hover:text-primary transition-colors group"
         >
           <Plus size={18} className="transition-transform group-hover:scale-110" />
           <span className="font-medium">Add to Weekly Plan</span>
@@ -141,7 +141,7 @@ const QuickAddNote = ({ onNoteAdded }) => {
           onSubmit={handleSubmit}
           className="p-4 flex flex-col"
         >
-          <label className="block text-sm font-semibold text-gray-900 mb-3">
+          <label className="block text-sm font-semibold text-primary mb-3">
             Add Quick Note
           </label>
           <div className="flex flex-col gap-3">
@@ -162,7 +162,7 @@ const QuickAddNote = ({ onNoteAdded }) => {
               <button
                 type="submit"
                 disabled={loading || !title.trim()}
-                className="flex items-center justify-center gap-2 bg-gray-900 text-white px-4 py-3 rounded-lg hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl min-w-[100px]"
+                className="flex items-center justify-center gap-2 bg-primary text-white px-4 py-3 rounded-lg hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl min-w-[100px]"
               >
                 {loading ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -174,7 +174,7 @@ const QuickAddNote = ({ onNoteAdded }) => {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="flex items-center justify-center px-4 py-3 rounded-lg border border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gray-400 transition-all duration-200"
+                className="flex items-center justify-center px-4 py-3 rounded-lg border border-gray-300 text-gray-600 hover:text-primary hover:border-gray-400 transition-all duration-200"
               >
                 <span className="text-sm font-medium">Cancel</span>
               </button>
@@ -210,7 +210,7 @@ const StatsCard = ({ icon, title, value, color, description, onClick }) => (
     <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center mx-auto mb-3 transition-colors`}>
       {icon}
     </div>
-    <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{value}</div>
+    <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">{value}</div>
     <div className="text-sm font-semibold text-gray-700 mb-2">{title}</div>
     <div className="text-xs text-gray-500">{description}</div>
   </motion.button>
@@ -235,7 +235,7 @@ const ExpandableSection = ({
       >
         <div className="flex items-center gap-3">
           {icon}
-          <span className="font-semibold text-gray-900">{title}</span>
+          <span className="font-semibold text-primary">{title}</span>
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${badgeColor}`}>
             {count}
           </span>
@@ -296,7 +296,7 @@ const TaskItem = ({ task, type, isOverdue = false }) => {
           {config.icon}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 group-hover:text-gray-700 truncate leading-tight">
+          <h3 className="font-semibold text-primary group-hover:text-gray-700 truncate leading-tight">
             {task.title}
           </h3>
           <p className="text-sm text-gray-700 mt-1">
@@ -433,10 +433,10 @@ const TodayPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
             {currentGreeting.icon}
           </div>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your day...</p>
         </motion.div>
       </div>
@@ -455,11 +455,11 @@ const TodayPage = () => {
             <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="text-red-600" size={24} />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Unable to load your day</h3>
+            <h3 className="text-lg font-semibold text-primary mb-2">Unable to load your day</h3>
             <p className="text-gray-600 text-sm mb-4">{error}</p>
             <button
               onClick={fetchData}
-              className="bg-gray-900 text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors w-full font-medium"
+              className="bg-primary text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors w-full font-medium"
             >
               Try Again
             </button>
@@ -487,7 +487,7 @@ const TodayPage = () => {
                   {currentGreeting.icon}
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary">
                     {currentGreeting.text}
                   </h1>
                   <p className="text-gray-600 text-sm sm:text-base">
@@ -506,7 +506,7 @@ const TodayPage = () => {
             </div>
             <div className="flex items-center gap-2 bg-white rounded-2xl border border-gray-200 shadow-sm px-4 py-3 w-fit">
               <Zap size={20} className="text-amber-500" />
-              <span className="text-sm font-semibold text-gray-900">
+              <span className="text-sm font-semibold text-primary">
                 {stats.totalUrgentTasks} urgent items
               </span>
             </div>
@@ -525,7 +525,7 @@ const TodayPage = () => {
                   <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
                     <Zap size={20} className="text-gray-400" />
                   </div>
-                  <h2 className="text-xl font-semibold text-gray-900">Your Daily Briefing</h2>
+                  <h2 className="text-xl font-semibold text-primary">Your Daily Briefing</h2>
                 </div>
                 <div className="space-y-3 animate-pulse">
                   <div className="h-4 bg-gray-200 rounded-md w-3/4"></div>
@@ -545,10 +545,10 @@ const TodayPage = () => {
             {briefing && !briefingLoading && (
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-gray-900 to-gray-700 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-primary to-gray-700 rounded-xl flex items-center justify-center">
                     <Zap size={20} className="text-white" />
                   </div>
-                  <h2 className="text-xl font-semibold text-gray-900">Your Daily Briefing</h2>
+                  <h2 className="text-xl font-semibold text-primary">Your Daily Briefing</h2>
                 </div>
                 <div className="prose prose-sm max-w-none prose-p:my-2 prose-li:my-0 text-gray-700">
                   <ReactMarkdown>{briefing}</ReactMarkdown>
@@ -568,8 +568,8 @@ const TodayPage = () => {
                     onClick={() => setActiveSection(tab.id)}
                     className={`flex-1 flex flex-col items-center py-3 px-2 rounded-xl text-xs font-medium transition-all duration-200 ${
                       activeSection === tab.id
-                        ? 'bg-gray-900 text-white shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'text-gray-600 hover:text-primary hover:bg-gray-50'
                     }`}
                   >
                     <Icon size={16} className="mb-1" />
@@ -644,7 +644,7 @@ const TodayPage = () => {
                           <Clock className="text-blue-600" size={20} />
                         </div>
                         <div>
-                          <h2 className="text-xl font-semibold text-gray-900">Today's Meetings</h2>
+                          <h2 className="text-xl font-semibold text-primary">Today's Meetings</h2>
                           <p className="text-sm text-gray-600">Your scheduled sessions</p>
                         </div>
                         <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium ml-auto">
@@ -662,7 +662,7 @@ const TodayPage = () => {
                             >
                               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="font-semibold text-gray-900 group-hover:text-blue-700 truncate">
+                                  <h3 className="font-semibold text-primary group-hover:text-blue-700 truncate">
                                     {meeting.title}
                                   </h3>
                                   <p className="text-sm text-gray-600 truncate">{meeting.team.teamName}</p>
@@ -707,7 +707,7 @@ const TodayPage = () => {
                           <AlertTriangle className="text-red-600" size={20} />
                         </div>
                         <div>
-                          <h2 className="text-xl font-semibold text-gray-900">Action Items</h2>
+                          <h2 className="text-xl font-semibold text-primary">Action Items</h2>
                           <p className="text-sm text-gray-600">Tasks requiring attention</p>
                         </div>
                         <div className="flex gap-2 ml-auto">
@@ -814,7 +814,7 @@ const TodayPage = () => {
                           <FileText className="text-green-600" size={20} />
                         </div>
                         <div>
-                          <h2 className="text-xl font-semibold text-gray-900">Weekly Plan</h2>
+                          <h2 className="text-xl font-semibold text-primary">Weekly Plan</h2>
                           <p className="text-sm text-gray-600">Notes and reminders</p>
                         </div>
                         <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium ml-auto">
@@ -832,7 +832,7 @@ const TodayPage = () => {
                               key={note._id}
                               className="block p-3 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-all duration-200 group"
                             >
-                              <p className="font-medium text-gray-800 group-hover:text-gray-900 line-clamp-2">
+                              <p className="font-medium text-gray-800 group-hover:text-primary line-clamp-2">
                                 {note.title}
                               </p>
                             </Link>

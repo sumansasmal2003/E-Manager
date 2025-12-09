@@ -36,7 +36,7 @@ const AiDraftModal = ({ isOpen, onClose, onDraft }) => {
           type="button"
           disabled={loading || !prompt.trim()}
           onClick={handleSubmit}
-          className="w-full flex items-center justify-center space-x-2 bg-gray-900 text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+          className="w-full flex items-center justify-center space-x-2 bg-primary text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-800 disabled:opacity-50"
         >
           {loading ? <Loader2 className="animate-spin" /> : <Zap size={18} />}
           <span>{loading ? 'Drafting...' : 'Generate Draft'}</span>

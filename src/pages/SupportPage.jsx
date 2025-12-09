@@ -117,7 +117,7 @@ const SupportPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold text-primary mb-4">
             How can we help you?
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
@@ -172,13 +172,13 @@ const SupportPage = () => {
               <div className={`${method.color} w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-4`}>
                 {method.icon}
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">{method.title}</h3>
+              <h3 className="text-xl font-semibold text-primary mb-2">{method.title}</h3>
               <p className="text-gray-600 mb-4">{method.description}</p>
               <div className="flex items-center text-sm text-gray-500 mb-4">
                 <Clock className="w-4 h-4 mr-2" />
                 {method.availability}
               </div>
-              <button className="w-full bg-gray-900 text-white py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors">
+              <button className="w-full bg-primary text-white py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors">
                 {method.action}
               </button>
             </div>
@@ -193,7 +193,7 @@ const SupportPage = () => {
             transition={{ delay: 0.3 }}
           >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Frequently Asked Questions</h2>
+              <h2 className="text-2xl font-bold text-primary">Frequently Asked Questions</h2>
               <span className="text-gray-500">{filteredFaqs.length} questions</span>
             </div>
 
@@ -204,7 +204,7 @@ const SupportPage = () => {
                     onClick={() => setActiveFaq(activeFaq === index ? null : index)}
                     className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
                   >
-                    <span className="font-medium text-gray-900 pr-4">{item.question}</span>
+                    <span className="font-medium text-primary pr-4">{item.question}</span>
                     {activeFaq === index ? (
                       <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
                     ) : (
@@ -239,7 +239,7 @@ const SupportPage = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Helpful Resources</h2>
+            <h2 className="text-2xl font-bold text-primary mb-6">Helpful Resources</h2>
 
             {/* Resources Grid */}
             <div className="grid grid-cols-1 gap-4 mb-8">
@@ -250,7 +250,7 @@ const SupportPage = () => {
                       {resource.icon}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{resource.title}</h3>
+                      <h3 className="font-semibold text-primary">{resource.title}</h3>
                       <p className="text-sm text-gray-600">{resource.description}</p>
                     </div>
                     <div className="text-right">
@@ -267,7 +267,7 @@ const SupportPage = () => {
             {/* System Status */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">System Status</h3>
+                <h3 className="text-lg font-semibold text-primary">System Status</h3>
                 <div className="flex items-center text-green-600">
                   <CheckCircle2 className="w-5 h-5 mr-2" />
                   <span className="font-medium">All Systems Operational</span>
@@ -318,7 +318,7 @@ const SupportPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="bg-gray-900 rounded-3xl p-8 text-center mt-16"
+          className="bg-primary rounded-3xl p-8 text-center mt-16"
         >
           <h2 className="text-2xl font-bold text-white mb-4">
             Still need help?
@@ -327,10 +327,10 @@ const SupportPage = () => {
             Our dedicated support team is here to help you get the most out of E Manager. We're committed to providing you with the best possible experience.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-gray-900 px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors">
+            <button className="bg-white text-primary px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors">
               Schedule a Demo
             </button>
-            <button className="border border-white text-white px-8 py-3 rounded-xl font-semibold hover:bg-white hover:text-gray-900 transition-colors">
+            <button className="border border-white text-white px-8 py-3 rounded-xl font-semibold hover:bg-white hover:text-primary transition-colors">
               Contact Sales
             </button>
           </div>

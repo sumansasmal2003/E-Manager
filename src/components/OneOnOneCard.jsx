@@ -60,12 +60,12 @@ const OneOnOneCard = ({ oneOnOne, onUpdated, onDeleted }) => {
       <div className="p-4 border-b border-gray-100 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <Calendar size={16} className="text-gray-500" />
-          <h3 className="text-lg font-semibold text-gray-900">{formattedDate}</h3>
+          <h3 className="text-lg font-semibold text-primary">{formattedDate}</h3>
         </div>
         <div>
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors"
           >
             {isEditing ? <Save size={16} /> : <FileText size={16} />}
           </button>
@@ -110,7 +110,7 @@ const OneOnOneCard = ({ oneOnOne, onUpdated, onDeleted }) => {
                   value={leaderNotes}
                   onChange={(e) => setLeaderNotes(e.target.value)}
                   rows={5}
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-primary"
                 />
               </div>
 
@@ -133,7 +133,7 @@ const OneOnOneCard = ({ oneOnOne, onUpdated, onDeleted }) => {
                           const newText = e.target.value;
                           setActionItems(actionItems.map((ai, i) => i === index ? { ...ai, text: newText } : ai));
                         }}
-                        className={`flex-1 text-sm p-2 border-b ${item.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}
+                        className={`flex-1 text-sm p-2 border-b ${item.completed ? 'line-through text-gray-500' : 'text-primary'}`}
                       />
                       <button
                         onClick={() => handleRemoveActionItem(index)}
@@ -161,7 +161,7 @@ const OneOnOneCard = ({ oneOnOne, onUpdated, onDeleted }) => {
               <button
                 onClick={handleUpdate}
                 disabled={loading}
-                className="w-full bg-gray-900 text-white font-medium py-2 px-4 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                className="w-full bg-primary text-white font-medium py-2 px-4 rounded-lg hover:bg-gray-800 disabled:opacity-50"
               >
                 {loading ? 'Saving...' : 'Save Notes & Actions'}
               </button>

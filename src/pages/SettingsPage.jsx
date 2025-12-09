@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import { Settings, Shield, User, Link2, Cat } from 'lucide-react';
+import { Settings, Shield, User, Link2, CreditCard, Palette } from 'lucide-react';
 import IntegrationSettings from '../components/IntegrationSettings';
 import AccountSettings from '../components/AccountSettings';
+import { useNavigate } from 'react-router-dom';
+import BrandingSettings from '../components/BrandingSettings';
+import { useAuth } from '../context/AuthContext';
 
 const SettingsPage = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('integrations');
+  const navigate = useNavigate();
 
   const tabs = [
     {
@@ -20,7 +25,21 @@ const SettingsPage = () => {
       icon: User,
       component: AccountSettings,
       description: 'Manage your profile and security'
-    }
+    },
+    {
+      id: 'billing',
+      name: 'Billing & Plans',
+      icon: CreditCard,
+      description: 'Upgrade plan and manage subscription',
+      action: () => navigate('/billing') // Special action
+    },
+    ...(user?.role === 'owner' ? [{
+      id: 'branding',
+      name: 'Custom Branding',
+      icon: Palette, // Import from lucide-react
+      component: BrandingSettings,
+      description: 'Logo and theme colors'
+    }] : []),
   ];
 
   const activeTabConfig = tabs.find(tab => tab.id === activeTab);
@@ -31,11 +50,11 @@ const SettingsPage = () => {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
             <Settings className="text-white" size={20} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+            <h1 className="text-2xl font-bold text-primary">Settings</h1>
             <p className="text-gray-600">Manage your account preferences and integrations</p>
           </div>
         </div>
@@ -53,11 +72,17 @@ const SettingsPage = () => {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => {
+                        if (tab.action) {
+                            tab.action(); // Navigate if action exists
+                        } else {
+                            setActiveTab(tab.id);
+                        }
+                    }}
                     className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
                       isActive
-                        ? 'bg-gray-900 text-white shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'text-gray-600 hover:text-primary hover:bg-gray-50'
                     }`}
                   >
                     <Icon size={18} />

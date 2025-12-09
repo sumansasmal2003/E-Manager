@@ -1,8 +1,10 @@
 import axios from 'axios';
 
+// Use environment variable if available, otherwise fallback to localhost
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const api = axios.create({
-  baseURL: 'https://e-manager-backend-6vwv.onrender.com/api', // Your backend URL
-  // baseURL: 'http://localhost:5000/api', // Your backend URL
+  baseURL: BASE_URL,
 });
 
 // Interceptor to add the token to every request

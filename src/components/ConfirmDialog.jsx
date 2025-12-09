@@ -23,7 +23,7 @@ const ConfirmDialog = ({ isOpen, onClose, onConfirm, options }) => {
         </div>
 
         {/* Title */}
-        <h2 className="text-xl font-semibold text-gray-900 mt-6">
+        <h2 className="text-xl font-semibold text-primary mt-6">
           {title}
         </h2>
 
@@ -38,7 +38,7 @@ const ConfirmDialog = ({ isOpen, onClose, onConfirm, options }) => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={onClose}
-            className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all duration-200"
+            className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
           >
             {cancelText}
           </motion.button>
@@ -50,7 +50,7 @@ const ConfirmDialog = ({ isOpen, onClose, onConfirm, options }) => {
             className={`flex-1 font-medium py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${
               danger
                 ? 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-600'
-                : 'bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-900'
+                : 'bg-primary text-white hover:bg-gray-800 focus:ring-primary'
             }`}
           >
             {confirmText}

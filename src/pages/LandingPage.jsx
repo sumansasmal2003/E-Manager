@@ -5,484 +5,711 @@ import {
   ClipboardList,
   Calendar,
   Users,
-  Brain, // Changed from FilePieChart to Brain for AI
+  Brain,
   ArrowRight,
   CheckCircle,
-  Star,
-  HelpCircle,
   Play,
   Shield,
   Zap,
-  User,
-  User2Icon,
-  FilePieChart // We'll use this in the features list
+  Building,
+  Briefcase,
+  Layers,
+  BarChart3,
+  Lock,
+  Globe,
+  ShieldCheck,
+  TrendingUp,
+  Clock,
+  FileText,
+  Target,
+  Award,
+  Sparkles
 } from 'lucide-react';
-import Navbar from '../components/Navbar';
-import image1 from '../assets/img1.png'; // This is the abstract flow chart
-import image2 from '../assets/img2.png'; // This is the futuristic meeting table
+import image1 from '../assets/img1.png';
+import image2 from '../assets/img2.png';
 
-// Professional Feature Card Component (Style from your file)
-const FeatureCard = ({ icon, title, description, delay = 0 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.3 }}
-    transition={{ duration: 0.5, delay }}
-    className="group bg-white p-8 rounded-2xl border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
-  >
-    <div className="w-14 h-14 bg-gray-900 text-white rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-      {icon}
-    </div>
-    <h3 className="text-xl font-bold text-gray-900 mt-6 mb-3">{title}</h3>
-    <p className="text-gray-600 leading-relaxed">{description}</p>
-  </motion.div>
-);
+// --- ANIMATION VARIANTS ---
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, duration: 0.8 },
+  },
+};
 
-// Professional Testimonial Card (Style from your file)
-const TestimonialCard = ({ quote, name, title, delay = 0 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.3 }}
-    transition={{ duration: 0.5, delay }}
-    className="bg-gray-50 border border-gray-200 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-  >
-    <div className="flex space-x-1 text-yellow-500 mb-4">
-      {[...Array(5)].map((_, i) => (
-        <Star key={i} size={18} fill="currentColor" />
-      ))}
-    </div>
-    <p className="text-gray-700 text-lg leading-relaxed italic mb-6">"{quote}"</p>
-    <div className="flex items-center">
-      <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-        <User2Icon className='text-gray-900' />
-      </div>
-      <div className="ml-4">
-        <p className="font-bold text-gray-900">{name}</p>
-        <p className="text-sm text-gray-600">{title}</p>
-      </div>
-    </div>
-  </motion.div>
-);
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1]
+    }
+  },
+};
 
-// Professional Image Component (Style from your file)
-const ProfessionalImage = ({ img, delay = 0 }) => (
+const fadeInUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7 }
+  }
+};
+
+// --- COMPONENTS ---
+
+// 1. Professional Image Component
+const ProfessionalImage = ({ img, delay = 0, className = "" }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.95 }}
     whileInView={{ opacity: 1, scale: 1 }}
     viewport={{ once: true, amount: 0.3 }}
-    transition={{ duration: 0.6, delay }}
-    className="relative"
+    transition={{ duration: 0.6, delay, ease: "easeOut" }}
+    className={`relative ${className}`}
   >
-    <div className="absolute inset-0 bg-gradient-to-br from-gray-400/10 to-gray-600/10 rounded-3xl transform rotate-1"></div>
+    <div className="absolute inset-0 bg-gradient-to-br from-slate-100/20 to-slate-200/20 rounded-2xl transform rotate-1"></div>
     <img
       src={img}
-      alt="E-Manager dashboard interface"
-      className="relative rounded-2xl shadow-2xl w-full h-auto"
+      alt="E-Manager Dashboard Interface"
+      className="relative rounded-xl shadow-lg w-full h-auto border border-slate-200/80"
     />
   </motion.div>
 );
 
-// FAQ Item Component (Style from your file)
-const FAQItem = ({ question, answer, delay = 0 }) => (
+// 2. Feature Card
+const FeatureCard = ({ icon, title, description, color }) => (
   <motion.div
-    initial={{ opacity: 0, y: 10 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.3 }}
-    transition={{ duration: 0.4, delay }}
-    className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300"
+    variants={itemVariants}
+    className="group bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5"
   >
-    <div className="flex items-start space-x-4">
-      <div className="w-8 h-8 bg-gray-100 text-gray-600 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-        <HelpCircle size={16} />
-      </div>
-      <div>
-        <h4 className="font-semibold text-gray-900 mb-2 text-lg">{question}</h4>
-        <p className="text-gray-600 leading-relaxed">{answer}</p>
-      </div>
+    <div className={`w-14 h-14 ${color} text-white rounded-xl flex items-center justify-center mb-5 group-hover:scale-105 transition-transform duration-300 shadow-md`}>
+      {icon}
     </div>
+    <h3 className="text-lg font-semibold text-primary mb-3 group-hover:text-gray-800 transition-colors">{title}</h3>
+    <p className="text-gray-600 leading-relaxed text-sm">{description}</p>
   </motion.div>
 );
 
+// 3. Use Case Card
+const UseCaseCard = ({ title, role, description, icon: Icon }) => (
+  <motion.div
+    variants={itemVariants}
+    className="bg-white p-6 rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-300"
+  >
+    <div className="flex items-center gap-3 mb-4">
+      <div className="p-2 bg-primary text-white rounded-lg">
+        <Icon size={20} />
+      </div>
+      <div>
+        <h4 className="font-semibold text-primary">{title}</h4>
+        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">{role}</span>
+      </div>
+    </div>
+    <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
+  </motion.div>
+);
+
+// 4. Stat Number
+const StatNumber = ({ value, label, icon: Icon }) => (
+  <div className="text-center px-4 py-6">
+    <div className="flex items-center justify-center gap-3 mb-3">
+      {Icon && <Icon size={24} className="text-gray-400" />}
+      <div className="text-3xl md:text-4xl font-bold text-primary">
+        {value}
+      </div>
+    </div>
+    <div className="text-sm font-medium text-gray-500">{label}</div>
+  </div>
+);
+
 const LandingPage = () => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-  };
-
   return (
-    <div className="min-h-screen bg-white text-gray-900 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 text-primary overflow-x-hidden font-sans">
 
-      {/* Hero Section - UPDATED */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20 md:pt-36 md:pb-28 text-center relative">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="max-w-4xl mx-auto"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm font-medium mb-8 border border-gray-200"
-            >
-              <Zap size={16} className="text-gray-900 mr-2" />
-              Introducing E-Manager AI: Your new co-pilot
-            </motion.div>
+      {/* --- 1. HERO SECTION --- */}
+      <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 lg:pt-40 lg:pb-32 overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white to-slate-50 -z-20"></div>
+        <div className="absolute top-10 right-10 w-64 h-64 bg-blue-50 rounded-full blur-3xl opacity-60 -z-10"></div>
+        <div className="absolute bottom-10 left-10 w-80 h-80 bg-slate-100 rounded-full blur-3xl opacity-50 -z-10"></div>
 
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 leading-tight mb-6">
-              The All-in-One Command Center,
-              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">
-                Now With a Brain.
-              </span>
-            </h1>
-
-            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-10">
-              E-Manager unifies your tasks, meetings, and member data,
-              now supercharged by an AI agent that understands (and acts on) your entire workflow.
-            </p>
-
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-12"
+              transition={{ duration: 0.8 }}
+              className="text-left"
             >
-              <Link
-                to="/register"
-                className="inline-flex items-center justify-center space-x-3 bg-gray-900 text-white font-semibold py-4 px-10 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-500/20 transition-all duration-200 text-lg shadow-lg hover:shadow-xl"
+              {/* Badge */}
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 py-2 mb-6 shadow-sm"
               >
-                <span>Get Started for Free</span>
-                <ArrowRight size={20} />
-              </Link>
+                <span className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span className="text-sm font-medium text-gray-700">v2.0 Released • Multi-Manager Support</span>
+              </motion.div>
+
+              {/* Headline */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary leading-tight mb-6">
+                Streamline Team Management with{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-gray-700">
+                  Intelligent Hierarchy
+                </span>
+              </h1>
+
+              {/* Subheadline */}
+              <p className="text-lg text-gray-600 mb-8 leading-relaxed max-w-xl">
+                The enterprise-grade platform that combines hierarchical management, real-time analytics, and AI assistance to optimize your organization's workflow.
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  to="/register"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary text-white font-semibold rounded-lg hover:bg-gray-800 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  Start Free Trial
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  to="/demo"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-primary border border-slate-300 font-semibold rounded-lg hover:border-primary transition-all hover:shadow-md"
+                >
+                  <Play size={16} className="fill-current" />
+                  Watch Demo
+                </Link>
+              </div>
+
+              {/* Trust Indicators */}
+              <div className="mt-10 pt-6 border-t border-slate-200">
+                <p className="text-sm text-gray-500 mb-4">Trusted by forward-thinking organizations</p>
+                <div className="flex flex-wrap items-center gap-6 opacity-70">
+                  {['StartupCo', 'TechCorp', 'InnovateLabs', 'ScaleInc'].map((company) => (
+                    <div key={company} className="text-sm font-medium text-gray-700">{company}</div>
+                  ))}
+                </div>
+              </div>
             </motion.div>
 
-            {/* Trust Badges */}
+            {/* Hero Image */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-gray-500"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative"
             >
-              <div className="flex items-center space-x-2">
-                <Shield size={18} className="text-gray-600" />
-                <span>Enterprise-grade security</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Users size={18} className="text-gray-600" />
-                <span>Unlimited team members</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle size={18} className="text-gray-600" />
-                <span>No credit card required</span>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Features Section - UPDATED */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-            className="text-center mb-20"
-          >
-            <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Your Complete Leadership Toolkit
-            </motion.h2>
-            <motion.p variants={itemVariants} className="text-xl text-gray-600 max-w-2xl mx-auto">
-              One platform to manage projects, people, and performance—all powered by AI.
-            </motion.p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <FeatureCard
-              icon={<ClipboardList size={28} />}
-              title="Smart Task Management"
-              description="Assign, track, and manage all your team's tasks. Use AI to break down complex goals into sub-tasks instantly."
-              delay={0.1}
-            />
-            <FeatureCard
-              icon={<Calendar size={28} />}
-              title="Effortless Scheduling"
-              description="Schedule team meetings, generate Zoom links instantly, and sync everything with your Google Calendar."
-              delay={0.2}
-            />
-            <FeatureCard
-              icon={<Users size={28} />}
-              title="Member & Team Hub"
-              description="Keep detailed profiles, track 1-on-1s, manage daily attendance, and get AI-generated talking points for meetings."
-              delay={0.3}
-            />
-            <FeatureCard
-              icon={<Brain size={28} />}
-              title="Your Personal AI Agent"
-              description="Go beyond search. Tell your AI to create, update, delete, or find anything in your account using plain English."
-              delay={0.4}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section - UPDATED */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center"
-          >
-            <div>
-              <motion.h2 variants={itemVariants} className="text-4xl font-bold text-gray-900 mb-6">
-                A workflow that just... works.
-              </motion.h2>
-              <motion.p variants={itemVariants} className="text-xl text-gray-600 mb-12 leading-relaxed">
-                Get up and running in minutes. E-Manager simplifies your workflow, so you can focus on what truly matters: leading your team.
-              </motion.p>
-
-              <div className="space-y-8">
-                {[
-                  {
-                    step: "01",
-                    title: "Create Your Teams",
-                    description: "Instantly set up teams and add members by name. No complex invites needed."
-                  },
-                  {
-                    step: "02",
-                    title: "Assign Tasks & Schedule",
-                    description: "Use bulk-add to assign tasks quickly or let your AI create them for you."
-                  },
-                  {
-                    step: "03",
-                    title: "Manage & Report",
-                    description: "Track daily progress on your 'Today' dashboard and generate AI-powered reports."
-                  },
-                  { // --- NEW STEP ---
-                    step: "04",
-                    title: "Delegate to Your AI",
-                    description: "Hit Ctrl+J and tell your AI what to do. 'Mark all 'Fixspire' tasks from last week as completed.' Done."
-                  }
-                ].map((item, index) => (
-                  <motion.div
-                    key={item.step}
-                    variants={itemVariants}
-                    className="flex items-start space-x-6 group"
-                  >
-                    <div className="w-14 h-14 bg-white border border-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:border-gray-900 transition-colors duration-300">
-                      <span className="text-2xl font-bold text-gray-400 group-hover:text-gray-900 transition-colors duration-300">
-                        {item.step}
-                      </span>
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
+                <img
+                  src={image1}
+                  alt="E-Manager Dashboard Preview"
+                  className="w-full h-auto"
+                />
+                {/* Floating Elements */}
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="absolute left-4 bottom-4 bg-white p-3 rounded-lg shadow-lg border border-slate-200"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-green-100 rounded-md text-green-600">
+                      <CheckCircle size={16} />
                     </div>
                     <div>
-                      <h4 className="text-xl font-semibold text-gray-900 mb-2">{item.title}</h4>
-                      <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                      <p className="text-xs text-gray-500 font-medium">Task Status</p>
+                      <p className="text-sm font-semibold text-primary">Complete</p>
                     </div>
-                  </motion.div>
-                ))}
+                  </div>
+                </motion.div>
               </div>
-            </div>
-
-            <ProfessionalImage img={image1} delay={0.3} />
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Advanced Features Section - UPDATED */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* --- 2. STATS SECTION --- */}
+      <section className="py-12 bg-white border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            <StatNumber value="10K+" label="Tasks Automated" icon={Zap} />
+            <div className="hidden md:block border-r border-slate-200"></div>
+            <StatNumber value="500+" label="Organizations" icon={Building} />
+            <div className="hidden md:block border-r border-slate-200"></div>
+            <StatNumber value="99.9%" label="Uptime SLA" icon={Shield} />
+            <div className="hidden md:block border-r border-slate-200"></div>
+            <StatNumber value="24/7" label="AI Support" icon={Brain} />
+          </div>
+        </div>
+      </section>
+
+      {/* --- 3. PROBLEM / SOLUTION --- */}
+      <section className="py-20 lg:py-28 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4">
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
+            viewport={{ once: true }}
             variants={containerVariants}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center"
+            className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center"
           >
-            <div className="lg:order-last">
-              <motion.h2 variants={itemVariants} className="text-4xl font-bold text-gray-900 mb-6">
-                Go beyond simple task tracking.
-              </motion.h2>
-              <motion.p variants={itemVariants} className="text-xl text-gray-600 mb-8 leading-relaxed">
-                E-Manager provides tools for genuine team leadership, not just project management.
-              </motion.p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <motion.div variants={fadeInUp}>
+              <div className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">
+                <Clock size={14} />
+                The Traditional Approach
+              </div>
+              <h2 className="text-3xl lg:text-4xl font-bold text-primary mb-6 leading-tight">
+                Scattered tools create fragmented workflows
+              </h2>
+              <p className="text-gray-600 mb-8 text-lg">
+                Managing teams across multiple platforms leads to communication gaps, missed deadlines, and decreased productivity.
+              </p>
+              <ul className="space-y-4">
                 {[
-                  "Track 1-on-1s & private leader notes",
-                  "Manage daily attendance with a roll call",
-                  "Google Calendar two-way sync",
-                  "Generate professional PDF & CSV reports",
-                  "Centralized team notes & resources",
-                  "AI-Generated reports & talking points",
-                ].map((feature, index) => (
-                  <motion.div
-                    key={feature}
-                    variants={itemVariants}
-                    className="flex items-center space-x-3"
-                  >
-                    <CheckCircle size={20} className="text-gray-900 shrink-0" />
-                    <span className="text-gray-700">{feature}</span>
-                  </motion.div>
+                  { text: "Manual attendance tracking across spreadsheets", icon: "✕" },
+                  { text: "Limited visibility into manager performance", icon: "✕" },
+                  { text: "Files scattered across different platforms", icon: "✕" },
+                  { text: "No centralized insights or reporting", icon: "✕" }
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-500 mt-0.5 flex-shrink-0">
+                      <span className="font-bold text-sm">{item.icon}</span>
+                    </div>
+                    <span className="text-gray-700">{item.text}</span>
+                  </li>
                 ))}
+              </ul>
+            </motion.div>
+
+            <motion.div variants={fadeInUp} className="relative">
+              <div className="bg-white p-2 rounded-xl shadow-lg border border-slate-200">
+                <ProfessionalImage img={image2} />
               </div>
+              {/* Decorative elements */}
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-blue-100 rounded-full blur-2xl opacity-60 -z-10"></div>
+              <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-slate-200 rounded-full blur-2xl opacity-50 -z-10"></div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* --- 4. CORE FEATURES GRID --- */}
+      <section className="py-20 lg:py-28 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">
+              <Sparkles size={14} />
+              Platform Features
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-primary mb-6">
+              Everything you need to manage effectively
+            </h2>
+            <p className="text-gray-600 text-lg">
+              A comprehensive suite of tools designed for modern organizational management
+            </p>
+          </div>
+
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            <FeatureCard
+              icon={<Layers size={24} />}
+              title="Hierarchical Management"
+              description="Create and manage multiple organizational levels with clear reporting structures and delegated authority."
+              color="bg-primary"
+            />
+            <FeatureCard
+              icon={<Brain size={24} />}
+              title="AI Executive Assistant"
+              description="Intelligent assistant that provides insights, automates reports, and helps with decision-making."
+              color="bg-gray-800"
+            />
+            <FeatureCard
+              icon={<BarChart3 size={24} />}
+              title="Advanced Analytics"
+              description="Comprehensive dashboards with real-time metrics on performance, productivity, and team health."
+              color="bg-primary"
+            />
+            <FeatureCard
+              icon={<ShieldCheck size={24} />}
+              title="Granular Permissions"
+              description="Fine-grained access controls with role-based permissions and audit trails."
+              color="bg-gray-800"
+            />
+            <FeatureCard
+              icon={<Globe size={24} />}
+              title="Centralized Resources"
+              description="Unified repository for all documents, files, and resources with version control."
+              color="bg-primary"
+            />
+            <FeatureCard
+              icon={<Lock size={24} />}
+              title="Enterprise Security"
+              description="Bank-level security with 2FA, encryption, and compliance certifications."
+              color="bg-gray-800"
+            />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* --- 5. ORGANIZATION STRUCTURE --- */}
+      <section className="py-20 lg:py-28 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7 }}
+              viewport={{ once: true }}
+            >
+              <div className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">
+                <Building size={14} />
+                Organizational Design
+              </div>
+              <h2 className="text-3xl lg:text-4xl font-bold text-primary mb-6 leading-tight">
+                Structure that mirrors your organization
+              </h2>
+              <p className="text-gray-600 mb-8 text-lg">
+                E-Manager replicates your real-world hierarchy with precision, ensuring everyone has the right level of access and visibility.
+              </p>
+
+              <div className="space-y-8">
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-white flex-shrink-0 shadow">
+                    <Users size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-primary mb-2">Organization Owners</h4>
+                    <p className="text-gray-600">
+                      Complete oversight with full administrative control, audit capabilities, and strategic decision-making tools.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-gray-800 flex items-center justify-center text-white flex-shrink-0 shadow">
+                    <Briefcase size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-primary mb-2">Team Managers</h4>
+                    <p className="text-gray-600">
+                      Operational control with team-specific management tools, task assignment, and performance monitoring.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200">
+                <div className="flex flex-col items-center">
+                  {/* Owner Level */}
+                  <div className="mb-8">
+                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-lg mb-3">
+                      <Building size={24} />
+                    </div>
+                    <p className="text-center text-sm font-medium text-primary">Owner</p>
+                  </div>
+
+                  {/* Connector */}
+                  <div className="h-8 w-0.5 bg-gray-300 mb-6"></div>
+
+                  {/* Manager Level */}
+                  <div className="flex gap-8 mb-8">
+                    {['Manager A', 'Manager B'].map((manager, idx) => (
+                      <div key={idx} className="flex flex-col items-center">
+                        <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-white shadow mb-2">
+                          {manager[0]}
+                        </div>
+                        <p className="text-center text-xs font-medium text-gray-700">{manager}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Connectors to Teams */}
+                  <div className="flex gap-16 mb-4">
+                    <div className="h-6 w-0.5 bg-gray-300"></div>
+                    <div className="h-6 w-0.5 bg-gray-300"></div>
+                  </div>
+
+                  {/* Team Level */}
+                  <div className="flex gap-12">
+                    {[2, 3].map((teamSize, idx) => (
+                      <div key={idx} className="flex gap-2">
+                        {Array.from({ length: teamSize }).map((_, i) => (
+                          <div key={i} className="w-8 h-8 bg-slate-200 rounded-full"></div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- 6. PRICING --- */}
+      <section className="py-20 lg:py-28 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-primary mb-4">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-gray-600">
+              Start free and upgrade as your organization grows
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {/* Starter */}
+            <div className="p-6 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition-colors">
+              <h3 className="text-lg font-semibold text-primary mb-2">Starter</h3>
+              <div className="flex items-baseline mb-4">
+                <span className="text-3xl font-bold text-primary">$0</span>
+                <span className="text-gray-500 ml-1">/month</span>
+              </div>
+              <p className="text-sm text-gray-500 mb-6">For small teams getting started</p>
+              <ul className="space-y-3 mb-8 text-sm text-gray-600">
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  Up to 10 team members
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  Basic task management
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  Email support
+                </li>
+              </ul>
+              <Link
+                to="/register"
+                className="block w-full text-center py-3 rounded-lg border border-primary text-primary font-medium hover:bg-primary hover:text-white transition-colors"
+              >
+                Get Started
+              </Link>
             </div>
 
-            <ProfessionalImage img={image2} delay={0.3} />
-          </motion.div>
-        </div>
-      </section>
+            {/* Professional */}
+            <div className="p-6 rounded-xl border-2 border-primary bg-white shadow-lg relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <span className="bg-primary text-white text-xs font-medium px-3 py-1 rounded-full">
+                  MOST POPULAR
+                </span>
+              </div>
+              <h3 className="text-lg font-semibold text-primary mb-2">Professional</h3>
+              <div className="flex items-baseline mb-4">
+                <span className="text-3xl font-bold text-primary">$29</span>
+                <span className="text-gray-500 ml-1">/month</span>
+              </div>
+              <p className="text-sm text-gray-500 mb-6">For growing organizations</p>
+              <ul className="space-y-3 mb-8 text-sm text-gray-600">
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  Up to 50 team members
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  Multiple managers support
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  Advanced analytics
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  Priority support
+                </li>
+              </ul>
+              <Link
+                to="/register"
+                className="block w-full text-center py-3 rounded-lg bg-primary text-white font-medium hover:bg-gray-800 transition-colors"
+              >
+                Start Free Trial
+              </Link>
+            </div>
 
-      {/* Testimonials Section - UPDATED */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-            className="text-center mb-16"
-          >
-            <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Trusted by modern team leaders
-            </motion.h2>
-            <motion.p variants={itemVariants} className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Join thousands of team leaders who have transformed their workflow with E-Manager.
-            </motion.p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <TestimonialCard
-              quote="The new AI agent is a game-changer. I just *tell* it to create tasks and meetings. It replaced three of our tools."
-              name="Sarah J."
-              title="Project Manager, Tech Startup"
-              delay={0.1}
-            />
-            <TestimonialCard
-              quote="Finally, a simple tool that lets me track my team's tasks and their attendance in one place. The 1-on-1 feature is brilliant."
-              name="Mark R."
-              title="Founder, Design Agency"
-              delay={0.2}
-            />
-            <TestimonialCard
-              quote="I love how I can ask the AI 'Am I missing anything for this week?' and it *knows*. It checks my tasks, my meetings, everything."
-              name="Emily K."
-              title="Engineering Lead, SaaS Co."
-              delay={0.3}
-            />
+            {/* Enterprise */}
+            <div className="p-6 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition-colors">
+              <h3 className="text-lg font-semibold text-primary mb-2">Enterprise</h3>
+              <div className="flex items-baseline mb-4">
+                <span className="text-3xl font-bold text-primary">$99</span>
+                <span className="text-gray-500 ml-1">/month</span>
+              </div>
+              <p className="text-sm text-gray-500 mb-6">For large organizations</p>
+              <ul className="space-y-3 mb-8 text-sm text-gray-600">
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  Unlimited members
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  Custom onboarding
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  Dedicated support
+                </li>
+              </ul>
+              <Link
+                to="/contact"
+                className="block w-full text-center py-3 rounded-lg border border-primary text-primary font-medium hover:bg-primary hover:text-white transition-colors"
+              >
+                Contact Sales
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section - UPDATED */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* --- 7. USE CASES --- */}
+      <section className="py-20 lg:py-28 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-primary mb-4">
+              Trusted by industry leaders
+            </h2>
+            <p className="text-gray-600">
+              See how different organizations leverage E-Manager
+            </p>
+          </div>
+
           <motion.div
+            className="grid md:grid-cols-3 gap-6"
+            variants={containerVariants}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-            className="text-center mb-16"
+            viewport={{ once: true }}
           >
-            <motion.h2 variants={itemVariants} className="text-4xl font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
-            </motion.h2>
-            <motion.p variants={itemVariants} className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Everything you need to know about getting started with E-Manager.
-            </motion.p>
+            <UseCaseCard
+              title="Digital Agencies"
+              role="Creative Directors"
+              description="Manage multiple client projects simultaneously while maintaining quality control and meeting deadlines."
+              icon={Target}
+            />
+            <UseCaseCard
+              title="Tech Startups"
+              role="Engineering Leads"
+              description="Coordinate cross-functional teams with agile workflows and real-time progress tracking."
+              icon={TrendingUp}
+            />
+            <UseCaseCard
+              title="Consulting Firms"
+              role="Project Managers"
+              description="Streamline client engagements with centralized documentation and team collaboration tools."
+              icon={FileText}
+            />
           </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <FAQItem
-              question="Is this a collaborative tool or just for me?"
-              answer="Currently, E-Manager is designed as a 'command center' for a single leader to manage their teams. Members do not have their own logins. This simplifies setup and management."
-              delay={0.1}
-            />
-            <FAQItem
-              question="Is my data secure?"
-              answer="Yes. Your data is protected. All team information, tasks, and notes are tied directly to your account. We use industry-standard encryption and never sell your data."
-              delay={0.2}
-            />
-            <FAQItem
-              question="How does the AI work?"
-              answer="Our AI is a two-part system. It has a 'router' to understand if you want to read or write data, and a 'talker' to answer questions. All actions are based *only* on your account data, which is sent securely to the AI for processing."
-              delay={0.3}
-            />
-            <FAQItem
-              question="What can the AI do?"
-              answer="The AI can read all your data to answer questions (e.g., 'How many tasks are pending?'). It can also create, update, and delete tasks, meetings, and personal notes. Just ask it in plain English."
-              delay={0.4}
-            />
-          </div>
         </div>
       </section>
 
-      {/* Final CTA Section - UPDATED */}
-      <section className="py-24 bg-gray-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* --- 8. FINAL CTA --- */}
+      <section className="py-20 lg:py-28 bg-white">
+        <div className="max-w-4xl mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.5 }}
-            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="bg-gradient-to-r from-primary to-gray-800 rounded-2xl p-8 md:p-12 text-center text-white shadow-xl"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Take control with your new AI assistant.
+            <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 mb-6">
+              <Award size={16} />
+              <span className="text-sm font-medium">Industry Leader 2024</span>
+            </div>
+
+            <h2 className="text-3xl lg:text-4xl font-bold mb-6">
+              Ready to transform your team management?
             </h2>
-            <p className="text-xl text-gray-700 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Stop juggling spreadsheets and docs. Start managing with an AI co-pilot that does the work for you.
+
+            <p className="text-gray-300 mb-8 text-lg max-w-2xl mx-auto">
+              Join thousands of organizations that have streamlined their operations with E-Manager.
             </p>
 
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center space-x-3 bg-gray-900 text-white font-semibold py-4 px-12 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-900/20 transition-all duration-200 text-lg shadow-lg hover:shadow-xl"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-primary font-semibold rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <span>Sign Up Now</span>
-                <ArrowRight size={20} />
+                Start 30-Day Free Trial
+                <ArrowRight size={18} />
+              </Link>
+              <Link
+                to="/demo"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-transparent text-white border border-white/30 font-semibold rounded-lg hover:bg-white/10 transition-colors"
+              >
+                Schedule a Demo
               </Link>
             </div>
 
-            <p className="text-gray-600 text-sm mt-6">
-              No credit card required • Setup in 2 minutes
+            <p className="mt-6 text-gray-400 text-sm">
+              No credit card required • 30-day free trial • Cancel anytime
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-50 border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-6 md:mb-0">
-              <p className="text-2xl font-bold text-gray-900">E-Manager</p>
-              <p className="text-gray-600 text-sm mt-2">
-                The AI-Powered Team Command Center.
+      {/* --- FOOTER --- */}
+      <footer className="bg-zinc-900 text-gray-400 py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="text-white font-bold text-xl mb-4">E-Manager</div>
+              <p className="text-sm text-gray-300">
+                The intelligent platform for modern organizational management.
               </p>
             </div>
-            <div className="text-gray-500 text-sm">
-              <p>© {new Date().getFullYear()} E-Manager. All rights reserved.</p>
+
+            <div>
+              <h4 className="text-white font-medium mb-4">Product</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/features" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link to="/security" className="hover:text-white transition-colors">Security</Link></li>
+              </ul>
             </div>
+
+            <div>
+              <h4 className="text-white font-medium mb-4">Company</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
+                <li><Link to="/careers" className="hover:text-white transition-colors">Careers</Link></li>
+                <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-white font-medium mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link></li>
+                <li><Link to="/terms" className="hover:text-white transition-colors">Terms</Link></li>
+                <li><Link to="/cookies" className="hover:text-white transition-colors">Cookies</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-gray-800 text-center text-sm text-gray-500">
+            © {new Date().getFullYear()} E-Manager Inc. All rights reserved.
           </div>
         </div>
       </footer>
+
     </div>
   );
 };

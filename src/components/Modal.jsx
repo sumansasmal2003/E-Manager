@@ -52,7 +52,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           >
             {/* Modal Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+              <h2 className="text-xl font-semibold text-primary">{title}</h2>
               <button
                 onClick={onClose}
                 className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"

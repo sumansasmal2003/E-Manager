@@ -60,7 +60,7 @@ const InteractiveCell = React.memo(({ memberName, dateString, status, onStatusCh
     <select
       value={status}
       onChange={(e) => onStatusChange(memberName, dateString, e.target.value)}
-      className={`w-full h-full text-sm font-medium border rounded-lg focus:ring-2 focus:ring-gray-900 transition-all duration-200 cursor-pointer appearance-none text-center ${config.color}`}
+      className={`w-full h-full text-sm font-medium border rounded-lg focus:ring-2 focus:ring-primary transition-all duration-200 cursor-pointer appearance-none text-center ${config.color}`}
     >
       <option value={NOT_SET} disabled>Select</option>
       <option value="Present">Present</option>
@@ -94,7 +94,7 @@ const AttendanceGrid = ({
   const renderHeader = () => (
     <thead className="sticky top-0 z-20">
       <tr className="bg-gray-50">
-        <th className="sticky left-0 z-30 bg-gray-100 p-4 border-b border-r border-gray-300 text-left text-sm font-semibold text-gray-900 min-w-[220px]">
+        <th className="sticky left-0 z-30 bg-gray-100 p-4 border-b border-r border-gray-300 text-left text-sm font-semibold text-primary min-w-[220px]">
           <div className="flex items-center space-x-3">
             <User size={18} className="text-gray-600" />
             <span>Team Member</span>
@@ -113,13 +113,13 @@ const AttendanceGrid = ({
                 isWeekend
                   ? 'bg-gray-200 text-gray-700'
                   : 'bg-gray-50 text-gray-600'
-              } ${isToday ? 'ring-2 ring-gray-900 ring-inset' : ''}`}
+              } ${isToday ? 'ring-2 ring-primary ring-inset' : ''}`}
             >
               <div className="space-y-1">
                 <div className="text-xs font-medium uppercase tracking-wide">
                   {format(date, 'EEE')}
                 </div>
-                <div className={`text-lg font-bold ${isToday ? 'text-gray-900' : ''}`}>
+                <div className={`text-lg font-bold ${isToday ? 'text-primary' : ''}`}>
                   {day}
                 </div>
               </div>
@@ -141,7 +141,7 @@ const AttendanceGrid = ({
                 <User size={14} className="text-gray-600" />
               </div>
               <div>
-                <div className="font-semibold text-gray-900 text-sm">{member.name}</div>
+                <div className="font-semibold text-primary text-sm">{member.name}</div>
                 <div className="text-xs text-gray-500">
                   {memberProfileMap.get(member.name)?.joiningDate
                     ? `Joined ${format(new Date(memberProfileMap.get(member.name).joiningDate), 'MMM yyyy')}`

@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'; // <-- 1. IMPORT useNavigate
-import { Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar, Menu, X, Sunrise, UserCheck, CheckSquare, Bell, User, Gamepad2, Brain, BarChart3, Server } from 'lucide-react';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Notebook, Users, LayoutDashboard, ChevronLeft, ChevronRight, Settings, Calendar,
+  Menu, X, Sunrise, UserCheck, CheckSquare, Bell, User, Gamepad2, Brain, BarChart3,
+  Server, Briefcase
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- 2. IMPORT MODALS AND HOOK ---
 import { useModal } from '../context/ModalContext';
+import { useAuth } from '../context/AuthContext';
+import api from '../api/axiosConfig'; // <-- Import API for interceptor
+
+// Modals
 import CommandPalette from '../components/CommandPalette';
 import AddNoteModal from '../components/AddNoteModal';
 import CreateTeamModal from '../components/CreateTeamModal';
@@ -13,10 +20,10 @@ import CreateMeetingModal from '../components/CreateMeetingModal';
 import AddMemberModal from '../components/AddMemberModal';
 import ShortcutsModal from '../components/ShortcutsModal';
 import AiChatModal from '../components/AiChatModal';
-import { useAuth } from '../context/AuthContext';
 import OnboardingModal from '../components/OnboardingModal';
+import UpgradeModal from '../components/UpgradeModal'; // <-- Import UpgradeModal
 
-// (SidebarLink component remains the same)
+// Sidebar Link Component
 const SidebarLink = ({ to, icon, children, isCollapsed, onNavigate }) => {
   const location = useLocation();
   const isActive = location.pathname === to;
@@ -30,8 +37,8 @@ const SidebarLink = ({ to, icon, children, isCollapsed, onNavigate }) => {
           isCollapsed ? 'justify-center' : 'space-x-3'
         } px-3 py-3 rounded-xl transition-all duration-200 ${
           isActive
-            ? 'bg-gray-900 text-white shadow-sm'
-            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            ? 'bg-primary text-white shadow-sm'
+            : 'text-gray-600 hover:text-primary hover:bg-gray-50'
         }`
       }
     >
@@ -59,14 +66,38 @@ const DashboardLayout = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [sidebarHeight, setSidebarHeight] = useState(0);
   const location = useLocation();
-  const navigate = useNavigate(); // <-- 3. GET navigate
-  const { isFirstLogin } = useAuth();
+  const navigate = useNavigate();
+  const { isFirstLogin, user } = useAuth();
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
 
-  // --- 4. GET MODAL CONTROLS ---
   const { modalState, openModal, closeModal, modalContext } = useModal();
 
-  // (useEffect for mobile sidebar, useEffect for sidebar height remain the same)
+  // --- 1. GLOBAL INTERCEPTOR FOR LIMITS ---
+  useEffect(() => {
+    // Intercept any response to check for "Upgrade" errors
+    const interceptor = api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        // Check for 403 Forbidden + specific message content
+        if (error.response && error.response.status === 403) {
+          const msg = error.response.data?.message || '';
+
+          // If the backend message mentions "Upgrade" or "limit"
+          if (msg.toLowerCase().includes('upgrade') || msg.toLowerCase().includes('limit')) {
+            openModal('upgradeModal', { message: msg });
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      api.interceptors.response.eject(interceptor);
+    };
+  }, [openModal]);
+
+  // --- End Interceptor ---
+
   useEffect(() => {
     setIsMobileSidebarOpen(false);
   }, [location.pathname]);
@@ -85,15 +116,12 @@ const DashboardLayout = () => {
     return () => window.removeEventListener('resize', updateSidebarHeight);
   }, []);
 
-  // --- 5. ADD KEYBOARD SHORTCUT LISTENER ---
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Check if we're in an input, textarea, or content-editable field
       const isTyping = e.target.tagName === 'INPUT' ||
                        e.target.tagName === 'TEXTAREA' ||
                        e.target.isContentEditable;
 
-      // Ctrl+K for Command Palette (works even in inputs)
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         openModal('commandPalette');
@@ -106,11 +134,8 @@ const DashboardLayout = () => {
         return;
       }
 
-      // '?' for Shortcuts (only if NOT typing)
-      // We also allow '/' as it's the same key
       if ((e.key === '?' || e.key === '/') && !isTyping) {
         e.preventDefault();
-        // Check if another modal is already open before opening
         if (!Object.values(modalState).some(isOpen => isOpen)) {
           openModal('shortcuts');
         }
@@ -124,21 +149,18 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     if (isFirstLogin) {
-      // Show the modal after a short delay so the UI can settle
       const timer = setTimeout(() => {
         setShowOnboardingModal(true);
-      }, 1500); // 1.5 second delay
-
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [isFirstLogin]);
 
-
-  // (getPageTitle, getPageDescription, handleNavigate, renderSidebarLinks remain the same)
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === '/today' || path === '/') return 'Today\'s Command Center';
     if (path === '/dashboard') return 'Dashboard Overview';
+    if (path === '/managers') return 'Organization Managers';
     if (path === '/notes') return 'My Notes';
     if (path === '/teams') return 'My Teams';
     if (path === '/settings') return 'My Settings';
@@ -146,6 +168,7 @@ const DashboardLayout = () => {
     if (path === '/members') return 'Team Members';
     if (path === '/attendance') return 'Attendance Tracking';
     if (path === '/notifications') return 'Notification Log';
+    if (path === '/pricing') return 'Plans & Billing'; // Added title for Pricing
     return 'Dashboard';
   };
 
@@ -153,6 +176,7 @@ const DashboardLayout = () => {
     const path = location.pathname;
     if (path === '/today' || path === '/') return 'Your daily briefing and action items.';
     if (path === '/dashboard') return 'Welcome to your dashboard overview';
+    if (path === '/managers') return 'Manage your team leads and their access.';
     if (path === '/notes') return 'Manage and organize your personal notes';
     if (path === '/teams') return 'Collaborate with your team members';
     if (path === '/settings') return 'Manage your account and connections';
@@ -160,6 +184,7 @@ const DashboardLayout = () => {
     if (path === '/members') return 'Manage your team members and roles';
     if (path === '/attendance') return 'Track and manage team attendance';
     if (path === '/notifications') return 'View a log of all sent emails';
+    if (path === '/pricing') return 'Upgrade your workspace limits';
     return '';
   };
 
@@ -171,17 +196,23 @@ const DashboardLayout = () => {
     <>
       <SidebarLink to="/today" icon={<Sunrise size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Today</SidebarLink>
       <SidebarLink to="/dashboard" icon={<LayoutDashboard size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Overview</SidebarLink>
+
+      {/* Show Managers link ONLY for Owners */}
+      {user?.role === 'owner' && (
+        <SidebarLink to="/managers" icon={<Briefcase size={isCollapsed ? 22 : 20} />} isCollapsed={isCollapsed} onNavigate={handleNavigate}>Managers</SidebarLink>
+      )}
+
       <button
         onClick={() => {
           openModal('aiChat');
-          handleNavigate(); // This closes the mobile sidebar
+          handleNavigate();
         }}
         className={`group flex items-center cursor-pointer ${
           isCollapsed ? 'justify-center' : 'space-x-3'
         } px-3 py-3 rounded-xl transition-all duration-200 w-full ${
-          modalState.aiChat // Check if modal is active for styling
-            ? 'bg-gray-900 text-white shadow-sm'
-            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+          modalState.aiChat
+            ? 'bg-primary text-white shadow-sm'
+            : 'text-gray-600 hover:text-primary hover:bg-gray-50'
         }`}
       >
         <div className={`${
@@ -216,14 +247,13 @@ const DashboardLayout = () => {
     </>
   );
 
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* ... (Mobile Header & Sidebar logic remains the same) ... */}
+      {/* Mobile Header */}
       <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="flex items-center justify-between p-4">
           <div>
-            <h1 className="text-lg font-semibold text-gray-900">
+            <h1 className="text-lg font-semibold text-primary">
               {getPageTitle()}
             </h1>
             <p className="text-sm text-gray-600 truncate">
@@ -232,7 +262,7 @@ const DashboardLayout = () => {
           </div>
           <button
             onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-            className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg text-gray-600 hover:text-primary hover:bg-gray-100 transition-colors"
           >
             {isMobileSidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -241,6 +271,7 @@ const DashboardLayout = () => {
 
       <div className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 h-full">
+          {/* Mobile Sidebar */}
           <AnimatePresence>
             {isMobileSidebarOpen && (
               <>
@@ -260,7 +291,7 @@ const DashboardLayout = () => {
                 >
                   <div className="p-4 flex flex-col h-full">
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-lg font-semibold text-gray-900">
+                      <h2 className="text-lg font-semibold text-primary">
                         Navigation
                       </h2>
                       <button
@@ -284,7 +315,7 @@ const DashboardLayout = () => {
             )}
           </AnimatePresence>
 
-          {/* ... (Desktop Sidebar logic remains the same) ... */}
+          {/* Desktop Sidebar */}
           <div
             className={`hidden lg:block shrink-0 ${
               isSidebarCollapsed ? 'lg:w-25' : 'lg:w-64'
@@ -302,7 +333,7 @@ const DashboardLayout = () => {
                     <motion.h2
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-lg font-semibold text-gray-900"
+                      className="text-lg font-semibold text-primary"
                     >
                       Navigation
                     </motion.h2>
@@ -332,14 +363,13 @@ const DashboardLayout = () => {
             </motion.aside>
           </div>
 
-          {/* ... (Main Content Area logic remains the same) ... */}
           <main className="flex-1 min-w-0 lg:mt-0 flex flex-col">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="mb-6 hidden lg:block"
             >
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl lg:text-3xl font-bold text-primary mb-2">
                 {getPageTitle()}
               </h1>
               <p className="text-gray-600">
@@ -365,7 +395,7 @@ const DashboardLayout = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
-              <p className="text-2xl font-bold text-gray-900">E-Manager</p>
+              <p className="text-2xl font-bold text-primary">E-Manager</p>
               <p className="text-gray-600 text-sm mt-2">
                 The AI-Powered Team Command Center.
               </p>
@@ -388,79 +418,26 @@ const DashboardLayout = () => {
         </div>
       </footer>
 
-      {/* --- 6. ADD ALL GLOBAL MODALS HERE --- */}
+      {/* --- Global Modals --- */}
+
+      {/* 1. Limit/Upgrade Modal */}
+      <UpgradeModal
+        isOpen={modalState.upgradeModal}
+        onClose={() => closeModal('upgradeModal')}
+        message={modalContext?.message}
+      />
+
       <CommandPalette />
       <ShortcutsModal />
       <AiChatModal />
+      <OnboardingModal isOpen={showOnboardingModal} onClose={() => setShowOnboardingModal(false)} />
 
-      <OnboardingModal
-        isOpen={showOnboardingModal}
-        onClose={() => setShowOnboardingModal(false)}
-      />
-
-      <CreateTeamModal
-        isOpen={modalState.createTeam}
-        onClose={() => closeModal('createTeam')}
-        onTeamCreated={(newTeam) => {
-          if (modalContext?.onTeamCreated) {
-            modalContext.onTeamCreated(newTeam);
-          } else {
-            navigate('/teams'); // Default action
-          }
-          closeModal('createTeam');
-        }}
-      />
-
-      <AddNoteModal
-        isOpen={modalState.addNote}
-        onClose={() => closeModal('addNote')}
-        onNoteAdded={(newNote) => {
-          if (modalContext?.onNoteAdded) {
-            modalContext.onNoteAdded(newNote);
-          } else {
-            navigate('/notes'); // Default action
-          }
-          closeModal('addNote');
-        }}
-      />
-
-      <CreateTaskModal
-        isOpen={modalState.createTask}
-        onClose={() => closeModal('createTask')}
-        teamId={modalContext?.teamId} // Get teamId from context
-        members={modalContext?.teamMembers} // Get members from context
-        onTasksCreated={(newTasks) => {
-          if (modalContext?.onTasksCreated) {
-            modalContext.onTasksCreated(newTasks);
-          }
-          closeModal('createTask');
-        }}
-      />
-
-      <CreateMeetingModal
-        isOpen={modalState.createMeeting}
-        onClose={() => closeModal('createMeeting')}
-        teamId={modalContext?.teamId}
-        members={modalContext?.teamMembers}
-        onMeetingCreated={(newMeeting) => {
-          if (modalContext?.onMeetingCreated) {
-            modalContext.onMeetingCreated(newMeeting);
-          }
-          closeModal('createMeeting');
-        }}
-      />
-
-      <AddMemberModal
-        isOpen={modalState.addMember}
-        onClose={() => closeModal('addMember')}
-        teamId={modalContext?.teamId}
-        onMemberAdded={(updatedTeam) => {
-          if (modalContext?.onMemberAdded) {
-            modalContext.onMemberAdded(updatedTeam);
-          }
-          closeModal('addMember');
-        }}
-      />
+      {/* Entity Creation Modals */}
+      <CreateTeamModal isOpen={modalState.createTeam} onClose={() => closeModal('createTeam')} onTeamCreated={(newTeam) => { modalContext?.onTeamCreated ? modalContext.onTeamCreated(newTeam) : navigate('/teams'); closeModal('createTeam'); }} />
+      <AddNoteModal isOpen={modalState.addNote} onClose={() => closeModal('addNote')} onNoteAdded={(newNote) => { modalContext?.onNoteAdded ? modalContext.onNoteAdded(newNote) : navigate('/notes'); closeModal('addNote'); }} />
+      <CreateTaskModal isOpen={modalState.createTask} onClose={() => closeModal('createTask')} teamId={modalContext?.teamId} members={modalContext?.teamMembers} onTasksCreated={(newTasks) => { modalContext?.onTasksCreated && modalContext.onTasksCreated(newTasks); closeModal('createTask'); }} />
+      <CreateMeetingModal isOpen={modalState.createMeeting} onClose={() => closeModal('createMeeting')} teamId={modalContext?.teamId} members={modalContext?.teamMembers} onMeetingCreated={(newMeeting) => { modalContext?.onMeetingCreated && modalContext.onMeetingCreated(newMeeting); closeModal('createMeeting'); }} />
+      <AddMemberModal isOpen={modalState.addMember} onClose={() => closeModal('addMember')} teamId={modalContext?.teamId} onMemberAdded={(updatedTeam) => { modalContext?.onMemberAdded && modalContext.onMemberAdded(updatedTeam); closeModal('addMember'); }} />
     </div>
   );
 };

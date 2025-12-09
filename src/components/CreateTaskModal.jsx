@@ -1,42 +1,37 @@
-// src/components/CreateTaskModal.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useModal } from '../context/ModalContext';
 import Modal from './Modal';
-import { Plus, Loader2, Info, X, Zap, Sparkles, Brain, User } from 'lucide-react'; // <-- 1. IMPORT USER ICON
+import { Plus, Loader2, Info, X, Zap, Sparkles, Brain, User } from 'lucide-react';
 import api from '../api/axiosConfig';
 import { motion, AnimatePresence } from 'framer-motion';
-import CustomSelect from './CustomSelect'; // <-- 2. IMPORT CUSTOMSELECT
+import CustomSelect from './CustomSelect';
 
-const CreateTaskModal = () => {
+// --- FIX 1: Accept props to get the callback ---
+const CreateTaskModal = ({ onTasksCreated }) => {
   const { modalState, closeModal, modalContext } = useModal();
-  const { teamId } = modalContext; // <-- 3. WE ONLY NEED teamId
+  const { teamId } = modalContext;
 
   const [tasks, setTasks] = useState([{ title: '', description: '', dueDate: null }]);
   const [assignedTo, setAssignedTo] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // --- 4. NEW STATE FOR MEMBERS ---
   const [teamMembers, setTeamMembers] = useState([]);
   const [isFetchingMembers, setIsFetchingMembers] = useState(false);
 
-  // (AI state is unchanged)
   const [isEstimating, setIsEstimating] = useState(false);
   const [estimate, setEstimate] = useState(null);
   const [subtaskLoading, setSubtaskLoading] = useState(false);
   const [complexTaskTitle, setComplexTaskTitle] = useState('');
 
-  // --- 5. NEW useEffect to fetch members ---
   useEffect(() => {
-    // Fetch members when the modal is opened and we have a teamId
     if (modalState.createTask && teamId) {
       const fetchTeamMembers = async () => {
         setIsFetchingMembers(true);
         setError(null);
         try {
-          // This route is defined in routes/teamRoutes.js and controllers/teamController.js
           const res = await api.get(`/teams/${teamId}`);
-          setTeamMembers(res.data.members || []); // The team object has a 'members' array
+          setTeamMembers(res.data.members || []);
         } catch (err) {
           console.error("Failed to fetch team members", err);
           setError("Failed to load team members.");
@@ -45,7 +40,7 @@ const CreateTaskModal = () => {
       };
       fetchTeamMembers();
     }
-  }, [modalState.createTask, teamId]); // Re-run if the modal opens or teamId changes
+  }, [modalState.createTask, teamId]);
 
   const resetForm = useCallback(() => {
     setTasks([{ title: '', description: '', dueDate: null }]);
@@ -56,8 +51,8 @@ const CreateTaskModal = () => {
     setIsEstimating(false);
     setComplexTaskTitle('');
     setSubtaskLoading(false);
-    setTeamMembers([]); // <-- Reset members
-    setIsFetchingMembers(false); // <-- Reset loading
+    setTeamMembers([]);
+    setIsFetchingMembers(false);
   }, []);
 
   const handleClose = () => {
@@ -74,7 +69,6 @@ const CreateTaskModal = () => {
     }
   };
 
-  // ... (addTaskRow, removeTaskRow are unchanged) ...
   const addTaskRow = () => {
     setTasks([...tasks, { title: '', description: '', dueDate: null }]);
   };
@@ -83,7 +77,6 @@ const CreateTaskModal = () => {
     setTasks(newTasks);
   };
 
-  // ... (handleGetEstimate, handleGenerateSubtasks are unchanged) ...
   const handleGetEstimate = async () => {
     const title = tasks[0]?.title;
     if (!title) {
@@ -133,7 +126,6 @@ const CreateTaskModal = () => {
     setSubtaskLoading(false);
   };
 
-  // ... (handleSubmit is unchanged) ...
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -153,10 +145,17 @@ const CreateTaskModal = () => {
     }
 
     try {
-      await api.post(`/tasks/${teamId}/bulk`, {
+      // 1. Capture the response
+      const res = await api.post(`/tasks/${teamId}/bulk`, {
         assignedTo,
         tasks: tasksToSubmit,
       });
+
+      // --- FIX 2: Update the parent state immediately ---
+      if (onTasksCreated) {
+        onTasksCreated(res.data);
+      }
+
       handleClose();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create tasks');
@@ -168,7 +167,6 @@ const CreateTaskModal = () => {
     <Modal isOpen={modalState.createTask} onClose={handleClose} title="Create New Task(s)">
       <form onSubmit={handleSubmit} className="space-y-6">
 
-        {/* (AI Subtask Generator UI is unchanged) */}
         <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Have a complex task?
@@ -185,7 +183,7 @@ const CreateTaskModal = () => {
               type="button"
               onClick={handleGenerateSubtasks}
               disabled={subtaskLoading}
-              className="flex items-center justify-center space-x-2 px-3 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50"
+              className="flex items-center justify-center space-x-2 px-3 py-2 bg-primary text-white rounded-lg hover:bg-gray-800 disabled:opacity-50"
             >
               {subtaskLoading ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
               <span className="text-sm font-medium">Break Down</span>
@@ -195,7 +193,6 @@ const CreateTaskModal = () => {
 
         <div className="h-px bg-gray-200"></div>
 
-        {/* --- 6. REPLACE <select> WITH <CustomSelect> --- */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Assign To
@@ -213,7 +210,6 @@ const CreateTaskModal = () => {
           )}
         </div>
 
-        {/* (Task List, AI Estimate UI, etc. are all unchanged) */}
         <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-700">
             Tasks (add multiple rows)
@@ -337,7 +333,7 @@ const CreateTaskModal = () => {
           <button
             type="submit"
             disabled={loading || isFetchingMembers}
-            className="px-5 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50 flex items-center space-x-2"
+            className="px-5 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-gray-800 disabled:opacity-50 flex items-center space-x-2"
           >
             {loading && <Loader2 className="animate-spin" size={16} />}
             <span>Create Task(s)</span>

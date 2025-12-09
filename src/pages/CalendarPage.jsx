@@ -214,7 +214,7 @@ const CalendarPage = () => {
         animate={{ opacity: 1, scale: 1 }}
         className={`p-2 rounded-lg text-white text-xs font-medium cursor-pointer hover:shadow-md transition-all duration-200 truncate border-l-4 ${
           isTask
-            ? 'bg-gray-900 border-gray-700 hover:bg-gray-800'
+            ? 'bg-primary border-gray-700 hover:bg-gray-800'
             : 'bg-green-600 border-green-500 hover:bg-green-500'
         }`}
         title={`${event.title} (${format(event.start, 'HH:mm')} - ${format(event.end, 'HH:mm')})`}
@@ -257,7 +257,7 @@ const CalendarPage = () => {
         animate={{ opacity: 1, scale: 1 }}
         className={`p-2 rounded-lg text-white text-xs font-medium cursor-pointer hover:shadow-lg transition-all duration-200 h-full overflow-hidden border-l-4 ${
           isTask
-            ? 'bg-gray-900 border-gray-700 hover:bg-gray-800'
+            ? 'bg-primary border-gray-700 hover:bg-gray-800'
             : 'bg-green-600 border-green-500 hover:bg-green-500'
         }`}
         title={`${event.title} (${format(event.start, 'HH:mm')} - ${format(event.end, 'HH:mm')})`}
@@ -313,7 +313,7 @@ const CalendarPage = () => {
         animate={{ opacity: 1, scale: 1 }}
         className={`p-3 rounded-xl text-white text-sm font-medium cursor-pointer hover:shadow-lg transition-all duration-200 h-full overflow-hidden border-l-4 ${
           isTask
-            ? 'bg-gray-900 border-gray-700 hover:bg-gray-800'
+            ? 'bg-primary border-gray-700 hover:bg-gray-800'
             : 'bg-green-600 border-green-500 hover:bg-green-500'
         }`}
         title={`${event.title} (${format(event.start, 'HH:mm')} - ${format(event.end, 'HH:mm')})`}
@@ -365,11 +365,11 @@ const CalendarPage = () => {
         {/* Header Section */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
               <CalendarIcon className="text-white" size={24} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
+              <h1 className="text-2xl font-bold text-primary">Calendar</h1>
               <p className="text-gray-600">Manage your schedule and team events</p>
             </div>
           </div>
@@ -379,20 +379,20 @@ const CalendarPage = () => {
             <div className="flex items-center bg-gray-100 rounded-lg p-1 shadow-sm">
               <button
                 onClick={() => onNavigate('TODAY')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-white rounded-md transition-all duration-200"
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary hover:bg-white rounded-md transition-all duration-200"
               >
                 Today
               </button>
               <div className="flex space-x-1">
                 <button
                   onClick={() => onNavigate('PREV')}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-white rounded-md transition-all duration-200"
+                  className="p-2 text-gray-600 hover:text-primary hover:bg-white rounded-md transition-all duration-200"
                 >
                   <ChevronLeft size={18} />
                 </button>
                 <button
                   onClick={() => onNavigate('NEXT')}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-white rounded-md transition-all duration-200"
+                  className="p-2 text-gray-600 hover:text-primary hover:bg-white rounded-md transition-all duration-200"
                 >
                   <ChevronRight size={18} />
                 </button>
@@ -405,8 +405,8 @@ const CalendarPage = () => {
                 onClick={() => onView(Views.MONTH)}
                 className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 flex items-center space-x-2 ${
                   view === Views.MONTH
-                    ? 'bg-gray-900 text-white shadow-sm'
-                    : 'text-gray-700 hover:text-gray-900 hover:bg-white'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-gray-700 hover:text-primary hover:bg-white'
                 }`}
               >
                 <Grid size={16} />
@@ -416,8 +416,8 @@ const CalendarPage = () => {
                 onClick={() => onView(Views.WEEK)}
                 className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 flex items-center space-x-2 ${
                   view === Views.WEEK
-                    ? 'bg-gray-900 text-white shadow-sm'
-                    : 'text-gray-700 hover:text-gray-900 hover:bg-white'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-gray-700 hover:text-primary hover:bg-white'
                 }`}
               >
                 <List size={16} />
@@ -427,8 +427,8 @@ const CalendarPage = () => {
                 onClick={() => onView(Views.DAY)}
                 className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 flex items-center space-x-2 ${
                   view === Views.DAY
-                    ? 'bg-gray-900 text-white shadow-sm'
-                    : 'text-gray-700 hover:text-gray-900 hover:bg-white'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-gray-700 hover:text-primary hover:bg-white'
                 }`}
               >
                 <Square size={16} />
@@ -450,7 +450,7 @@ const CalendarPage = () => {
                 onClick={() => setShowTaskEvents(!showTaskEvents)}
                 className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                   showTaskEvents
-                    ? 'bg-gray-900 text-white'
+                    ? 'bg-primary text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -476,7 +476,7 @@ const CalendarPage = () => {
               <BarChart3 size={16} />
               <span>{filteredEvents.length} events</span>
             </div>
-            <div className="text-lg font-semibold text-gray-900">{label}</div>
+            <div className="text-lg font-semibold text-primary">{label}</div>
           </div>
         </div>
       </div>
@@ -534,7 +534,7 @@ const CalendarPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex justify-center items-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-gray-600">Loading calendar events...</p>
         </div>
       </div>
@@ -550,11 +550,11 @@ const CalendarPage = () => {
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CalendarIcon className="text-red-600" size={24} />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to Load Calendar</h3>
+            <h3 className="text-lg font-semibold text-primary mb-2">Failed to Load Calendar</h3>
             <p className="text-gray-600 mb-4">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+              className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
             >
               Try Again
             </button>
@@ -624,7 +624,7 @@ const CalendarPage = () => {
                   {/* Header */}
                   <div className="flex justify-between items-start mb-6">
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{selectedEvent.title}</h3>
+                      <h3 className="text-2xl font-bold text-primary mb-2">{selectedEvent.title}</h3>
                       <div className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${
                         selectedEvent.resource?.type === 'task'
                           ? 'bg-gray-100 text-gray-800'
@@ -647,7 +647,7 @@ const CalendarPage = () => {
                     <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
                       <Clock size={20} className="text-gray-600 mt-0.5 flex-shrink-0" />
                       <div>
-                        <div className="font-semibold text-gray-900 text-lg">
+                        <div className="font-semibold text-primary text-lg">
                           {formatDate(selectedEvent.start)}
                         </div>
                         <div className="text-gray-600">
@@ -665,7 +665,7 @@ const CalendarPage = () => {
                         <Users size={20} className="text-gray-600 mt-0.5 flex-shrink-0" />
                         <div>
                           <div className="text-sm font-medium text-gray-700">Team</div>
-                          <div className="font-semibold text-gray-900 text-lg">{selectedEvent.resource.teamName}</div>
+                          <div className="font-semibold text-primary text-lg">{selectedEvent.resource.teamName}</div>
                         </div>
                       </div>
                     )}
@@ -683,7 +683,7 @@ const CalendarPage = () => {
                       {selectedEvent.resource?.teamId && (
                         <button
                           onClick={() => handleNavigateToTeam(selectedEvent.resource.teamId)}
-                          className="w-full bg-gray-900 text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition-all duration-200 flex items-center justify-center space-x-3 font-semibold shadow-sm"
+                          className="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition-all duration-200 flex items-center justify-center space-x-3 font-semibold shadow-sm"
                         >
                           <span>View Team Details</span>
                           <ArrowRight size={18} />
@@ -711,7 +711,7 @@ const CalendarPage = () => {
                   {/* Header */}
                   <div className="flex justify-between items-center mb-6">
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-900">
+                      <h3 className="text-2xl font-bold text-primary">
                         {format(moreEventsData.date, 'MMMM dd, yyyy')}
                       </h3>
                       <p className="text-gray-600">
@@ -737,13 +737,13 @@ const CalendarPage = () => {
                         transition={{ delay: index * 0.1 }}
                         className={`p-4 rounded-xl border-l-4 transition-all duration-200 hover:shadow-md ${
                           event.resource?.type === 'task'
-                            ? 'border-gray-900 bg-gray-50 hover:bg-gray-100'
+                            ? 'border-primary bg-gray-50 hover:bg-gray-100'
                             : 'border-green-500 bg-green-50 hover:bg-green-100'
                         }`}
                       >
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900 text-lg mb-1">{event.title}</h4>
+                            <h4 className="font-semibold text-primary text-lg mb-1">{event.title}</h4>
                             <div className="flex items-center space-x-4 text-sm text-gray-600">
                               <span>{formatTime(event.start)} - {formatTime(event.end)}</span>
                               <span>•</span>
@@ -774,7 +774,7 @@ const CalendarPage = () => {
                         {event.resource?.teamId && (
                           <button
                             onClick={() => handleNavigateToTeam(event.resource.teamId)}
-                            className="text-sm text-gray-600 hover:text-gray-900 flex items-center space-x-2 transition-colors font-medium"
+                            className="text-sm text-gray-600 hover:text-primary flex items-center space-x-2 transition-colors font-medium"
                           >
                             <span>View Team Details</span>
                             <ExternalLink size={14} />
