@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
 import {
   Users, Plus, Search, Trash2, Mail, Calendar, Briefcase,
-  Loader2, AlertCircle, ShieldCheck, Shield, Lock, Unlock // <-- Import Shield
+  Loader2, AlertCircle, ShieldCheck, Shield, Lock, Unlock
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Input from '../components/Input';
 import CreateManagerModal from '../components/CreateManagerModal';
-import PermissionsModal from '../components/PermissionsModal'; // <-- Import Modal
+import PermissionsModal from '../components/PermissionsModal';
 import { useConfirm } from '../context/ConfirmContext';
 
 const ManagersPage = () => {
@@ -32,7 +32,12 @@ const ManagersPage = () => {
     setLoading(true);
     try {
       const res = await api.get('/user/managers');
-      setManagers(res.data);
+
+      // FIX: Filter the response to ONLY include users with role 'manager'
+      // This removes employees from the list
+      const onlyManagers = res.data.filter(user => user.role === 'manager');
+
+      setManagers(onlyManagers);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch managers');
     }
@@ -47,20 +52,16 @@ const ManagersPage = () => {
         ? `Are you sure you want to suspend ${manager.username}? They will no longer be able to log in.`
         : `Are you sure you want to activate ${manager.username}? They will regain access to their dashboard.`,
       confirmText: `Yes, ${action}`,
-      danger: manager.isActive // Red button for suspend, normal for activate
+      danger: manager.isActive
     });
 
     if (confirmed) {
       try {
         await api.put(`/user/managers/${manager._id}/suspend`);
 
-        // Update local state
         setManagers(managers.map(m =>
           m._id === manager._id ? { ...m, isActive: !m.isActive } : m
         ));
-
-        // Optional: show success toast/alert
-        // alert(res.data.message);
       } catch (err) {
         alert(err.response?.data?.message || 'Failed to update status');
       }
@@ -89,12 +90,10 @@ const ManagersPage = () => {
     }
   };
 
-  // --- NEW HANDLER ---
   const handleOpenPermissions = (manager) => {
     setSelectedManager(manager);
     setIsPermModalOpen(true);
   };
-  // -------------------
 
   const filteredManagers = managers.filter(m =>
     m.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -126,16 +125,14 @@ const ManagersPage = () => {
         onManagerCreated={handleManagerCreated}
       />
 
-      {/* --- NEW MODAL COMPONENT --- */}
       <PermissionsModal
         isOpen={isPermModalOpen}
         onClose={() => {
           setIsPermModalOpen(false);
-          fetchManagers(); // Refresh list to get updated permissions
+          fetchManagers();
         }}
         manager={selectedManager}
       />
-      {/* --------------------------- */}
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
@@ -201,7 +198,7 @@ const ManagersPage = () => {
                   >
                     {manager.isActive ? <Lock size={18} /> : <Unlock size={18} />}
                   </button>
-                  {/* --- NEW: Permissions Button --- */}
+
                   <button
                     onClick={() => handleOpenPermissions(manager)}
                     className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -209,7 +206,6 @@ const ManagersPage = () => {
                   >
                     <Shield size={18} />
                   </button>
-                  {/* ------------------------------- */}
 
                   <button
                     onClick={() => handleDelete(manager._id, manager.username)}

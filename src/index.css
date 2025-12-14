@@ -2,10 +2,12 @@
 @import 'react-big-calendar/lib/css/react-big-calendar.css';
 @plugin "@tailwindcss/typography";
 
-
+/* --- 1. ROOT VARIABLES (Light Mode Defaults) --- */
 :root {
+  /* Default Brand Color (Fallback until JS loads) */
   --brand-primary: #111827;
 
+  /* Brand Scale (Updated by ThemeContext) */
   --brand-50: #f9fafb;
   --brand-100: #f3f4f6;
   --brand-200: #e5e7eb;
@@ -17,145 +19,199 @@
   --brand-800: #1f2937;
   --brand-900: #111827;
   --brand-950: #030712;
+
+  /* LIGHT MODE: Map semantics to Brand Scale */
+  --bg-main: var(--brand-50);
+  --bg-card: #ffffff;
+  --border-color: var(--brand-200);
+
+  /* Text Colors (Standard High Contrast) */
+  --text-main: var(--brand-900);
+  --text-secondary: var(--brand-500);
+  --text-muted: var(--brand-400);
+
+  /* Primary Action (Buttons/Links) */
+  --primary-action: var(--brand-900);      /* Dark button */
+  --primary-fg: #ffffff;                   /* White text on button */
 }
 
+/* --- 2. DARK MODE OVERRIDES (The "Professional" Slate Theme) --- */
+.dark {
+  /* Tells browser to render scrollbars & inputs in dark mode */
+  color-scheme: dark;
+
+  /* PROFESSIONAL PALETTE:
+     We use 'Slate' (Blue-Grey) instead of inverting the user's specific brand color.
+     This ensures consistent readability and a premium feel.
+  */
+
+  /* Backgrounds */
+  --bg-main: #0f172a;   /* Slate-900: Deep Blue-Black */
+  --bg-card: #1e293b;   /* Slate-800: Card Background */
+
+  /* Borders - Essential for Dark Mode depth */
+  --border-color: #334155; /* Slate-700: Visible borders */
+
+  /* Text Colors - Tuned for readability on dark backgrounds */
+  --text-main: #f8fafc;      /* Slate-50: Almost White (Reduces eye strain vs pure white) */
+  --text-secondary: #cbd5e1; /* Slate-300: Lighter than normal gray to pop against dark */
+  --text-muted: #94a3b8;     /* Slate-400: Visible but subtle */
+
+  /* Primary Action in Dark Mode */
+  /* We use the Lighter brand shade (500) so it glows against the dark background */
+  --primary-action: var(--brand-500);
+  --primary-fg: #ffffff;
+}
+
+/* --- 3. TAILWIND THEME MAPPING --- */
 @theme {
-  /* 2. Primary Brand Colors */
-  --color-primary: var(--brand-primary);
-  --color-primary-hover: color-mix(in srgb, var(--brand-primary), black 10%);
+  /* Map Tailwind utilities to our dynamic variables */
 
-  /* 3. Override Default Grays with Dynamic Brand Shades */
-  --color-gray-50: var(--brand-50);
-  --color-gray-100: var(--brand-100);
-  --color-gray-200: var(--brand-200);
-  --color-gray-300: var(--brand-300);
-  --color-gray-400: var(--brand-400);
-  --color-gray-500: var(--brand-500);
-  --color-gray-600: var(--brand-600);
-  --color-gray-700: var(--brand-700);
-  --color-gray-800: var(--brand-800);
-  --color-gray-900: var(--brand-900);
-  --color-gray-950: var(--brand-950);
+  /* Colors */
+  --color-primary: var(--primary-action);
+  --color-primary-fg: var(--primary-fg);
 
-  /* Keep legacy custom vars if needed */
-  --color-light-white: #f8f9fa;
-  --color-secondary: #6c757d;
-  --color-dark: #212529;
-  --color-border: var(--brand-200); /* Make borders theme-aware */
+  /* We override the gray scale to use our semantic variables.
+     This allows 'text-gray-600' to automatically become light in dark mode. */
+  --color-gray-50: var(--bg-main);
+  --color-gray-100: var(--bg-card);
+  --color-gray-200: var(--border-color);
+  --color-gray-300: var(--text-muted);     /* Mapped to ensure visibility */
+  --color-gray-400: var(--text-muted);
+  --color-gray-500: var(--text-secondary);
+  --color-gray-600: var(--text-secondary); /* Forced lighter for readability */
+  --color-gray-700: var(--text-main);
+  --color-gray-800: var(--text-main);
+  --color-gray-900: var(--text-main);
+  --color-gray-950: #ffffff;
 }
-/*
- * For Firefox
- * scrollbar-color: <thumb-color> <track-color>
- */
-* {
-  scrollbar-color: var(--brand-900) transparent;
-  scrollbar-width: thin;
+
+/* --- 4. GLOBAL RESETS & TRANSITIONS --- */
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
   font-family: "Roboto", sans-serif;
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-duration: 150ms;
+
+  /* Smooth Theme Transition */
+  transition-property: background-color, color, border-color;
+  transition-duration: 300ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/*
- * For WebKit-based browsers (Chrome, Edge, Safari)
- */
+/* Standardize scrollbars for a cleaner look */
 ::-webkit-scrollbar {
-  width: 10px;  /* Width of the vertical scrollbar */
-  height: 10px; /* Height of the horizontal scrollbar */
+  width: 8px;
+  height: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  background: transparent; /* Makes the track invisible */
+  background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #111827; /* (primary) */
-  border-radius: 5px;
+  background-color: var(--border-color); /* Matches theme border */
+  border-radius: 4px;
 }
-
-::-webkit-scrollbar-thumb {
-  background: var(--brand-900);
-  border-radius: 5px;
-}
-
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--brand-700);
+  background-color: var(--text-muted);
 }
 
-.rbc-time-header-gutter,
-/* This targets the main time column */
-.rbc-time-gutter {
-  min-width: 55px !important;  /* Give it a fixed width */
-  max-width: 55px !important;  /* Give it a fixed width */
-  flex: 0 0 55px !important;    /* Don't let it shrink */
-  text-align: right;           /* Align time nicely */
-  padding-right: 5px;
-  z-index: 10;                 /* Keep it on top */
+/* --- 5. COMPONENT FIXES (Critical for "Perfect" Look) --- */
+
+/* CARD FIX: Force white backgrounds to adapt */
+/* Using !important ensures we override any hardcoded 'bg-white' classes in your components */
+.dark .bg-white {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color);
+  color: var(--text-main);
 }
 
-/* 2. Fix for the "All-Day" row (scrollable) */
-/* This is the container for all-day events */
-.rbc-day-slot .rbc-allday-cell {
-  max-height: 120px !important; /* Set a max height */
-  overflow-y: auto !important;  /* Make it scrollable */
+/* BACKGROUND FIX: Handle light grays (bg-gray-50) */
+.dark .bg-slate-50,
+.dark .bg-gray-50,
+.dark .bg-zinc-50 {
+  background-color: #020617; /* Slate-950: Slightly darker than main bg for contrast */
+  border-color: var(--border-color);
 }
 
-/* 3. Fix for the "+X more" links in the ALL-DAY row */
-/* This is your new request! */
-.rbc-allday-cell .rbc-row-segment {
-  max-height: 120px !important; /* Match the cell height */
+/* INPUT FIX: Professional inputs in dark mode */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #020617 !important; /* Deep dark input bg */
+  border-color: var(--border-color) !important;
+  color: var(--text-main) !important;
 }
-.rbc-allday-cell .rbc-show-more {
-  display: block !important;    /* Ensure the "+X more" button is visible */
-  position: sticky;
-  bottom: 0;
-  background: white;
-  width: 100%;
-  text-align: center;
+.dark input::placeholder {
+  color: var(--text-muted);
 }
 
-/* 4. This class applies the fixed height for Week/Day view */
-.rbc-tailwind-wrapper {
-  height: 75vh;
+/* TEXT UTILITY OVERRIDES */
+/* Ensure developers using specific text classes don't break accessibility */
+.dark .text-gray-900, .dark .text-slate-900, .dark .text-zinc-900 { color: var(--text-main); }
+.dark .text-gray-800, .dark .text-slate-800, .dark .text-zinc-800 { color: var(--text-main); }
+.dark .text-gray-700, .dark .text-slate-700, .dark .text-zinc-700 { color: #e2e8f0; } /* Slate-200 */
+.dark .text-gray-600, .dark .text-slate-600, .dark .text-zinc-600 { color: #cbd5e1; } /* Slate-300 */
+.dark .text-gray-500, .dark .text-slate-500, .dark .text-zinc-500 { color: #94a3b8; } /* Slate-400 */
+
+/* --- 6. REACT BIG CALENDAR (Dark Mode Polish) --- */
+/* Removes the 'white block' look and blends it into the theme */
+.dark .rbc-off-range-bg { background-color: transparent; opacity: 0.3; }
+.dark .rbc-today { background-color: rgba(59, 130, 246, 0.1); /* Subtle blue tint */ }
+.dark .rbc-event {
+  border: 1px solid var(--primary-action);
+  background-color: rgba(59, 130, 246, 0.2); /* Translucent event bg */
+}
+.dark .rbc-toolbar button {
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
+.dark .rbc-toolbar button:hover,
+.dark .rbc-toolbar button.rbc-active {
+  background-color: var(--border-color);
+}
+.dark .rbc-header,
+.dark .rbc-month-view,
+.dark .rbc-time-view,
+.dark .rbc-agenda-view,
+.dark .rbc-time-content,
+.dark .rbc-timeslot-group,
+.dark .rbc-day-slot .rbc-time-slot,
+.dark .rbc-header + .rbc-header,
+.dark .rbc-day-bg + .rbc-day-bg {
+  border-color: var(--border-color);
 }
 
-/* 5. Fix event content to wrap text */
-.rbc-event-content {
-  white-space: normal !important;
-  word-break: break-word !important;
-}
-
+/* --- 7. ANIMATIONS --- */
 .typing-cursor {
-              display: inline-block; width: 8px; height: 1em;
-              background-color: currentColor; margin-left: 4px;
-              animation: blink 1s infinite;
-            }
-            @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  display: inline-block; width: 8px; height: 1em;
+  background-color: currentColor; margin-left: 4px;
+  animation: blink 1s infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-            .gemini-loader {
-              display: flex; align-items: center; justify-content: center;
-              height: 20px; width: 50px;
-            }
-            .gemini-loader div {
-              width: 8px; height: 100%; margin: 0 2px;
-              background-color: #9ca3af; border-radius: 4px;
-              animation: gemini-pulse 1.2s infinite;
-            }
-            .gemini-loader div:nth-child(1) { animation-delay: 0s; }
-            .gemini-loader div:nth-child(2) { animation-delay: 0.2s; }
-            .gemini-loader div:nth-child(3) { animation-delay: 0.4s; }
-            @keyframes gemini-pulse {
-              0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
-              50% { transform: scaleY(1); opacity: 1; }
-            }
+.gemini-loader {
+  display: flex; align-items: center; justify-content: center;
+  height: 20px; width: 50px;
+}
+.gemini-loader div {
+  width: 8px; height: 100%; margin: 0 2px;
+  background-color: var(--text-muted);
+  border-radius: 4px;
+  animation: gemini-pulse 1.2s infinite;
+}
+.gemini-loader div:nth-child(1) { animation-delay: 0s; }
+.gemini-loader div:nth-child(2) { animation-delay: 0.2s; }
+.gemini-loader div:nth-child(3) { animation-delay: 0.4s; }
+@keyframes gemini-pulse {
+  0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
 
-            /* NEW: Mic Listening Animation */
-            .mic-listening-button {
-              background-color: #ef4444; /* red-500 */
-              color: white;
-              animation: pulse-red 1.5s infinite;
-            }
-            @keyframes pulse-red {
-              0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-              50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
-            }
+.mic-listening-button {
+  background-color: #ef4444;
+  color: white;
+  animation: pulse-red 1.5s infinite;
+}
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}

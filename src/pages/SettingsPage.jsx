@@ -26,20 +26,23 @@ const SettingsPage = () => {
       component: AccountSettings,
       description: 'Manage your profile and security'
     },
-    {
-      id: 'billing',
-      name: 'Billing & Plans',
-      icon: CreditCard,
-      description: 'Upgrade plan and manage subscription',
-      action: () => navigate('/billing') // Special action
-    },
-    ...(user?.role === 'owner' ? [{
-      id: 'branding',
-      name: 'Custom Branding',
-      icon: Palette, // Import from lucide-react
-      component: BrandingSettings,
-      description: 'Logo and theme colors'
-    }] : []),
+    // --- OWNER ONLY SECTIONS ---
+    ...(user?.role === 'owner' ? [
+      {
+        id: 'billing',
+        name: 'Billing & Plans',
+        icon: CreditCard,
+        description: 'Upgrade plan and manage subscription',
+        action: () => navigate('/billing')
+      },
+      {
+        id: 'branding',
+        name: 'Custom Branding',
+        icon: Palette,
+        component: BrandingSettings,
+        description: 'Logo and theme colors'
+      }
+    ] : []),
   ];
 
   const activeTabConfig = tabs.find(tab => tab.id === activeTab);

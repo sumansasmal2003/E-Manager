@@ -7,7 +7,9 @@ const TeamCard = ({ team, onDelete }) => {
   const handleDeleteClick = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    onDelete(team._id);
+    if (onDelete) {
+      onDelete(team._id);
+    }
   };
 
   const isOwner = team.owner && team.owner._id === team.currentUser?._id;
@@ -37,15 +39,18 @@ const TeamCard = ({ team, onDelete }) => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 duration-200">
-          <button
-            onClick={handleDeleteClick}
-            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            title="Disband team"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
+        {/* FIX: Only show button if onDelete is provided */}
+        {onDelete && (
+          <div className="flex items-center space-x-2 duration-200">
+            <button
+              onClick={handleDeleteClick}
+              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Disband team"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Owner Info */}

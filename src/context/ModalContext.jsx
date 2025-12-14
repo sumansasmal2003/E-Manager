@@ -15,6 +15,7 @@ export const ModalProvider = ({ children }) => {
     shortcuts: false,
     aiChat: false,
     upgradeModal: false,
+    createEmployee: false,
     // Add other modals here if needed
   });
 

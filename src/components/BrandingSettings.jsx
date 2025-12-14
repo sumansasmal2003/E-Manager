@@ -1,24 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import api from '../api/axiosConfig';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
   Palette, Upload, Loader2, Save, X, Image as ImageIcon,
-  LayoutDashboard, Users, Settings as SettingsIcon, Bell
+  LayoutDashboard, Users, Settings as SettingsIcon, Bell, Plus, Trash2
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const BrandingSettings = () => {
   const { user, login } = useAuth();
   const { setBranding } = useTheme();
 
+  // State
   const [primaryColor, setPrimaryColor] = useState(user?.branding?.primaryColor || '#111827');
   const [logoUrl, setLogoUrl] = useState(user?.branding?.logoUrl || '');
+  const [savedColors, setSavedColors] = useState(user?.branding?.savedColors || []); // <-- Custom Colors
   const [loading, setLoading] = useState(false);
 
-  // Modern Presets
-  const presets = [
-    '#111827', // Zinc (Default)
+  const colorInputRef = useRef(null);
+
+  // Default Presets (System)
+  const defaultPresets = [
+    '#111827', // Zinc
     '#2563eb', // Blue
     '#7c3aed', // Violet
     '#db2777', // Pink
@@ -28,16 +32,40 @@ const BrandingSettings = () => {
     '#0891b2', // Cyan
   ];
 
+  // --- ACTIONS ---
+
+  const handleAddCustomColor = () => {
+    // Prevent duplicates
+    if (!savedColors.includes(primaryColor)) {
+      // Optional: Limit max saved colors to keep UI clean (e.g., 10)
+      if (savedColors.length >= 10) {
+        alert("You can save up to 10 custom colors.");
+        return;
+      }
+      setSavedColors([...savedColors, primaryColor]);
+    }
+  };
+
+  const handleRemoveCustomColor = (colorToRemove, e) => {
+    e.stopPropagation(); // Prevent clicking the color underneath
+    setSavedColors(savedColors.filter(c => c !== colorToRemove));
+  };
+
   const handleSave = async () => {
     setLoading(true);
     try {
-      const res = await api.put('/user/branding', { logoUrl, primaryColor });
+      // Send savedColors along with other data
+      const res = await api.put('/user/branding', {
+        logoUrl,
+        primaryColor,
+        savedColors
+      });
 
       // Update Contexts
       login({ ...user, branding: res.data.branding });
       setBranding(res.data.branding);
 
-      alert('Branding updated successfully!');
+      alert('Branding settings saved successfully!');
     } catch (err) {
       console.error(err);
       alert('Failed to update branding.');
@@ -97,29 +125,33 @@ const BrandingSettings = () => {
             </div>
           </div>
 
-          {/* 2. Color Picker */}
-          <div className="space-y-4">
+          {/* 2. Color Picker Section */}
+          <div className="space-y-6">
             <label className="block text-sm font-semibold text-gray-700">Brand Color</label>
 
+            {/* Main Picker */}
             <div className="flex items-center gap-4">
-               {/* Native Picker Hidden behind a custom UI */}
-               <div className="relative group cursor-pointer">
+               <div
+                 className="relative group cursor-pointer"
+                 onClick={() => colorInputRef.current.click()}
+               >
                  <div
-                    className="w-16 h-16 rounded-xl shadow-inner border border-gray-200"
-                    style={{ backgroundColor: primaryColor }}
+                   className="w-16 h-16 rounded-xl shadow-inner border border-gray-200 transition-colors duration-200"
+                   style={{ backgroundColor: primaryColor }}
                  />
                  <input
+                   ref={colorInputRef}
                    type="color"
                    value={primaryColor}
                    onChange={(e) => setPrimaryColor(e.target.value)}
-                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                   className="opacity-0 absolute top-1/2 left-1/2 w-0 h-0 pointer-events-none"
                  />
                  <div className="absolute -bottom-2 -right-2 bg-white p-1.5 rounded-full shadow-sm border border-gray-100 group-hover:scale-110 transition-transform">
                    <Palette size={14} className="text-gray-600" />
                  </div>
                </div>
 
-               <div className="flex-1">
+               <div className="flex-1 flex gap-3">
                  <input
                     type="text"
                     value={primaryColor}
@@ -127,30 +159,71 @@ const BrandingSettings = () => {
                     className="font-mono text-sm border border-gray-300 rounded-lg px-3 py-2 w-32 focus:ring-2 focus:ring-blue-500 outline-none uppercase"
                     maxLength={7}
                  />
+
+                 {/* SAVE CURRENT COLOR BUTTON */}
+                 <button
+                   onClick={handleAddCustomColor}
+                   className="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 transition-colors"
+                   title="Save this color to Custom list"
+                 >
+                   <Plus size={14} />
+                   Save Color
+                 </button>
                </div>
             </div>
 
-            {/* Presets */}
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Presets</p>
-              <div className="flex flex-wrap gap-3">
-                {presets.map(color => (
-                  <button
-                    key={color}
-                    onClick={() => setPrimaryColor(color)}
-                    className={`w-8 h-8 rounded-full border-2 transition-all ${primaryColor === color ? 'border-gray-900 scale-110 shadow-md' : 'border-transparent hover:scale-105'}`}
-                    style={{ backgroundColor: color }}
-                    title={color}
-                  />
-                ))}
+            <div className="border-t border-gray-100 pt-4 space-y-4">
+
+              {/* CUSTOM COLORS */}
+              {savedColors.length > 0 && (
+                <div>
+                  <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">My Saved Colors</p>
+                  <div className="flex flex-wrap gap-3">
+                    {savedColors.map((color, index) => (
+                      <div key={`${color}-${index}`} className="relative group">
+                        <button
+                          onClick={() => setPrimaryColor(color)}
+                          className={`w-8 h-8 rounded-full border-2 transition-all ${primaryColor === color ? 'border-gray-900 scale-110 shadow-md' : 'border-gray-200 hover:scale-105'}`}
+                          style={{ backgroundColor: color }}
+                          title={color}
+                        />
+                        {/* Remove Button (Visible on Hover) */}
+                        <button
+                          onClick={(e) => handleRemoveCustomColor(color, e)}
+                          className="absolute -top-1 -right-1 bg-white shadow-sm border border-gray-200 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity transform scale-75 hover:scale-100 hover:text-red-500"
+                          title="Remove color"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* SYSTEM PRESETS */}
+              <div>
+                <p className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">System Presets</p>
+                <div className="flex flex-wrap gap-3">
+                  {defaultPresets.map(color => (
+                    <button
+                      key={color}
+                      onClick={() => setPrimaryColor(color)}
+                      className={`w-8 h-8 rounded-full border-2 transition-all ${primaryColor === color ? 'border-gray-900 scale-110 shadow-md' : 'border-transparent hover:scale-105'}`}
+                      style={{ backgroundColor: color }}
+                      title={color}
+                    />
+                  ))}
+                </div>
               </div>
+
             </div>
           </div>
 
         </div>
 
         {/* --- RIGHT COLUMN: LIVE PREVIEW --- */}
-        <div className="bg-gray-100 rounded-2xl p-6 border border-gray-200">
+        <div className="bg-gray-100 rounded-2xl p-6 border border-gray-200 sticky top-8">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Live Preview</h4>
             <div className="flex gap-1.5">
@@ -166,22 +239,19 @@ const BrandingSettings = () => {
             {/* Mock Sidebar */}
             <div className="w-20 bg-white border-r border-gray-100 flex flex-col items-center py-4 gap-4">
               <div
-                 className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300"
-                 style={{ backgroundColor: primaryColor }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors duration-300"
+                  style={{ backgroundColor: primaryColor }}
               >
-                 {/* Logo Placeholder */}
-                 <div className="w-5 h-5 bg-white/20 rounded-md"></div>
+                  <div className="w-5 h-5 bg-white/20 rounded-md"></div>
               </div>
 
               <div className="flex-1 w-full px-2 space-y-2 mt-4">
-                {/* Active Link */}
                 <div
                   className="w-full aspect-square rounded-lg flex items-center justify-center bg-gray-50 transition-colors duration-300"
-                  style={{ color: primaryColor, backgroundColor: `${primaryColor}15` }} // 15 = low opacity hex
+                  style={{ color: primaryColor, backgroundColor: `${primaryColor}15` }}
                 >
                   <LayoutDashboard size={18} />
                 </div>
-                {/* Inactive Links */}
                 <div className="w-full aspect-square rounded-lg flex items-center justify-center text-gray-400">
                   <Users size={18} />
                 </div>
@@ -191,9 +261,8 @@ const BrandingSettings = () => {
               </div>
             </div>
 
-            {/* Mock Content Area */}
+            {/* Mock Content */}
             <div className="flex-1 flex flex-col">
-               {/* Mock Header */}
                <div className="h-14 border-b border-gray-100 flex items-center justify-between px-6">
                  <div className="w-24 h-4 bg-gray-200 rounded-full"></div>
                  <div className="flex gap-3">
@@ -204,7 +273,6 @@ const BrandingSettings = () => {
                  </div>
                </div>
 
-               {/* Mock Dashboard Body */}
                <div className="p-6 bg-gray-50 flex-1 space-y-4">
                   <div className="flex justify-between items-center">
                     <div className="w-32 h-6 bg-gray-200 rounded-md"></div>

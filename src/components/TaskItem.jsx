@@ -42,7 +42,6 @@ const TaskItem = ({ task, onEdit, onDelete }) => {
   const handleDeleteClick = async (e) => {
     e.stopPropagation();
 
-    // --- 4. REPLACE window.confirm WITH await confirm ---
     const confirmed = await confirm({
       title: 'Delete Task?',
       description: `Are you sure you want to delete the task "${task.title}"? This cannot be undone.`,
@@ -50,14 +49,16 @@ const TaskItem = ({ task, onEdit, onDelete }) => {
       danger: true
     });
 
-    if (confirmed) { // Check the boolean result
+    if (confirmed && onDelete) {
       onDelete(task._id);
     }
   };
 
   const handleEditClick = (e) => {
     e.stopPropagation();
-    onEdit(task);
+    if (onEdit) {
+      onEdit(task);
+    }
   };
 
   const formatDueDate = (dueDate) => {
@@ -100,20 +101,24 @@ const TaskItem = ({ task, onEdit, onDelete }) => {
 
             {/* Actions - Always visible on desktop, visible on hover for mobile */}
             <div className="flex items-center gap-1 opacity-0 lg:opacity-100 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
-              <button
-                onClick={handleEditClick}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Edit task"
-              >
-                <Edit size={16} />
-              </button>
-              <button
-                onClick={handleDeleteClick}
-                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                title="Delete task"
-              >
-                <Trash2 size={16} />
-              </button>
+              {onEdit && (
+                <button
+                  onClick={handleEditClick}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Edit task"
+                >
+                  <Edit size={16} />
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={handleDeleteClick}
+                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Delete task"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
             </div>
           </div>
 
@@ -170,20 +175,24 @@ const TaskItem = ({ task, onEdit, onDelete }) => {
 
           {/* Mobile Actions - Only visible on mobile */}
           <div className="flex items-center gap-1 lg:hidden flex-shrink-0">
-            <button
-              onClick={handleEditClick}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Edit task"
-            >
-              <Edit size={16} />
-            </button>
-            <button
-              onClick={handleDeleteClick}
-              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              title="Delete task"
-            >
-              <Trash2 size={16} />
-            </button>
+            {onEdit && (
+              <button
+                onClick={handleEditClick}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Edit task"
+              >
+                <Edit size={16} />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={handleDeleteClick}
+                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Delete task"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
           </div>
         </div>
       </div>

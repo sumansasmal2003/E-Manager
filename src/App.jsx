@@ -1,12 +1,13 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
-import TeamsPage from './pages/TeamsPage';
+import PermissionRoute from './components/PermissionRoute'; // <--- Import PermissionRoute
 
 // Layouts
 import DashboardLayout from './layouts/DashboardLayout';
 
 // Pages
+import TeamsPage from './pages/TeamsPage';
 import SetupOrganizationPage from './pages/SetupOrganizationPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
@@ -23,7 +24,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ProfilePage from './pages/ProfilePage';
 import GamePage from './pages/GamePage';
 import SystemLogPage from './pages/SystemLogPage';
-import ManagersPage from './pages/ManagersPage'; // <-- Import
+import ManagersPage from './pages/ManagersPage';
 import PricingPage from './pages/PricingPage';
 import FeaturesPage from './pages/FeaturesPage';
 import Pricing from './pages/Pricing';
@@ -68,25 +69,55 @@ function App() {
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/setup-organization" element={<SetupOrganizationPage />} />
+
             <Route element={<DashboardLayout />}>
               <Route path="/today" element={<TodayPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/managers" element={<ManagersPage />} /> {/* <-- Add Route */}
               <Route path="/notes" element={<NotesPage />} />
               <Route path="/teams" element={<TeamsPage />} />
               <Route path="/team/:teamId" element={<TeamDetailPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/members" element={<MembersPage />} />
               <Route path="/members/details" element={<MemberDetailPage />} />
               <Route path="/attendance" element={<AttendancePage />} />
               <Route path="/support" element={<SupportPage />} />
-              <Route path="/notifications" element={<NotificationPage />} />
-              <Route path="/games" element={<GamePage />} />
-              <Route path="/ai-usage" element={<AiUsagePage />} />
-              <Route path="/system-logs" element={<SystemLogPage />} />
-              <Route path="/billing" element={<PricingPage />} />
+
+              {/* --- RESTRICTED ROUTES --- */}
+
+              {/* Only Owner */}
+              <Route element={<PermissionRoute requiredRole="owner" />}>
+                <Route path="/managers" element={<ManagersPage />} />
+                <Route path="/billing" element={<PricingPage />} />
+              </Route>
+
+              {/* Permission: View Calendar */}
+              <Route element={<PermissionRoute requiredPermission="canViewCalendar" />}>
+                 <Route path="/calendar" element={<CalendarPage />} />
+              </Route>
+
+              {/* Permission: View Notifications */}
+              <Route element={<PermissionRoute requiredPermission="canViewNotifications" />}>
+                 <Route path="/notifications" element={<NotificationPage />} />
+              </Route>
+
+              {/* Permission: Games */}
+              <Route element={<PermissionRoute requiredPermission="canAccessGameSpace" />}>
+                <Route path="/games" element={<GamePage />} />
+              </Route>
+
+              {/* Permission: System Logs */}
+              <Route element={<PermissionRoute requiredPermission="canViewSystemLog" />}>
+                <Route path="/system-logs" element={<SystemLogPage />} />
+              </Route>
+
+              {/* Permission: Not Employee (e.g. AI Usage) */}
+              <Route element={<PermissionRoute requiredRole="owner" />}>
+                 {/* Or use custom permission check for 'not:employee' if PermissionRoute supports it,
+                     otherwise Owner/Manager logic suffices for billing/usage pages */}
+                 <Route path="/ai-usage" element={<AiUsagePage />} />
+              </Route>
+
             </Route>
           </Route>
 

@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
 import TeamCard from '../components/TeamCard';
-// 1. REMOVE local CreateTeamModal import
-// import CreateTeamModal from '../components/CreateTeamModal';
 import { Plus, Users, AlertCircle, Grid, Table, Trash2, Calendar, User, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useModal } from '../context/ModalContext'; // 2. IMPORT useModal
+import { useModal } from '../context/ModalContext';
 import { useAuth } from '../context/AuthContext';
 
 const TeamsPage = () => {
@@ -13,11 +11,13 @@ const TeamsPage = () => {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // 3. REMOVE local modal state
-  // const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
 
-  const { openModal } = useModal(); // 4. GET openModal from context
+  const { openModal } = useModal();
+
+  const isEmployee = user?.role === 'employee';
+  // 1. Define isOwner helper
+  const isOwner = user?.role === 'owner';
 
   useEffect(() => {
     const fetchTeams = async () => {
@@ -33,31 +33,25 @@ const TeamsPage = () => {
     fetchTeams();
   }, []);
 
-  // 5. ADD useEffect for 'T' key shortcut
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Don't trigger while typing
       const isTyping = e.target.tagName === 'INPUT' ||
                        e.target.tagName === 'TEXTAREA' ||
                        e.target.isContentEditable;
 
-      if (e.key.toLowerCase() === 't' && !isTyping) {
+      // Disable 'Create Team' shortcut for non-owners
+      if (e.key.toLowerCase() === 't' && !isTyping && isOwner) {
         e.preventDefault();
-        // Call the global modal, passing the local function to update state
         openModal('createTeam', { onTeamCreated: handleTeamCreated });
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [openModal, teams]); // Pass 'teams' so handleTeamCreated has the current list
-  // --- END OF NEW CODE ---
+  }, [openModal, teams, isOwner]);
 
-  // 6. SIMPLIFY handleTeamCreated
-  // This function is now a callback for the global modal
   const handleTeamCreated = (newTeam) => {
     setTeams([newTeam, ...teams]);
-    // No need to close the modal, DashboardLayout does that.
   };
 
   const handleDeleteTeam = async (teamId) => {
@@ -87,7 +81,7 @@ const TeamsPage = () => {
   return (
     <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* ... (Header JSX is the same) ... */}
+        {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex items-center space-x-4">
@@ -100,7 +94,9 @@ const TeamsPage = () => {
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-primary">My Teams</h1>
+                <h1 className="text-3xl font-bold text-primary">
+                  {isEmployee ? 'My Teams' : 'All Teams'}
+                </h1>
                 <p className="text-gray-600 mt-1">
                   {teams.length} team{teams.length !== 1 ? 's' : ''} •
                   <span className="text-primary font-medium ml-1">Collaborate & manage</span>
@@ -132,8 +128,8 @@ const TeamsPage = () => {
                 </button>
               </div>
 
-              {/* 7. UPDATE onClick to use global modal */}
-              {user?.role === 'owner' && (
+              {/* Only Owners can create teams */}
+              {isOwner && (
                 <button
                   onClick={() => openModal('createTeam', { onTeamCreated: handleTeamCreated })}
                   className="bg-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gray-800 transition-colors"
@@ -146,7 +142,6 @@ const TeamsPage = () => {
           </div>
         </div>
 
-        {/* ... (Loading State is the same) ... */}
         {loading && (
           <div className="flex justify-center items-center py-20">
             <div className="flex flex-col items-center space-y-4">
@@ -156,7 +151,6 @@ const TeamsPage = () => {
           </div>
         )}
 
-        {/* ... (Error State is the same) ... */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center shadow-sm">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -173,7 +167,6 @@ const TeamsPage = () => {
           </div>
         )}
 
-        {/* ... (Teams Content is the same) ... */}
         {!loading && !error && (
           teams.length > 0 ? (
             viewMode === 'grid' ? (
@@ -183,7 +176,8 @@ const TeamsPage = () => {
                   <TeamCard
                     key={team._id}
                     team={team}
-                    onDelete={handleDeleteTeam}
+                    // FIX: Pass delete handler ONLY if user is Owner
+                    onDelete={isOwner ? handleDeleteTeam : undefined}
                   />
                 ))}
               </div>
@@ -192,7 +186,6 @@ const TeamsPage = () => {
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    {/* ... (table head) ... */}
                     <thead>
                       <tr className="border-b border-gray-200">
                         <th className="text-left py-4 px-6 text-sm font-semibold text-primary">Team</th>
@@ -202,7 +195,6 @@ const TeamsPage = () => {
                         <th className="text-left py-4 px-6 text-sm font-semibold text-primary">Actions</th>
                       </tr>
                     </thead>
-                    {/* ... (table body) ... */}
                     <tbody className="divide-y divide-gray-200">
                       {teams.map((team) => (
                         <tr
@@ -252,13 +244,17 @@ const TeamsPage = () => {
                               >
                                 <Eye size={16} />
                               </Link>
-                              <button
-                                onClick={() => handleDeleteTeam(team._id)}
-                                className="p-2 rounded-lg hover:bg-red-50 transition-colors text-red-600 cursor-pointer"
-                                title="Delete Team"
-                              >
-                                <Trash2 size={16} />
-                              </button>
+
+                              {/* FIX: Check isOwner instead of !isEmployee */}
+                              {isOwner && (
+                                <button
+                                  onClick={() => handleDeleteTeam(team._id)}
+                                  className="p-2 rounded-lg hover:bg-red-50 transition-colors text-red-600 cursor-pointer"
+                                  title="Delete Team"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -276,27 +272,22 @@ const TeamsPage = () => {
               </div>
               <h3 className="text-xl font-semibold text-primary mb-2">No teams yet</h3>
               <p className="text-gray-600 max-w-md mx-auto mb-6">
-                Create your first team to start collaborating with others on projects and tasks.
+                {isEmployee ? "You haven't been assigned to any teams yet." : "Create your first team to start collaborating."}
               </p>
-              <button
-                onClick={() => openModal('createTeam', { onTeamCreated: handleTeamCreated })}
-                className="bg-primary text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors font-semibold inline-flex items-center space-x-2"
-              >
-                <Plus size={20} />
-                <span>Create Your First Team</span>
-              </button>
+
+              {isOwner && (
+                <button
+                  onClick={() => openModal('createTeam', { onTeamCreated: handleTeamCreated })}
+                  className="bg-primary text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors font-semibold inline-flex items-center space-x-2"
+                >
+                  <Plus size={20} />
+                  <span>Create Your First Team</span>
+                </button>
+              )}
             </div>
           )
         )}
       </div>
-
-      {/* 8. REMOVE the local modal */}
-      {/* <CreateTeamModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onTeamCreated={handleTeamCreated}
-      />
-      */}
     </div>
   );
 };

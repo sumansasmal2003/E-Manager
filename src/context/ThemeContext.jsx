@@ -3,20 +3,18 @@ import { useAuth } from './AuthContext';
 
 const ThemeContext = createContext();
 
-// --- COLOR UTILITIES ---
-
-// Convert Hex to RGB Array
+// Helper: Hex to RGB array
 const hexToRgb = (hex) => {
   const bigint = parseInt(hex.replace('#', ''), 16);
   return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
 };
 
-// Convert RGB Array to Hex String
+// Helper: RGB array to Hex string
 const rgbToHex = (r, g, b) => {
   return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 };
 
-// Mix two colors (Standard weighted mix)
+// Helper: Mix two colors
 const mix = (color1, color2, weight) => {
   const w = weight;
   const w1 = 1 - w;
@@ -29,62 +27,106 @@ const mix = (color1, color2, weight) => {
 export const ThemeProvider = ({ children }) => {
   const { user } = useAuth();
 
+  // 1. Theme State (Light / Dark / System)
+  // Default to 'system' so it adapts to the user's OS preference automatically
+  const [theme, setThemeState] = useState(() => localStorage.getItem('theme') || 'system');
+
+  // Wrapper to save to localStorage automatically
+  const setTheme = (newTheme) => {
+    setThemeState(newTheme);
+    localStorage.setItem('theme', newTheme);
+  };
+
+  // 2. Branding State
   const [branding, setBranding] = useState({
     logoUrl: '',
-    primaryColor: '#111827' // Default: Zinc-900
+    primaryColor: '#111827' // Default Zinc-900
   });
 
-  // 1. SYNC WITH USER STATE
+  // --- TOGGLE (Keep for backwards compatibility if needed) ---
+  const toggleTheme = () => {
+    setTheme(prev => {
+      if (prev === 'light') return 'dark';
+      if (prev === 'dark') return 'system';
+      return 'light';
+    });
+  };
+
+  // --- APPLY THEME LOGIC ---
+  useEffect(() => {
+    const root = window.document.documentElement;
+    const removeDark = () => root.classList.remove('dark');
+    const addDark = () => root.classList.add('dark');
+
+    if (theme === 'system') {
+      // Check system preference
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+      // Apply immediately
+      if (mediaQuery.matches) addDark();
+      else removeDark();
+
+      // Listen for system changes (e.g. sunset on Mac/Windows)
+      const handler = (e) => {
+        if (e.matches) addDark();
+        else removeDark();
+      };
+
+      mediaQuery.addEventListener('change', handler);
+      return () => mediaQuery.removeEventListener('change', handler);
+
+    } else {
+      // Manual Override
+      if (theme === 'dark') addDark();
+      else removeDark();
+    }
+  }, [theme]);
+
+  // --- SYNC BRANDING ---
   useEffect(() => {
     if (user?.branding) {
-      // Apply User Branding
       setBranding({
         logoUrl: user.branding.logoUrl || '',
         primaryColor: user.branding.primaryColor || '#111827'
       });
     } else {
-      // Reset to Defaults (Logout)
-      setBranding({
-        logoUrl: '',
-        primaryColor: '#111827'
-      });
+      setBranding({ logoUrl: '', primaryColor: '#111827' });
     }
   }, [user]);
 
-  // 2. GENERATE & INJECT CSS VARIABLES
+  // --- GENERATE PALETTE ---
   useEffect(() => {
     const root = document.documentElement;
     const base = hexToRgb(branding.primaryColor);
     const white = [255, 255, 255];
     const black = [0, 0, 0];
 
-    // Set the main primary variable (used by text-primary, bg-primary)
+    // Set Main Primary Variable
     root.style.setProperty('--brand-primary', branding.primaryColor);
 
-    // Generate gradients based on the primary color (treated as the '900' shade)
+    // Generate Scale
     const shades = {
-      50:  mix(base, white, 0.98), // 98% White
-      100: mix(base, white, 0.96), // 96% White
-      200: mix(base, white, 0.90), // 90% White
+      50:  mix(base, white, 0.98),
+      100: mix(base, white, 0.95),
+      200: mix(base, white, 0.90),
       300: mix(base, white, 0.80),
       400: mix(base, white, 0.60),
       500: mix(base, white, 0.40),
-      600: mix(base, white, 0.25),
-      700: mix(base, white, 0.15),
-      800: mix(base, white, 0.05), // 5% White (Dark)
-      900: base,                   // The selected color
-      950: mix(base, black, 0.20)  // 20% Black (Darker)
+      600: mix(base, white, 0.20),
+      700: base,
+      800: mix(base, black, 0.20),
+      900: mix(base, black, 0.40),
+      950: mix(base, black, 0.60)
     };
 
-    // Inject all shades as CSS variables
+    // Apply Brand Variables
     Object.entries(shades).forEach(([key, rgb]) => {
       root.style.setProperty(`--brand-${key}`, rgbToHex(...rgb));
     });
 
   }, [branding.primaryColor]);
 
-  // Provide setter so Settings Page can update it immediately
-  const value = { branding, setBranding };
+  const value = { theme, setTheme, toggleTheme, branding, setBranding };
 
   return (
     <ThemeContext.Provider value={value}>

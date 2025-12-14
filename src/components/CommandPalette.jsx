@@ -2,29 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Plus, Users, Notebook, Settings, Calendar, UserCheck,
-  CheckSquare, Bell, ClipboardList, FileText, User, Loader2, UserPlus, Video
+  CheckSquare, Bell, ClipboardList, FileText, User, Loader2, Briefcase, Video
 } from 'lucide-react';
 import { useModal } from '../context/ModalContext';
+import { useAuth } from '../context/AuthContext'; // Import useAuth
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import { useDebounce } from '../hooks/useDebounce';
 
-// --- Static Actions ---
-const staticActions = [
-  { id: 'create_task', title: 'Create New Task', icon: <Plus size={18} />, action: (openModal) => openModal('createTask') },
-  { id: 'create_team', title: 'Create New Team', icon: <Users size={18} />, action: (openModal) => openModal('createTeam') },
-  { id: 'add_note', title: 'Add New Note', icon: <Notebook size={18} />, action: (openModal) => openModal('addNote') },
-  { id: 'create_meeting', title: 'Schedule Meeting', icon: <Video size={18} />, action: (openModal) => openModal('createMeeting') },
-  { id: 'add_member', title: 'Add New Member', icon: <UserPlus size={18} />, action: (openModal) => openModal('addMember') },
-  { id: 'go_settings', title: 'Go to Settings', icon: <Settings size={18} />, link: '/settings' },
-  { id: 'go_calendar', title: 'Go to Calendar', icon: <Calendar size={18} />, link: '/calendar' },
-  { id: 'go_members', title: 'Go to Members', icon: <UserCheck size={18} />, link: '/members' },
-  { id: 'go_attendance', title: 'Go to Attendance', icon: <CheckSquare size={18} />, link: '/attendance' },
-  { id: 'go_notifications', title: 'Go to Notifications', icon: <Bell size={18} />, link: '/notifications' },
-];
-
 const CommandPalette = () => {
   const { modalState, closeModal, openModal, modalContext } = useModal();
+  const { user } = useAuth(); // Get current user
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,6 +23,86 @@ const CommandPalette = () => {
   const debouncedQuery = useDebounce(searchQuery, 300);
   const inputRef = useRef(null);
   const resultsRef = useRef(null);
+
+  // --- ROLE & PERMISSION CHECKS ---
+  const isOwner = user?.role === 'owner';
+  const isManager = user?.role === 'manager';
+  const isEmployee = user?.role === 'employee';
+
+  const canCreateTasks = isOwner || (isManager && user?.permissions?.canCreateTasks !== false);
+  const canCreateMeetings = isOwner || (isManager && user?.permissions?.canCreateMeetings !== false);
+  const canCreateNotes = isOwner || (isManager && user?.permissions?.canCreateNotes !== false);
+
+  // View Permissions
+  const canViewMembers = isOwner || isManager; // Employees usually shouldn't browse full member list via shortcut
+  const canViewAttendance = isOwner || (isManager && user?.permissions?.canMarkAttendance !== false);
+
+  // --- DEFINE ACTIONS DYNAMICALLY ---
+  const getActions = () => {
+    const actions = [];
+
+    // 1. GLOBAL ACTIONS (Always available if permitted)
+
+    // Create Team: OWNER ONLY
+    if (isOwner) {
+      actions.push({ id: 'create_team', title: 'Create New Team', icon: <Users size={18} />, action: (open) => open('createTeam') });
+    }
+
+    // Hire Employee: OWNER ONLY (Replaces Add Member)
+    // "remove the add new member... give the hire member functionality but not for managers or members"
+    if (isOwner) {
+      actions.push({ id: 'hire_employee', title: 'Hire New Employee', icon: <Briefcase size={18} />, action: (open) => open('createEmployee') });
+    }
+
+    // Settings: Owner or Manager (maybe restricted for Employee)
+    if (!isEmployee) {
+      actions.push({ id: 'go_settings', title: 'Go to Settings', icon: <Settings size={18} />, link: '/settings' });
+    }
+
+    // Calendar: If permitted
+    if (user?.permissions?.canViewCalendar !== false) {
+      actions.push({ id: 'go_calendar', title: 'Go to Calendar', icon: <Calendar size={18} />, link: '/calendar' });
+    }
+
+    // Members: Owner/Manager only
+    if (canViewMembers) {
+      actions.push({ id: 'go_members', title: 'Go to Members', icon: <UserCheck size={18} />, link: '/members' });
+    }
+
+    // Attendance: Owner/Manager with permission
+    if (canViewAttendance) {
+      actions.push({ id: 'go_attendance', title: 'Go to Attendance', icon: <CheckSquare size={18} />, link: '/attendance' });
+    }
+
+    // Notifications: Everyone
+    if (user?.permissions?.canViewNotifications !== false) {
+      actions.push({ id: 'go_notifications', title: 'Go to Notifications', icon: <Bell size={18} />, link: '/notifications' });
+    }
+
+    // 2. CONTEXTUAL ACTIONS (Only when on a Team Page)
+    // We check modalContext?.teamId to ensure we are in a team context
+    if (modalContext?.teamId) {
+
+      // Create Task: Owner or Permitted Manager (Not Employee)
+      if (canCreateTasks) {
+        actions.push({ id: 'create_task', title: 'Create New Task', icon: <Plus size={18} />, action: (open) => open('createTask') });
+      }
+
+      // Create Meeting: Owner or Permitted Manager (Not Employee)
+      if (canCreateMeetings) {
+        actions.push({ id: 'create_meeting', title: 'Schedule Meeting', icon: <Video size={18} />, action: (open) => open('createMeeting') });
+      }
+
+      // Add Note: Owner or Permitted Manager (Not Employee)
+      if (canCreateNotes) {
+        actions.push({ id: 'add_note', title: 'Add New Note', icon: <Notebook size={18} />, action: (open) => open('addNote') });
+      }
+    }
+
+    return actions;
+  };
+
+  const staticActions = getActions();
 
   // Focus input when modal opens
   useEffect(() => {
@@ -57,14 +125,10 @@ const CommandPalette = () => {
     }
   }, [debouncedQuery]);
 
-  // Filter static actions
-  const filteredStaticActions = staticActions.filter(action => {
-    // Hide contextual actions if context isn't set
-    if ((action.id === 'create_task' || action.id === 'create_meeting' || action.id === 'add_member') && !modalContext?.teamId) {
-      return false;
-    }
-    return action.title.toLowerCase().includes(searchQuery.toLowerCase())
-  });
+  // Filter static actions based on search
+  const filteredStaticActions = staticActions.filter(action =>
+    action.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Combine dynamic results
   const dynamicResults = [
@@ -74,6 +138,9 @@ const CommandPalette = () => {
     ...(results?.notes || []),
     ...(results?.teamNotes || []),
   ];
+
+  // OPTIONAL: You could strictly filter dynamicResults here if the API leaks data
+  // e.g., Filter teams where user is not a member (if you had that list)
 
   const allResults = [...filteredStaticActions, ...dynamicResults];
 
@@ -86,7 +153,7 @@ const CommandPalette = () => {
 
   const handleSelect = (result) => {
     if (result.action) {
-      result.action(openModal); // e.g., openModal('createTask')
+      result.action(openModal);
     } else if (result.link) {
       navigate(result.link);
     } else if (result.teamName) { // Team

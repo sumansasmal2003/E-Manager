@@ -26,6 +26,8 @@ const AccountSettings = () => {
   const [loading2fa, setLoading2fa] = useState(false);
   const [error2fa, setError2fa] = useState(null);
 
+  const isOwner = user?.role === 'owner'; // --- CHECK OWNERSHIP ---
+
   // Initialize from user context
   useEffect(() => {
     if (user) {
@@ -171,7 +173,13 @@ const AccountSettings = () => {
                 name="companyName"
                 value={formData.companyName}
                 onChange={handleChange}
+                disabled={!isOwner} // --- RESTRICT ACCESS ---
               />
+              {!isOwner && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Only the organization owner can change the company name.
+                </p>
+              )}
             </div>
           </div>
           <div className="flex justify-end">
